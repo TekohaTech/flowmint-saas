@@ -1,5 +1,5 @@
 export enum RolNombre {
-    ADMINISTRADOR = 'Administrador',
-    USUARIO = 'Usuario',
-    EMPLEADO = 'Empleado',
+    SUPERADMIN = 'SUPERADMIN',
+    DUENO = 'DUENO',
+    EMPLEADO = 'EMPLEADO',
 }

@@ -55,4 +55,13 @@ export class CreateUsuarioDto {
   @IsInt()
   @IsOptional()
   rol_id?: number;
+
+  @ApiProperty({
+    description: 'The ID of the business assigned to the user.',
+    example: 1,
+    required: false,
+  })
+  @IsInt()
+  @IsOptional()
+  comercio_id?: number;
 }

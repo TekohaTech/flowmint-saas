@@ -185,6 +185,8 @@ const Turnos = ({ visible = true }) => {
   }, []);
 
   const cargarDatos = async () => {
+    console.log('[Turnos] Cargando datos...');
+    console.log('[Turnos] Token:', localStorage.getItem('token'));
     try {
       const [
         turnosResponse,
@@ -197,6 +199,13 @@ const Turnos = ({ visible = true }) => {
         api.get("/empleados"),
         api.get("/servicios"),
       ]);
+
+      console.log('[Turnos] Datos cargados:', {
+        turnos: turnosResponse.data,
+        clientes: clientesResponse.data,
+        empleados: empleadosResponse.data,
+        servicios: serviciosResponse.data
+      });
 
       setTurnos(turnosResponse.data);
       setClientes(clientesResponse.data);

@@ -12,10 +12,8 @@ services:
     volumes:
       - ./FlowMint-backend-nestjs:/usr/src/app
       - /usr/src/app/node_modules
-    environment:
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/flowmint?schema=public
-      - JWT_SECRET=super-secret-key-that-should-be-in-a-vault-change-in-production
-      - PORT=3000
+    env_file:
+      - .env
     networks:
       - app-network
 
@@ -23,6 +21,8 @@ services:
     build:
       context: ./FlowMint-frontend
       dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:3000/api
     ports:
       - "5173:5173"
     depends_on:
@@ -32,6 +32,7 @@ services:
       - /app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
+      - VITE_API_URL=http://localhost:3000/api
     networks:
       - app-network
 

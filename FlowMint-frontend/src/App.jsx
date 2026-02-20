@@ -10,6 +10,7 @@ import Turnos from './component/Turnos';
 import Usuarios from './component/Usuarios';
 import Ganancias from './component/Ganancias';
 import Dashboard from './component/Dashboard';
+import Comercios from './component/Comercios';
 import ProtectedRoute from './component/ProtectedRoute';
 import DashboardHome from './component/DashboardHome'; // Import the new component
 
@@ -37,6 +38,7 @@ function App() {
                     <Route path='turnos' element={<Turnos />} />
                     <Route path='usuarios' element={<Usuarios />} />
                     <Route path='ganancias' element={<Ganancias />} />
+                    <Route path='comercios' element={<Comercios />} />
                 </Route>
             </Routes>
         </Router>

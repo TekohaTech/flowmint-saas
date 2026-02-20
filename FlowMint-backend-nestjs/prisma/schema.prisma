@@ -11,117 +11,107 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Comercio {
+  comercio_id Int       @id @default(autoincrement())
+  nombre      String
+  direccion   String?
+  telefono    String?
+  email       String?   @unique
+  activo      Boolean   @default(false) // Tú lo activas desde el panel
+  logo_url    String?
+  creado_en   DateTime  @default(now())
+  actualizado_en DateTime @updatedAt
+
+  // Relaciones
+  usuarios    Usuario[]
+  clientes    Cliente[]
+  empleados   Empleado[]
+  servicios   Servicio[]
+  turnos      Turno[]
+}
+
 model Usuario {
   usuario_id Int      @id @default(autoincrement())
   nombre     String
   apellido   String
   dni        String?
-  user       String   @unique
-  pass       String
-  correo     String?
+  user       String?  @unique // Opcional ahora que usamos Google
+  pass       String?  // Opcional ahora que usamos Google
+  googleId   String?  @unique // Identificador de Google
+  correo     String?  @unique
   rol_id     Int      @default(2)
-  estado     String   @default("A")
+  estado     String   @default("A") // A: Activo, I: Inactivo, B: Borrado
   
-  // Relación
+  comercio_id Int?     // Null solo para el SuperAdmin
+  comercio    Comercio? @relation(fields: [comercio_id], references: [comercio_id])
+  
   rol        Rol      @relation(fields: [rol_id], references: [rol_id])
+  creado_en   DateTime @default(now())
 }
 
 model Rol {
-
   rol_id    Int       @id @default(autoincrement())
-
-  nombre    String
-
-  // Relación inversa
-
+  nombre    String    @unique // SUPERADMIN, DUEÑO, EMPLEADO
   usuarios  Usuario[]
-
 }
-
-
 
 model Cliente {
-
   cliente_id Int    @id @default(autoincrement())
-
   nombre     String
-
   apellido   String
-
   telefono   String?
+  email      String?
+  estado     String  @default("A") // Para borrado lógico
 
-  email      String? @unique
-
-
+  comercio_id Int
+  comercio    Comercio @relation(fields: [comercio_id], references: [comercio_id])
 
   turnos Turno[]
-
+  
+  @@unique([email, comercio_id]) // El email solo es único por comercio
 }
-
-
 
 model Empleado {
-
   empleado_id Int    @id @default(autoincrement())
-
   nombre      String
-
   apellido    String
-
   puesto      String?
+  estado      String  @default("A")
 
-
+  comercio_id Int
+  comercio    Comercio @relation(fields: [comercio_id], references: [comercio_id])
 
   turnos Turno[]
-
 }
-
-
 
 model Servicio {
-
   servicio_id Int     @id @default(autoincrement())
-
   nombre      String
-
   descripcion String?
-
   precio      Float
+  duracion    Int
+  estado      String  @default("A")
 
-  duracion    Int // en minutos
-
-
+  comercio_id Int
+  comercio    Comercio @relation(fields: [comercio_id], references: [comercio_id])
 
   turnos Turno[]
-
 }
 
-
-
 model Turno {
-
   turno_id   Int      @id @default(autoincrement())
-
   fecha_hora DateTime
-
   estado     String   @default("pendiente") // pendiente, confirmado, cancelado
 
-
+  comercio_id Int
+  comercio    Comercio @relation(fields: [comercio_id], references: [comercio_id])
 
   cliente_id Int
-
   cliente    Cliente @relation(fields: [cliente_id], references: [cliente_id])
 
-
-
   empleado_id Int
-
   empleado    Empleado @relation(fields: [empleado_id], references: [empleado_id])
 
-
-
   servicio_id Int
-
   servicio    Servicio @relation(fields: [servicio_id], references: [servicio_id])
-
 }

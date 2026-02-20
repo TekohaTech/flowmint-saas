@@ -336,6 +336,10 @@ const Ganancias = () => {
   const fetchGanancias = async () => {
     setLoading(true);
     setError('');
+    console.log('[Ganancias] Iniciando fetch...');
+    console.log('[Ganancias] Token:', localStorage.getItem('token'));
+    console.log('[Ganancias] Fechas:', fechaInicio, fechaFin);
+    
     try {
       const responses = await Promise.all([
         revenueAPI.getDaily(fechaInicio, fechaFin),
@@ -349,6 +353,7 @@ const Ganancias = () => {
         revenueAPI.getSummary(fechaInicio, fechaFin)
       ]);
 
+      console.log('[Ganancias] Respuestas recibidas:', responses);
       setDiarias(responses[0]);
       setSemanales(responses[1]);
       setMensuales(responses[2]);
@@ -359,7 +364,8 @@ const Ganancias = () => {
       setAnualesPorEmpleado(responses[7]);
       setResumen(responses[8]);
     } catch (error) {
-      console.error("Error fetching ganancias data:", error);
+      console.error("[Ganancias] Error:", error);
+      console.error("[Ganancias] Error response:", error.response);
       setError('Error al cargar los datos de ganancias. Por favor, inténtalo de nuevo.');
     } finally {
       setLoading(false);

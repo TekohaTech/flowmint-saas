@@ -4,11 +4,15 @@ import { PrismaService } from './prisma/prisma.service';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as dotenv from 'dotenv';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Enable Cookie Parser
+  app.use(cookieParser());
 
   // Enable CORS for local development and production
   app.enableCors({
@@ -18,9 +22,9 @@ async function bootstrap() {
       'http://127.0.0.1:5173',
       'http://127.0.0.1:3000',
     ],
-    credentials: true,
+    credentials: true, // Required for cookies
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'set-cookie'],
   });
 
   // Configure global validation

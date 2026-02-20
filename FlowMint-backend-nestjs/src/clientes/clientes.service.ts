@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateClienteDto } from './dto/create-cliente.dto';
 import { UpdateClienteDto } from './dto/update-cliente.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -7,26 +7,45 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class ClientesService {
   constructor(private prisma: PrismaService) {}
 
-  create(createClienteDto: CreateClienteDto) {
-    return this.prisma.cliente.create({ data: createClienteDto });
+  create(createClienteDto: CreateClienteDto, comercioId: number) {
+    return this.prisma.cliente.create({
+      data: {
+        ...createClienteDto,
+        comercio_id: comercioId,
+      },
+    });
   }
 
-  findAll() {
-    return this.prisma.cliente.findMany();
+  findAll(comercioId?: number) {
+    // Si no hay comercioId (SuperAdmin), devuelve todos. Si hay, filtra.
+    const where = comercioId ? { comercio_id: comercioId, estado: 'A' } : { estado: 'A' };
+    return this.prisma.cliente.findMany({ where });
   }
 
-  findOne(id: number) {
-    return this.prisma.cliente.findUnique({ where: { cliente_id: id } });
+  async findOne(id: number, comercioId?: number) {
+    const where = comercioId ? { cliente_id: id, comercio_id: comercioId } : { cliente_id: id };
+    const cliente = await this.prisma.cliente.findFirst({ where });
+    
+    if (!cliente || cliente.estado === 'B') {
+      throw new NotFoundException(`Cliente #${id} no encontrado`);
+    }
+    return cliente;
   }
 
-  update(id: number, updateClienteDto: UpdateClienteDto) {
+  async update(id: number, updateClienteDto: UpdateClienteDto, comercioId?: number) {
+    await this.findOne(id, comercioId); // Valida que exista y pertenezca al comercio
     return this.prisma.cliente.update({
       where: { cliente_id: id },
       data: updateClienteDto,
     });
   }
 
-  remove(id: number) {
-    return this.prisma.cliente.delete({ where: { cliente_id: id } });
+  async remove(id: number, comercioId?: number) {
+    await this.findOne(id, comercioId);
+    // Borrado lógico
+    return this.prisma.cliente.update({
+      where: { cliente_id: id },
+      data: { estado: 'B' },
+    });
   }
 }

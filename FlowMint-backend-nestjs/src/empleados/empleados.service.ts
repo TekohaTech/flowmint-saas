@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateEmpleadoDto } from './dto/create-empleado.dto';
 import { UpdateEmpleadoDto } from './dto/update-empleado.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -7,26 +7,43 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class EmpleadosService {
   constructor(private prisma: PrismaService) {}
 
-  create(createEmpleadoDto: CreateEmpleadoDto) {
-    return this.prisma.empleado.create({ data: createEmpleadoDto });
+  create(createEmpleadoDto: CreateEmpleadoDto, comercioId: number) {
+    return this.prisma.empleado.create({
+      data: {
+        ...createEmpleadoDto,
+        comercio_id: comercioId,
+      },
+    });
   }
 
-  findAll() {
-    return this.prisma.empleado.findMany();
+  findAll(comercioId?: number) {
+    const where = comercioId ? { comercio_id: comercioId, estado: 'A' } : { estado: 'A' };
+    return this.prisma.empleado.findMany({ where });
   }
 
-  findOne(id: number) {
-    return this.prisma.empleado.findUnique({ where: { empleado_id: id } });
+  async findOne(id: number, comercioId?: number) {
+    const where = comercioId ? { empleado_id: id, comercio_id: comercioId } : { empleado_id: id };
+    const empleado = await this.prisma.empleado.findFirst({ where });
+    
+    if (!empleado || empleado.estado === 'B') {
+      throw new NotFoundException(`Empleado #${id} no encontrado`);
+    }
+    return empleado;
   }
 
-  update(id: number, updateEmpleadoDto: UpdateEmpleadoDto) {
+  async update(id: number, updateEmpleadoDto: UpdateEmpleadoDto, comercioId?: number) {
+    await this.findOne(id, comercioId);
     return this.prisma.empleado.update({
       where: { empleado_id: id },
       data: updateEmpleadoDto,
     });
   }
 
-  remove(id: number) {
-    return this.prisma.empleado.delete({ where: { empleado_id: id } });
+  async remove(id: number, comercioId?: number) {
+    await this.findOne(id, comercioId);
+    return this.prisma.empleado.update({
+      where: { empleado_id: id },
+      data: { estado: 'B' },
+    });
   }
 }

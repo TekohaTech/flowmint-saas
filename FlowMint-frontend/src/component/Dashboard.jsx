@@ -21,6 +21,7 @@ import {
   Menu,
   Zap,
   MessageSquare,
+  Store,
 } from "lucide-react";
 import AIChat from "./AIChat";
 
@@ -45,50 +46,71 @@ const Dashboard = () => {
   const toggleSidebar = () => setShowSidebar(!showSidebar);
   const toggleChat = () => setShowChat(!showChat);
 
-  const menuItems = [
-    {
-      path: "/dashboard",
-      icon: Zap,
-      label: "Panel",
-      color: "var(--neon-cyan)",
-    },
-    {
-      path: "/dashboard/turnos",
-      icon: Calendar,
-      label: "Turnos",
-      color: "var(--neon-cyan)",
-    },
-    {
-      path: "/dashboard/clientes",
-      icon: Users,
-      label: "Clientes",
-      color: "var(--neon-green)",
-    },
-    {
-      path: "/dashboard/empleados",
-      icon: Briefcase,
-      label: "Empleados",
-      color: "var(--neon-purple)",
-    },
-    {
-      path: "/dashboard/servicios",
-      icon: Scissors,
-      label: "Servicios",
-      color: "var(--neon-pink)",
-    },
-    {
-      path: "/dashboard/usuarios",
-      icon: User,
-      label: "Usuarios",
-      color: "var(--neon-yellow)",
-    },
-    {
-      path: "/dashboard/ganancias",
-      icon: DollarSign,
-      label: "Ganancias",
-      color: "var(--neon-orange)",
-    },
-  ];
+  const menuItems = user?.rol === 'SUPERADMIN' 
+    ? [
+        {
+          path: "/dashboard",
+          icon: Zap,
+          label: "Panel",
+          color: "var(--neon-cyan)",
+        },
+        {
+          path: "/dashboard/comercios",
+          icon: Store,
+          label: "Comercios",
+          color: "var(--neon-green)",
+        },
+        {
+          path: "/dashboard/usuarios",
+          icon: User,
+          label: "Usuarios",
+          color: "var(--neon-purple)",
+        },
+      ]
+    : [
+        {
+          path: "/dashboard",
+          icon: Zap,
+          label: "Panel",
+          color: "var(--neon-cyan)",
+        },
+        {
+          path: "/dashboard/turnos",
+          icon: Calendar,
+          label: "Turnos",
+          color: "var(--neon-cyan)",
+        },
+        {
+          path: "/dashboard/clientes",
+          icon: Users,
+          label: "Clientes",
+          color: "var(--neon-green)",
+        },
+        {
+          path: "/dashboard/empleados",
+          icon: Briefcase,
+          label: "Empleados",
+          color: "var(--neon-purple)",
+        },
+        {
+          path: "/dashboard/servicios",
+          icon: Scissors,
+          label: "Servicios",
+          color: "var(--neon-pink)",
+        },
+        {
+          path: "/dashboard/usuarios",
+          icon: User,
+          label: "Usuarios",
+          color: "var(--neon-yellow)",
+        },
+        {
+          path: "/dashboard/ganancias",
+          icon: DollarSign,
+          label: "Ganancias",
+          color: "var(--neon-orange)",
+        },
+      ];
 
   const SidebarContent = ({ onClose }) => (
     <div

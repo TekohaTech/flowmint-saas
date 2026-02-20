@@ -1,95 +1,66 @@
-import {
-  Controller,
-  Post,
-  UseGuards,
-  Request,
-  Get,
-  Body,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Controller, Post, UseGuards, Request, Get, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './local-auth.guard';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { AuthGuard } from '@nestjs/passport';
+import { Public } from './public.decorator';
+import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Public()
+  @UseGuards(LocalAuthGuard)
   @Post('login')
-  @ApiOperation({
-    summary: 'User login',
-    description: 'Authenticate user and return JWT token',
-  })
+  @ApiOperation({ summary: 'User login with username and password' })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Successfully authenticated',
-    schema: {
-      type: 'object',
-      properties: {
-        access_token: {
-          type: 'string',
-          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        },
-        user: {
-          type: 'object',
-          properties: {
-            usuario_id: { type: 'number', example: 1 },
-            nombre: { type: 'string', example: 'Admin' },
-            apellido: { type: 'string', example: 'Sistema' },
-            user: { type: 'string', example: 'admin' },
-            rol_id: { type: 'number', example: 1 },
-          },
-        },
-      },
-    },
-  })
-  @ApiResponse({ status: 401, description: 'Invalid credentials' })
-  async login(@Body() loginDto: LoginDto) {
-    console.log('Direct login endpoint called with:', loginDto);
-    const user = await this.authService.validateUser(loginDto.user, loginDto.pass);
-    if (!user) {
-      console.log('Direct login - user validation failed');
-      throw new UnauthorizedException('Invalid credentials');
-    }
-    console.log('Direct login - user validated successfully, generating token');
-    return this.authService.login(user);
+  async login(@Request() req, @Res({ passthrough: true }) res) {
+    const authData = await this.authService.login(req.user);
+    
+    // Set HttpOnly Cookie
+    res.cookie('access_token', authData.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    });
+
+    return authData;
   }
 
+  @Post('logout')
+  async logout(@Res({ passthrough: true }) res) {
+    res.clearCookie('access_token');
+    return { message: 'Logged out successfully' };
+  }
 
-  @Get('profile')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth('JWT-auth')
-  @ApiOperation({
-    summary: 'Get user profile',
-    description: 'Get authenticated user profile information',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'User profile retrieved successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        usuario_id: { type: 'number', example: 1 },
-        nombre: { type: 'string', example: 'Admin' },
-        apellido: { type: 'string', example: 'Sistema' },
-        user: { type: 'string', example: 'admin' },
-        correo: { type: 'string', example: 'admin@flowmint.com' },
-        rol_id: { type: 'number', example: 1 },
-      },
-    },
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  getProfile(@Request() req) {
-    return req.user;
+  // GOOGLE AUTH ENDPOINTS
+  @Public()
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth(@Request() req) {}
+
+  @Public()
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Request() req, @Res() res) {
+    const user = await this.authService.validateGoogleUser(req.user);
+    const authData = await this.authService.login(user);
+    
+    // Set HttpOnly Cookie
+    res.cookie('access_token', authData.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+    });
+
+    // Redirigir al frontend con los datos del usuario (Ajustar URL según producción)
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const userData = encodeURIComponent(JSON.stringify(authData.user));
+    
+    return res.redirect(`${frontendUrl}/login?user=${userData}`);
   }
 }

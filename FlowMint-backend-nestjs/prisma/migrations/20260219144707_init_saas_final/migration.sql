@@ -1,4 +1,19 @@
 -- CreateTable
+CREATE TABLE "Comercio" (
+    "comercio_id" SERIAL NOT NULL,
+    "nombre" TEXT NOT NULL,
+    "direccion" TEXT,
+    "telefono" TEXT,
+    "email" TEXT,
+    "activo" BOOLEAN NOT NULL DEFAULT false,
+    "logo_url" TEXT,
+    "creado_en" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "actualizado_en" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Comercio_pkey" PRIMARY KEY ("comercio_id")
+);
+
+-- CreateTable
 CREATE TABLE "Usuario" (
     "usuario_id" SERIAL NOT NULL,
     "nombre" TEXT NOT NULL,
@@ -9,6 +24,8 @@ CREATE TABLE "Usuario" (
     "correo" TEXT,
     "rol_id" INTEGER NOT NULL DEFAULT 2,
     "estado" TEXT NOT NULL DEFAULT 'A',
+    "comercio_id" INTEGER,
+    "creado_en" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Usuario_pkey" PRIMARY KEY ("usuario_id")
 );
@@ -28,6 +45,8 @@ CREATE TABLE "Cliente" (
     "apellido" TEXT NOT NULL,
     "telefono" TEXT,
     "email" TEXT,
+    "estado" TEXT NOT NULL DEFAULT 'A',
+    "comercio_id" INTEGER NOT NULL,
 
     CONSTRAINT "Cliente_pkey" PRIMARY KEY ("cliente_id")
 );
@@ -38,6 +57,8 @@ CREATE TABLE "Empleado" (
     "nombre" TEXT NOT NULL,
     "apellido" TEXT NOT NULL,
     "puesto" TEXT,
+    "estado" TEXT NOT NULL DEFAULT 'A',
+    "comercio_id" INTEGER NOT NULL,
 
     CONSTRAINT "Empleado_pkey" PRIMARY KEY ("empleado_id")
 );
@@ -49,6 +70,8 @@ CREATE TABLE "Servicio" (
     "descripcion" TEXT,
     "precio" DOUBLE PRECISION NOT NULL,
     "duracion" INTEGER NOT NULL,
+    "estado" TEXT NOT NULL DEFAULT 'A',
+    "comercio_id" INTEGER NOT NULL,
 
     CONSTRAINT "Servicio_pkey" PRIMARY KEY ("servicio_id")
 );
@@ -58,6 +81,7 @@ CREATE TABLE "Turno" (
     "turno_id" SERIAL NOT NULL,
     "fecha_hora" TIMESTAMP(3) NOT NULL,
     "estado" TEXT NOT NULL DEFAULT 'pendiente',
+    "comercio_id" INTEGER NOT NULL,
     "cliente_id" INTEGER NOT NULL,
     "empleado_id" INTEGER NOT NULL,
     "servicio_id" INTEGER NOT NULL,
@@ -66,13 +90,34 @@ CREATE TABLE "Turno" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Comercio_email_key" ON "Comercio"("email");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Usuario_user_key" ON "Usuario"("user");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Cliente_email_key" ON "Cliente"("email");
+CREATE UNIQUE INDEX "Rol_nombre_key" ON "Rol"("nombre");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Cliente_email_comercio_id_key" ON "Cliente"("email", "comercio_id");
+
+-- AddForeignKey
+ALTER TABLE "Usuario" ADD CONSTRAINT "Usuario_comercio_id_fkey" FOREIGN KEY ("comercio_id") REFERENCES "Comercio"("comercio_id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Usuario" ADD CONSTRAINT "Usuario_rol_id_fkey" FOREIGN KEY ("rol_id") REFERENCES "Rol"("rol_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Cliente" ADD CONSTRAINT "Cliente_comercio_id_fkey" FOREIGN KEY ("comercio_id") REFERENCES "Comercio"("comercio_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Empleado" ADD CONSTRAINT "Empleado_comercio_id_fkey" FOREIGN KEY ("comercio_id") REFERENCES "Comercio"("comercio_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Servicio" ADD CONSTRAINT "Servicio_comercio_id_fkey" FOREIGN KEY ("comercio_id") REFERENCES "Comercio"("comercio_id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Turno" ADD CONSTRAINT "Turno_comercio_id_fkey" FOREIGN KEY ("comercio_id") REFERENCES "Comercio"("comercio_id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Turno" ADD CONSTRAINT "Turno_cliente_id_fkey" FOREIGN KEY ("cliente_id") REFERENCES "Cliente"("cliente_id") ON DELETE RESTRICT ON UPDATE CASCADE;

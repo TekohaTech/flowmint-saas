@@ -4,239 +4,130 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('🌱 Iniciando seed de la base de datos...');
+  console.log('🌱 Iniciando seed SaaS Multi-tenant...');
 
-  // Limpiar datos existentes (opcional, comentar si no quieres borrar)
-  console.log('🗑️  Limpiando datos existentes...');
+  // Limpiar datos
   await prisma.turno.deleteMany();
   await prisma.servicio.deleteMany();
   await prisma.empleado.deleteMany();
   await prisma.cliente.deleteMany();
   await prisma.usuario.deleteMany();
   await prisma.rol.deleteMany();
+  await prisma.comercio.deleteMany();
 
-  // Crear roles
-  console.log('📝 Creando roles...');
-  const rolAdmin = await prisma.rol.create({
-    data: {
-      rol_id: 1,
-      nombre: 'Administrador',
-    },
-  });
+  // 1. Crear Roles
+  const rolSuperAdmin = await prisma.rol.create({ data: { rol_id: 1, nombre: 'SUPERADMIN' } });
+  const rolDueno = await prisma.rol.create({ data: { rol_id: 2, nombre: 'DUENO' } });
+  const rolEmpleado = await prisma.rol.create({ data: { rol_id: 3, nombre: 'EMPLEADO' } });
 
-  const rolUsuario = await prisma.rol.create({
-    data: {
-      rol_id: 2,
-      nombre: 'Usuario',
-    },
-  });
+  const hashedPass = await bcrypt.hash('admin123', 10);
 
-  const rolEmpleado = await prisma.rol.create({
-    data: {
-      rol_id: 3,
-      nombre: 'Empleado',
-    },
-  });
-
-  console.log('✅ Roles creados:', [rolAdmin, rolUsuario, rolEmpleado]);
-
-  // Crear usuario admin
-  console.log('👤 Creando usuario administrador...');
-  const hashedPassword = await bcrypt.hash('admin123', 10);
-
-  const admin = await prisma.usuario.create({
-    data: {
-      nombre: 'Admin',
-      apellido: 'Sistema',
-      dni: '12345678',
-      user: 'admin',
-      pass: hashedPassword,
-      correo: 'admin@flowmint.com',
-      rol_id: 1,
-      estado: 'A',
-    },
-  });
-
-  console.log('✅ Usuario admin creado:', {
-    user: admin.user,
-    password: 'admin123',
-    correo: admin.correo,
-  });
-
-  // Crear usuario de prueba
-  const hashedPasswordUser = await bcrypt.hash('user123', 10);
-
-  const usuario = await prisma.usuario.create({
-    data: {
-      nombre: 'Usuario',
-      apellido: 'Prueba',
-      dni: '87654321',
-      user: 'usuario',
-      pass: hashedPasswordUser,
-      correo: 'usuario@flowmint.com',
-      rol_id: 2,
-      estado: 'A',
-    },
-  });
-
-  console.log('✅ Usuario de prueba creado:', {
-    user: usuario.user,
-    password: 'user123',
-    correo: usuario.correo,
-  });
-
-  // Crear servicios de ejemplo
-  console.log('💈 Creando servicios...');
-  const servicioCorte = await prisma.servicio.create({
-    data: {
-      nombre: 'Corte de Cabello',
-      descripcion: 'Corte de cabello clásico',
-      precio: 15.0,
-      duracion: 30,
-    },
-  });
-
-  const servicioColoracion = await prisma.servicio.create({
-    data: {
-      nombre: 'Coloración',
-      descripcion: 'Tintura completa',
-      precio: 45.0,
-      duracion: 90,
-    },
-  });
-
-  const servicioBarba = await prisma.servicio.create({
-    data: {
-      nombre: 'Arreglo de Barba',
-      descripcion: 'Perfilado y arreglo de barba',
-      precio: 10.0,
-      duracion: 20,
-    },
-  });
-
-  const servicioMasaje = await prisma.servicio.create({
-    data: {
-      nombre: 'Masaje Capilar',
-      descripcion: 'Masaje relajante del cuero cabelludo',
-      precio: 20.0,
-      duracion: 45,
-    },
-  });
-
-  console.log('✅ Servicios creados:', [
-    servicioCorte,
-    servicioColoracion,
-    servicioBarba,
-    servicioMasaje,
-  ]);
-
-  // Crear empleados
-  console.log('👨‍💼 Creando empleados...');
-  const empleado1 = await prisma.empleado.create({
+  // 2. Crearte a TI (SuperAdmin)
+  await prisma.usuario.create({
     data: {
       nombre: 'Juan',
-      apellido: 'Pérez',
-      puesto: 'Estilista Senior',
+      apellido: 'Admin',
+      user: 'admin',
+      pass: hashedPass,
+      correo: 'admin@flowmint.com',
+      rol_id: rolSuperAdmin.rol_id,
+      estado: 'A',
+      comercio_id: null, // Los SuperAdmin no pertenecen a un comercio
     },
   });
 
-  const empleado2 = await prisma.empleado.create({
+  // 3. Crear Comercio de Prueba 1
+  const comercio1 = await prisma.comercio.create({
     data: {
-      nombre: 'María',
-      apellido: 'González',
-      puesto: 'Colorista',
+      nombre: 'Barbería Posadas',
+      direccion: 'Calle Falsa 123',
+      telefono: '3764000001',
+      activo: true, // Ya validado por vos
     },
   });
 
-  const empleado3 = await prisma.empleado.create({
+  // Dueño del Comercio 1
+  await prisma.usuario.create({
     data: {
       nombre: 'Carlos',
-      apellido: 'Rodríguez',
-      puesto: 'Barbero',
+      apellido: 'Barbero',
+      user: 'carlos',
+      pass: hashedPass,
+      correo: 'carlos@barberia.com',
+      rol_id: rolDueno.rol_id,
+      comercio_id: comercio1.comercio_id,
+      estado: 'A',
     },
   });
 
-  console.log('✅ Empleados creados:', [empleado1, empleado2, empleado3]);
-
-  // Crear clientes
-  console.log('👥 Creando clientes...');
-  const cliente1 = await prisma.cliente.create({
+  // Empleado del Comercio 1
+  const emp1 = await prisma.empleado.create({
     data: {
-      nombre: 'Ana',
-      apellido: 'Martínez',
-      telefono: '+54 11 1234-5678',
-      email: 'ana.martinez@email.com',
+      nombre: 'Lucas',
+      apellido: 'Cortes',
+      puesto: 'Barbero Senior',
+      comercio_id: comercio1.comercio_id,
     },
   });
 
-  const cliente2 = await prisma.cliente.create({
+  // Cliente del Comercio 1
+  const cli1 = await prisma.cliente.create({
     data: {
-      nombre: 'Pedro',
-      apellido: 'López',
-      telefono: '+54 11 8765-4321',
-      email: 'pedro.lopez@email.com',
+      nombre: 'Roberto',
+      apellido: 'Gomez',
+      email: 'roberto@gmail.com',
+      comercio_id: comercio1.comercio_id,
     },
   });
 
-  const cliente3 = await prisma.cliente.create({
+  // Servicio del Comercio 1
+  const serv1 = await prisma.servicio.create({
     data: {
-      nombre: 'Laura',
-      apellido: 'Fernández',
-      telefono: '+54 11 5555-6666',
-      email: 'laura.fernandez@email.com',
+      nombre: 'Corte + Barba',
+      precio: 5000,
+      duracion: 45,
+      comercio_id: comercio1.comercio_id,
     },
   });
 
-  console.log('✅ Clientes creados:', [cliente1, cliente2, cliente3]);
-
-  // Crear turnos de ejemplo
-  console.log('📅 Creando turnos...');
-  const hoy = new Date();
-  const manana = new Date(hoy);
-  manana.setDate(manana.getDate() + 1);
-  manana.setHours(10, 0, 0, 0);
-
-  const pasadoManana = new Date(hoy);
-  pasadoManana.setDate(pasadoManana.getDate() + 2);
-  pasadoManana.setHours(14, 30, 0, 0);
-
-  const turno1 = await prisma.turno.create({
+  // Turno del Comercio 1
+  await prisma.turno.create({
     data: {
-      fecha_hora: manana,
-      estado: 'confirmado',
-      cliente_id: cliente1.cliente_id,
-      empleado_id: empleado1.empleado_id,
-      servicio_id: servicioCorte.servicio_id,
+      fecha_hora: new Date(),
+      cliente_id: cli1.cliente_id,
+      empleado_id: emp1.empleado_id,
+      servicio_id: serv1.servicio_id,
+      comercio_id: comercio1.comercio_id,
     },
   });
 
-  const turno2 = await prisma.turno.create({
+  // 4. Crear Comercio de Prueba 2 (INACTIVO - Pendiente de tu OK)
+  const comercio2 = await prisma.comercio.create({
     data: {
-      fecha_hora: pasadoManana,
-      estado: 'pendiente',
-      cliente_id: cliente2.cliente_id,
-      empleado_id: empleado2.empleado_id,
-      servicio_id: servicioColoracion.servicio_id,
+      nombre: 'Estética Glow',
+      direccion: 'Av. Corrientes 456',
+      activo: false, // Esperando tu botón de OK
     },
   });
 
-  console.log('✅ Turnos creados:', [turno1, turno2]);
+  await prisma.usuario.create({
+    data: {
+      nombre: 'Lucía',
+      apellido: 'Estética',
+      user: 'lucia',
+      pass: hashedPass,
+      rol_id: rolDueno.rol_id,
+      comercio_id: comercio2.comercio_id,
+      estado: 'A',
+    },
+  });
 
-  console.log('\n🎉 Seed completado exitosamente!');
-  console.log('\n📋 Credenciales de acceso:');
-  console.log('   Admin:');
-  console.log('     Usuario: admin');
-  console.log('     Password: admin123');
-  console.log('   Usuario:');
-  console.log('     Usuario: usuario');
-  console.log('     Password: user123');
+  console.log('✅ Sistema SaaS inicializado.');
+  console.log('👤 SuperAdmin: admin / admin123');
+  console.log('🏠 Comercio Activo: carlos / admin123');
+  console.log('⏳ Comercio Pendiente: lucia / admin123');
 }
 
 main()
-  .catch((e) => {
-    console.error('❌ Error durante el seed:', e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+  .catch((e) => { console.error(e); process.exit(1); })
+  .finally(async () => { await prisma.$disconnect(); });

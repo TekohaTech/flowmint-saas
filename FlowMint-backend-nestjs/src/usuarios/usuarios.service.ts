@@ -21,7 +21,21 @@ export class UsuariosService {
 
   async findAll() {
     const users = await this.prisma.usuario.findMany({
-      include: { rol: true },
+      include: { 
+        rol: true,
+        comercio: true 
+      },
+    });
+    return users.map(({ pass, ...rest }) => rest);
+  }
+
+  async findAllByComercio(comercio_id: number) {
+    const users = await this.prisma.usuario.findMany({
+      where: { comercio_id },
+      include: { 
+        rol: true,
+        comercio: true 
+      },
     });
     return users.map(({ pass, ...rest }) => rest);
   }
@@ -29,7 +43,10 @@ export class UsuariosService {
   async findOne(id: number) {
     const user = await this.prisma.usuario.findUnique({
       where: { usuario_id: id },
-      include: { rol: true },
+      include: { 
+        rol: true,
+        comercio: true 
+      },
     });
     if (user) {
       const { pass, ...rest } = user;
@@ -45,7 +62,10 @@ export class UsuariosService {
     const { pass, ...result } = await this.prisma.usuario.update({
       where: { usuario_id: id },
       data: updateUsuarioDto,
-      include: { rol: true },
+      include: { 
+        rol: true,
+        comercio: true 
+      },
     });
     return result;
   }
@@ -57,7 +77,10 @@ export class UsuariosService {
   async findByUsername(username: string) {
     return this.prisma.usuario.findUnique({
       where: { user: username },
-      include: { rol: true },
+      include: { 
+        rol: true,
+        comercio: true 
+      },
     });
   }
 }

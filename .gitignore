@@ -1,23 +1,73 @@
-# Dependencies
-node_modules/
-FlowMint-backend-nestjs/node_modules/
-FlowMint-frontend/node_modules/
-
-# Environment variables
+# ============================================================
+# SECRETS & ENVIRONMENT - NUNCA SUBIR A GIT
+# ============================================================
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
+**/.env
+**/.env.local
+**/.env.*.local
+*.pem
+*.key
+credentials.json
+secrets.json
+service-account.json
 
-# Build outputs
+# ============================================================
+# DEPENDENCIES
+# ============================================================
+node_modules/
+**/node_modules/
+.pnp
+.pnp.js
+
+# ============================================================
+# BUILD OUTPUTS
+# ============================================================
 dist/
 build/
 .next/
 .nuxt/
 out/
+*.tsbuildinfo
+.turbo
 
-# OS generated files
+# ============================================================
+# LOGS
+# ============================================================
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ============================================================
+# DATABASE
+# ============================================================
+*.db
+*.db-journal
+postgres_data/
+prisma/migrations/*_*/
+
+# ============================================================
+# IDE & EDITORS
+# ============================================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
+
+# ============================================================
+# OS GENERATED FILES
+# ============================================================
 .DS_Store
 .DS_Store?
 ._*
@@ -25,33 +75,34 @@ out/
 .Trashes
 ehthumbs.db
 Thumbs.db
+Desktop.ini
 
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
+# ============================================================
+# TESTING & COVERAGE
+# ============================================================
 coverage/
+.nyc_output/
 *.lcov
+lib-cov/
+.grunt/
+.lock-wscript/
 
-# Temporary folders
+# ============================================================
+# TEMPORARY FILES
+# ============================================================
 tmp/
 temp/
+.cache/
+.parcel-cache/
+.eslintcache
 
-# Database
-*.db
-*.db-journal
-
-# Supabase
-supabase/
-
-# Backend dist files
-FlowMint-backend-nestjs/dist/
+# ============================================================
+# MISC
+# ============================================================
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

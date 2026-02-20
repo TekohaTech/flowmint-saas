@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Button, Modal, Table, Form, Alert, Spinner } from 'react-bootstrap';
+import { Button, Modal, Table, Form, Alert, Spinner, Col } from 'react-bootstrap';
 import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
-import { useAuth } from '../hooks/useAuth';
+import { authAPI } from '../services/api';
 import api from '../services/api';
-import './Usuarios.css'; // Custom styles for the component
+import './Usuarios.css'; 
 
 const Usuarios = () => {
     const [usuarios, setUsuarios] = useState([]);
     const [roles, setRoles] = useState([]);
+    const [comercios, setComercios] = useState([]);
     const [loading, setLoading] = useState(true);
     const [loadingRoles, setLoadingRoles] = useState(true);
     const [error, setError] = useState('');
@@ -20,15 +21,17 @@ const Usuarios = () => {
         user: '',
         pass: '',
         correo: '',
-        rol_id: null
+        rol_id: null,
+        comercio_id: null
     });
     const [isEditMode, setIsEditMode] = useState(false);
     
     const [showConfirmDelete, setShowConfirmDelete] = useState(false);
     const [userToDelete, setUserToDelete] = useState(null);
 
-    const { user: currentUser } = useAuth();
-    const isAdmin = currentUser?.rol?.nombre === 'Administrador';
+    const currentUser = authAPI.getCurrentUser();
+    const isSuperAdmin = currentUser?.rol === 'SUPERADMIN';
+    const isAdmin = isSuperAdmin || currentUser?.rol === 'DUEÑO';
 
     const fetchUsuarios = useCallback(async () => {
         try {
@@ -37,7 +40,7 @@ const Usuarios = () => {
             setUsuarios(response.data);
             setError('');
         } catch (err) {
-            setError('Error al cargar los usuarios. ¿El servidor está funcionando?');
+            setError('Error al cargar los usuarios.');
             console.error(err);
         } finally {
             setLoading(false);
@@ -57,12 +60,23 @@ const Usuarios = () => {
         }
     }, []);
 
+    const fetchComercios = useCallback(async () => {
+        if (!isSuperAdmin) return;
+        try {
+            const response = await api.get('/comercios');
+            setComercios(response.data);
+        } catch (err) {
+            console.error('Error al cargar comercios:', err);
+        }
+    }, [isSuperAdmin]);
+
     useEffect(() => {
         if (isAdmin) {
             fetchUsuarios();
             fetchRoles();
+            fetchComercios();
         }
-    }, [isAdmin, fetchUsuarios, fetchRoles]);
+    }, [isAdmin, fetchUsuarios, fetchRoles, fetchComercios]);
 
     const handleCloseModal = () => {
         setShowModal(false);
@@ -73,16 +87,13 @@ const Usuarios = () => {
             user: '',
             pass: '',
             correo: '',
-            rol_id: null
+            rol_id: null,
+            comercio_id: null
         });
         setIsEditMode(false);
     };
 
     const handleShowCreateModal = () => {
-        if (roles.length === 0) {
-            setError("No se han cargado los roles. Intente de nuevo en un momento.");
-            return;
-        }
         setIsEditMode(false);
         setModalData({
             usuario_id: null,
@@ -91,16 +102,20 @@ const Usuarios = () => {
             user: '',
             pass: '',
             correo: '',
-            rol_id: roles[0].rol_id // Default to the first available role
+            rol_id: roles.find(r => r.nombre === 'DUEÑO')?.rol_id || roles[0]?.rol_id,
+            comercio_id: currentUser?.comercio_id || null
         });
         setShowModal(true);
     };
 
     const handleShowEditModal = (usuario) => {
         setIsEditMode(true);
-        // Ensure rol_id is a number, falling back to a default if it's missing
-        const rolId = usuario.rol?.rol_id || (roles.length > 0 ? roles[0].rol_id : null);
-        setModalData({ ...usuario, pass: '', rol_id: rolId });
+        setModalData({ 
+            ...usuario, 
+            pass: '', 
+            rol_id: usuario.rol?.rol_id,
+            comercio_id: usuario.comercio_id 
+        });
         setShowModal(true);
     };
     
@@ -118,26 +133,14 @@ const Usuarios = () => {
         const { name, value } = e.target;
         setModalData(prev => ({
             ...prev,
-            [name]: name === 'rol_id' ? parseInt(value, 10) : value
+            [name]: (name === 'rol_id' || name === 'comercio_id') ? (value === "" ? null : parseInt(value, 10)) : value
         }));
     };
 
     const handleSaveChanges = async (e) => {
         e.preventDefault();
-        
         const userData = { ...modalData };
-        
-        // Ensure rol_id is a valid number
-        if (!userData.rol_id || isNaN(parseInt(userData.rol_id))) {
-            setError("Debe seleccionar un rol válido.");
-            return;
-        }
-        userData.rol_id = parseInt(userData.rol_id, 10);
-
-        // Do not send empty password on update
-        if (isEditMode && !userData.pass) {
-            delete userData.pass;
-        }
+        if (isEditMode && !userData.pass) delete userData.pass;
 
         try {
             if (isEditMode) {
@@ -148,10 +151,7 @@ const Usuarios = () => {
             fetchUsuarios();
             handleCloseModal();
         } catch (err) {
-            const apiError = err.response?.data?.message;
-            const errorMessage = Array.isArray(apiError) ? apiError.join(', ') : apiError;
-            setError(`Error al guardar el usuario: ${errorMessage || err.message}`);
-            console.error(err);
+            setError(`Error al guardar: ${err.response?.data?.message || err.message}`);
         }
     };
     
@@ -162,11 +162,9 @@ const Usuarios = () => {
             fetchUsuarios();
             handleCloseConfirmDelete();
         } catch (err) {
-            setError(`Error al eliminar el usuario: ${err.response?.data?.message || err.message}`);
-            console.error(err);
+            setError(`Error al eliminar: ${err.response?.data?.message || err.message}`);
         }
     };
-
 
     if (!isAdmin) {
         return (
@@ -181,43 +179,50 @@ const Usuarios = () => {
     }
 
     return (
-        <div className="container-fluid user-management-container">
-            <h1 className="text-neon-cyan">Gestión de Usuarios</h1>
-            {error && <Alert variant="danger" onClose={() => setError('')} dismissible>{error}</Alert>}
+        <div className="container-fluid user-management-container animate__animated animate__fadeIn">
+            <h1 className="text-neon-cyan mb-4">Gestión de Usuarios {isSuperAdmin ? '(Global)' : ''}</h1>
+            {error && <Alert variant="danger" onClose={() => setError('')} dismissible className="bg-dark text-danger border-danger">{error}</Alert>}
             
-            <div className="d-flex justify-content-end mb-3">
-                <Button variant="outline-success" onClick={handleShowCreateModal} disabled={loadingRoles}>
-                    {loadingRoles ? <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /> : <FaPlus className="me-2" />}
-                    Crear Usuario
+            <div className="d-flex justify-content-end mb-4">
+                <Button variant="outline-success" onClick={handleShowCreateModal} className="shadow-glow-green">
+                    <FaPlus className="me-2" /> Crear Usuario
                 </Button>
             </div>
 
             <div className="table-responsive">
-                <Table striped bordered hover variant="dark" className="neon-table">
+                <Table hover variant="dark" className="border-secondary">
                     <thead>
-                        <tr>
-                            <th>ID</th>
+                        <tr className="border-bottom border-secondary text-neon-cyan text-uppercase small">
                             <th>Usuario</th>
                             <th>Nombre Completo</th>
                             <th>Email</th>
+                            {isSuperAdmin && <th>Comercio</th>}
                             <th>Rol</th>
-                            <th>Acciones</th>
+                            <th className="text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         {usuarios.map((usuario) => (
-                            <tr key={usuario.usuario_id}>
-                                <td>{usuario.usuario_id}</td>
-                                <td>{usuario.user}</td>
+                            <tr key={usuario.usuario_id} className="align-middle">
+                                <td><span className="fw-bold text-white">{usuario.user}</span></td>
                                 <td>{`${usuario.nombre} ${usuario.apellido}`}</td>
-                                <td>{usuario.correo}</td>
+                                <td>{usuario.correo || '-'}</td>
+                                {isSuperAdmin && (
+                                    <td>
+                                        {usuario.comercio ? (
+                                            <span className="text-info">{usuario.comercio.nombre}</span>
+                                        ) : (
+                                            <span className="text-muted italic">Sistema</span>
+                                        )}
+                                    </td>
+                                )}
                                 <td>
-                                    <span className={`badge bg-${usuario.rol?.nombre === 'Administrador' ? 'danger' : 'primary'}`}>
+                                    <span className={`badge border ${usuario.rol?.nombre === 'SUPERADMIN' ? 'border-danger text-danger' : 'border-primary text-primary'}`}>
                                         {usuario.rol?.nombre || 'N/A'}
                                     </span>
                                 </td>
-                                <td>
-                                    <Button variant="outline-primary" size="sm" className="me-2" onClick={() => handleShowEditModal(usuario)} disabled={loadingRoles}>
+                                <td className="text-center">
+                                    <Button variant="outline-primary" size="sm" className="me-2" onClick={() => handleShowEditModal(usuario)}>
                                         <FaEdit />
                                     </Button>
                                     <Button variant="outline-danger" size="sm" onClick={() => handleShowConfirmDelete(usuario)}>
@@ -231,44 +236,57 @@ const Usuarios = () => {
             </div>
 
             {/* Create / Edit Modal */}
-            <Modal show={showModal} onHide={handleCloseModal} centered>
-                <Modal.Header closeButton className="neon-modal-header">
+            <Modal show={showModal} onHide={handleCloseModal} centered contentClassName="bg-dark border-secondary text-white">
+                <Modal.Header closeButton closeVariant="white" className="border-secondary">
                     <Modal.Title className="text-neon-cyan">{isEditMode ? 'Editar Usuario' : 'Crear Usuario'}</Modal.Title>
                 </Modal.Header>
-                <Modal.Body className="neon-modal-body">
+                <Modal.Body className="p-4">
                     <Form onSubmit={handleSaveChanges}>
-                        <Form.Group className="mb-3" controlId="formNombre">
-                            <Form.Label>Nombre</Form.Label>
-                            <Form.Control type="text" name="nombre" value={modalData.nombre} onChange={handleFormChange} required />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formApellido">
-                            <Form.Label>Apellido</Form.Label>
-                            <Form.Control type="text" name="apellido" value={modalData.apellido} onChange={handleFormChange} required />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formUser">
-                            <Form.Label>Usuario</Form.Label>
-                            <Form.Control type="text" name="user" value={modalData.user} onChange={handleFormChange} required />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formCorreo">
-                            <Form.Label>Email</Form.Label>
-                            <Form.Control type="email" name="correo" value={modalData.correo} onChange={handleFormChange} />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formPass">
-                            <Form.Label>Contraseña {isEditMode && '(Dejar en blanco para no cambiar)'}</Form.Label>
-                            <Form.Control type="password" name="pass" value={modalData.pass} onChange={handleFormChange} required={!isEditMode} />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="formRol">
-                            <Form.Label>Rol</Form.Label>
-                            <Form.Select name="rol_id" value={modalData.rol_id || ''} onChange={handleFormChange} required>
-                                <option value="" disabled>Seleccione un rol...</option>
-                                {roles.map(rol => (
-                                    <option key={rol.rol_id} value={rol.rol_id}>{rol.nombre}</option>
-                                ))}
-                            </Form.Select>
-                        </Form.Group>
-                        <div className="d-grid">
-                            <Button variant="outline-primary" type="submit">
-                                {isEditMode ? 'Guardar Cambios' : 'Crear Usuario'}
+                        <div className="row g-3">
+                            <Col md={6}>
+                                <Form.Label className="small text-muted text-uppercase">Nombre</Form.Label>
+                                <Form.Control className="bg-black border-secondary text-white" type="text" name="nombre" value={modalData.nombre} onChange={handleFormChange} required />
+                            </Col>
+                            <Col md={6}>
+                                <Form.Label className="small text-muted text-uppercase">Apellido</Form.Label>
+                                <Form.Control className="bg-black border-secondary text-white" type="text" name="apellido" value={modalData.apellido} onChange={handleFormChange} required />
+                            </Col>
+                            <Col md={12}>
+                                <Form.Label className="small text-muted text-uppercase">Nombre de Usuario</Form.Label>
+                                <Form.Control className="bg-black border-secondary text-white" type="text" name="user" value={modalData.user} onChange={handleFormChange} required />
+                            </Col>
+                            <Col md={12}>
+                                <Form.Label className="small text-muted text-uppercase">Correo Electrónico</Form.Label>
+                                <Form.Control className="bg-black border-secondary text-white" type="email" name="correo" value={modalData.correo} onChange={handleFormChange} />
+                            </Col>
+                            <Col md={12}>
+                                <Form.Label className="small text-muted text-uppercase">Contraseña {isEditMode && '(Dejar en blanco para no cambiar)'}</Form.Label>
+                                <Form.Control className="bg-black border-secondary text-white" type="password" name="pass" value={modalData.pass} onChange={handleFormChange} required={!isEditMode} />
+                            </Col>
+                            <Col md={6}>
+                                <Form.Label className="small text-muted text-uppercase">Rol de Acceso</Form.Label>
+                                <Form.Select className="bg-black border-secondary text-white" name="rol_id" value={modalData.rol_id || ''} onChange={handleFormChange} required>
+                                    <option value="" disabled>Seleccione...</option>
+                                    {roles.map(rol => (
+                                        <option key={rol.rol_id} value={rol.rol_id}>{rol.nombre}</option>
+                                    ))}
+                                </Form.Select>
+                            </Col>
+                            {isSuperAdmin && (
+                                <Col md={6}>
+                                    <Form.Label className="small text-muted text-uppercase">Asignar Comercio</Form.Label>
+                                    <Form.Select className="bg-black border-secondary text-white" name="comercio_id" value={modalData.comercio_id || ''} onChange={handleFormChange}>
+                                        <option value="">Ninguno (SuperAdmin)</option>
+                                        {comercios.map(c => (
+                                            <option key={c.comercio_id} value={c.comercio_id}>{c.nombre}</option>
+                                        ))}
+                                    </Form.Select>
+                                </Col>
+                            )}
+                        </div>
+                        <div className="d-grid mt-4">
+                            <Button variant="outline-cyan" type="submit" className="fw-bold py-2">
+                                {isEditMode ? 'GUARDAR CAMBIOS' : 'CREAR USUARIO'}
                             </Button>
                         </div>
                     </Form>
@@ -276,16 +294,17 @@ const Usuarios = () => {
             </Modal>
 
             {/* Confirm Delete Modal */}
-            <Modal show={showConfirmDelete} onHide={handleCloseConfirmDelete} centered>
-                <Modal.Header closeButton className="neon-modal-header">
-                    <Modal.Title className="text-neon-cyan">Confirmar Eliminación</Modal.Title>
+            <Modal show={showConfirmDelete} onHide={handleCloseConfirmDelete} centered contentClassName="bg-dark border-danger text-white">
+                <Modal.Header closeButton closeVariant="white" className="border-secondary">
+                    <Modal.Title className="text-danger">Confirmar Eliminación</Modal.Title>
                 </Modal.Header>
-                <Modal.Body className="neon-modal-body">
-                    ¿Estás seguro de que quieres eliminar al usuario <strong>{userToDelete?.user}</strong>? Esta acción no se puede deshacer.
+                <Modal.Body className="p-4">
+                    ¿Estás seguro de que quieres eliminar al usuario <strong>{userToDelete?.user}</strong>? 
+                    <p className="mt-2 text-muted small">Esta acción no se puede deshacer.</p>
                 </Modal.Body>
-                <Modal.Footer className="neon-modal-footer">
-                    <Button variant="secondary" onClick={handleCloseConfirmDelete}>Cancelar</Button>
-                    <Button variant="danger" onClick={handleDeleteUser}>Eliminar</Button>
+                <Modal.Footer className="border-secondary">
+                    <Button variant="outline-light" onClick={handleCloseConfirmDelete}>Cancelar</Button>
+                    <Button variant="danger" onClick={handleDeleteUser}>ELIMINAR</Button>
                 </Modal.Footer>
             </Modal>
         </div>
