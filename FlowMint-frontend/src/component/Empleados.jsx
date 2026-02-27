@@ -133,7 +133,7 @@ const Empleados = () => {
           <div className="d-flex align-items-center gap-3 mb-3">
             <Briefcase size={36} style={{ color: "var(--neon-purple)" }} />
             <div>
-              <h2 className="text-center" style={{ color: "var(--neon-purple)", marginBottom: "0" }}>
+              <h2 className="text-center" style={{ color: 'white', textShadow: '0 0 10px rgba(139, 92, 246, 0.3)', marginBottom: "0" }}>
                 EMPLEADOS
               </h2>
               <small style={{ color: "var(--text-muted)" }}>

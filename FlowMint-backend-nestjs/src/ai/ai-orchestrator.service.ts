@@ -13,35 +13,84 @@ export class AiOrchestratorService implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    // Temporarily disabled AI providers to fix build errors
-    // this.providers.push(this.groqService);
-    // this.providers.push(this.cerebrasService);
-    this.logger.log('AI Orchestrator initialized (Providers temporarily disabled for system stability)');
+    this.providers.push(this.groqService);
+    this.providers.push(this.cerebrasService);
+    this.logger.log('AI Orchestrator initialized with ' + this.providers.length + ' providers');
   }
 
   async chat(messages: any[], providerName?: string) {
-    throw new Error('AI Chat is temporarily disabled. Please configure API keys and fix service implementation.');
+    if (this.providers.length === 0) {
+      throw new Error('No AI providers available. Please configure API keys.');
+    }
+
+    const provider = providerName 
+      ? this.providers.find(p => p.name === providerName)
+      : this.providers[0];
+
+    if (!provider) {
+      throw new Error(`Provider ${providerName} not found`);
+    }
+
+    return provider.chat(messages);
   }
 
   async chatStream(messages: any[], providerName?: string) {
-    throw new Error('AI Chat is temporarily disabled.');
+    if (this.providers.length === 0) {
+      throw new Error('No AI providers available. Please configure API keys.');
+    }
+
+    const provider = providerName 
+      ? this.providers.find(p => p.name === providerName)
+      : this.providers[0];
+
+    if (!provider) {
+      throw new Error(`Provider ${providerName} not found`);
+    }
+
+    return provider.chatStream(messages);
   }
 
   async generateResponse(message: string, systemPrompt?: string): Promise<string> {
-    this.logger.warn('AI Service is disabled. Returning placeholder response.');
-    return "The AI service is currently unavailable. Please check the server logs for more information.";
+    if (this.providers.length === 0) {
+      return "The AI service is currently unavailable. Please check the server logs for more information.";
+    }
+
+    const messages = [
+      ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
+      { role: 'user', content: message }
+    ];
+
+    const response = await this.chat(messages);
+    return response;
   }
 
   async *generateStream(message: string, systemPrompt?: string): AsyncGenerator<string> {
-    this.logger.warn('AI Service is disabled. Returning placeholder stream.');
-    yield "The AI service is currently unavailable.";
+    if (this.providers.length === 0) {
+      yield "The AI service is currently unavailable.";
+      return;
+    }
+
+    const messages = [
+      ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
+      { role: 'user', content: message }
+    ];
+
+    const stream = await this.chatStream(messages);
+    for await (const chunk of stream) {
+      yield chunk;
+    }
   }
 
   getProviderStatus(): any {
     return {
-      status: 'disabled',
-      providers: [],
-      message: 'AI providers are temporarily disabled for system stability.',
+      status: this.providers.length > 0 ? 'enabled' : 'disabled',
+      providers: this.providers.map(p => ({
+        name: p.name,
+        status: p.isConfigured ? 'configured' : 'not_configured'
+      })),
+      message: this.providers.length > 0 
+        ? 'AI providers are enabled.' 
+        : 'No AI providers configured. Add API keys to .env file.',
     };
   }
 }

@@ -17,10 +17,29 @@ model Comercio {
   direccion   String?
   telefono    String?
   email       String?   @unique
-  activo      Boolean   @default(false) // Tú lo activas desde el panel
+  
+  // Control de licencia
+  activo      Boolean   @default(false) // true = puede usar el sistema
+  estado      String    @default("pendiente") // pendiente, activo, suspendido
+  
+  // Información adicional
+  categoria   String?   // barberia, peluqueria, spa, otro
   logo_url    String?
-  creado_en   DateTime  @default(now())
-  actualizado_en DateTime @updatedAt
+  
+  // Datos del dueño (para mostrar en panel admin)
+  dueno_nombre   String?
+  dueno_apellido String?
+  dueno_email    String?
+  dueno_telefono String?
+  
+  // Fechas de control
+  fecha_solicitud   DateTime  @default(now())
+  fecha_activacion  DateTime?
+  fecha_suspension  DateTime?
+  motivo_suspension String?
+  
+  creado_en      DateTime  @default(now())
+  actualizado_en DateTime  @updatedAt
 
   // Relaciones
   usuarios    Usuario[]

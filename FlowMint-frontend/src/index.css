@@ -22,17 +22,34 @@
     --bg-card: linear-gradient(145deg, #1e1e3e 0%, #2a2050 100%);
     --bg-hover: #2d2555;
 
-    /* Text Colors */
-    --text-primary: #ffffff;
-    --text-secondary: #b8b8d1;
-    --text-muted: #8b8b9f;
-    --text-accent: var(--neon-cyan);
+/* Text Colors */
+--text-primary: #ffffff;
+--text-secondary: #e2e2f0;
+--text-muted: #b0b0cc; /* Incluso más claro */
+--text-accent: var(--neon-cyan);
 
-    /* Borders & Shadows */
-    --border-color: rgba(0, 243, 255, 0.3);
-    --shadow-glow: 0 0 20px rgba(0, 243, 255, 0.3);
-    --shadow-glow-pink: 0 0 20px rgba(255, 0, 110, 0.3);
-    --shadow-glow-green: 0 0 20px rgba(22, 242, 179, 0.3);
+/* Force Bootstrap overrides for dark theme legibility */
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+.bg-dark {
+    background: var(--bg-card) !important;
+}
+
+.text-black {
+    color: var(--text-primary) !important;
+}
+
+.bg-black {
+    background: #05050f !important;
+}
+
+/* Borders & Shadows */
+    --border-color: rgba(0, 243, 255, 0.4);
+    --shadow-glow: 0 0 12px rgba(0, 243, 255, 0.4);
+    --shadow-glow-pink: 0 0 12px rgba(255, 0, 110, 0.4);
+    --shadow-glow-green: 0 0 12px rgba(22, 242, 179, 0.4);
 
     /* Spacing */
     --spacing-xs: 0.25rem;
@@ -197,16 +214,16 @@ h1 {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-shadow: 0 0 30px rgba(0, 243, 255, 0.5);
+    text-shadow: 0 0 8px rgba(0, 243, 255, 0.4);
     animation: glowText 2s ease-in-out infinite alternate;
 }
 
 @keyframes glowText {
     from {
-        filter: drop-shadow(0 0 10px var(--neon-cyan));
+        filter: drop-shadow(0 0 4px var(--neon-cyan));
     }
     to {
-        filter: drop-shadow(0 0 20px var(--neon-pink));
+        filter: drop-shadow(0 0 8px var(--neon-pink));
     }
 }
 
@@ -223,7 +240,7 @@ h3 {
 
 p {
     margin-bottom: var(--spacing-md);
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 a {
@@ -373,7 +390,7 @@ textarea::placeholder {
 label {
     display: block;
     margin-bottom: var(--spacing-sm);
-    color: var(--neon-green);
+    color: var(--text-primary);
     font-weight: 600;
     text-transform: uppercase;
     font-size: 0.85rem;
@@ -450,7 +467,7 @@ th {
 td {
     padding: 1rem;
     border-bottom: 1px solid rgba(0, 243, 255, 0.1);
-    color: var(--text-secondary);
+    color: var(--text-primary);
 }
 
 tr:last-child td {

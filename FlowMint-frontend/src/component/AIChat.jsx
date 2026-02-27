@@ -22,7 +22,7 @@ const AIChat = ({ show, onHide }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "¡Hola! Soy el Asistente AI de FlowMint. Puedo ayudarte con:\n\n• Gestionar turnos\n• Información de clientes\n• Horarios de empleados\n• Detalles de servicios\n• Reportes de ganancias\n\n¿En qué puedo ayudarte hoy?",
+      text: "¡Hola! 👋 Soy el Asistente AI de FlowMint\n\nEstoy aquí para ayudarte a gestionar tu peluquería/barbería/spa. Puedo:\n\n📅 Crear y gestionar turnos\n👥 Buscar y atender clientes\n👨‍💼 Controlar horarios de empleados\n💰 Ver reportes de ganancias\n🎂 Generar mensajes para clientes (cumpleaños, recordatorios)\n\n¿En qué puedo ayudarte hoy?",
       sender: "bot",
       timestamp: new Date(),
     },
@@ -143,11 +143,43 @@ const AIChat = ({ show, onHide }) => {
   };
 
   const quickActions = [
-    { text: "¿Cómo creo un turno?", icon: "📅" },
-    { text: "Mostrar gestión de clientes", icon: "👥" },
-    { text: "Explicar reportes de ganancias", icon: "💰" },
-    { text: "Ayuda con servicios", icon: "✂️" },
+    { text: "Crear turno para cliente", icon: "📅" },
+    { text: "Buscar cliente frecuente", icon: "🔍" },
+    { text: "Ver estadísticas del mes", icon: "📊" },
+    { text: "Horario de empleados", icon: "👨‍💼" },
+    { text: "Servicios más pedidos", icon: "✂️" },
+    { text: "Plantilla cumpleaños", icon: "🎂" },
   ];
+
+  const templates = {
+    cumpleanos: `🎂¡Feliz Cumpleaños! 🎉
+
+Querido cliente, en tu día especial queremos mimarte.
+
+🎁 Te regalamos un [descuento/servicio gratis] en tu próximo turno.
+
+📞 Reserva tu cita respondiendo este mensaje o llamanos.
+
+¡Te esperamos! 🎈`,
+    
+    recordatorio: `📅 Recordatorio de tu turno
+
+Hola [nombre], te recordamos que tienes un turno mañana a las [hora] en [nombre del negocio].
+
+¿Necesitas cambiarlo? Responde este mensaje.
+
+¡Nos vemos pronto! ✂️`,
+    
+    promocion: `🔥[Nombre del servicio] - Oferta especial!
+
+Ahora por tiempo limitado: [descuento] en tu próximo turno de [servicio].
+
+📞 Reserva tu cita ahora!
+
+[Nombre del negocio]`,
+  };
+
+  const [showTemplates, setShowTemplates] = useState(false);
 
   return (
     <Modal
@@ -394,6 +426,145 @@ const AIChat = ({ show, onHide }) => {
                 </Badge>
               ))}
             </div>
+            
+            {/* Botón de Plantillas */}
+            <div className="mt-3">
+              <button
+                type="button"
+                onClick={() => setShowTemplates(!showTemplates)}
+                style={{
+                  background: "transparent",
+                  border: "2px solid var(--neon-purple)",
+                  color: "var(--neon-purple)",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontSize: "0.85rem",
+                  fontWeight: "600",
+                  textTransform: "uppercase",
+                  letterSpacing: "1px",
+                }}
+              >
+                📋 {showTemplates ? "Ocultar Plantillas" : "Ver Plantillas para Clientes"}
+              </button>
+            </div>
+
+            {/* Plantillas para Copiar */}
+            {showTemplates && (
+              <div className="mt-3" style={{ background: "var(--bg-tertiary)", padding: "1rem", borderRadius: "12px", border: "2px solid var(--border-color)" }}>
+                <small style={{ color: "var(--neon-cyan)", textTransform: "uppercase", fontSize: "0.7rem", letterSpacing: "1px" }}>
+                  Mensajes listos para copiar
+                </small>
+                
+                {/* Plantilla Cumpleaños */}
+                <div className="mt-2 mb-3">
+                  <div className="d-flex justify-content-between align-items-center mb-1">
+                    <span style={{ color: "var(--neon-pink)", fontWeight: "bold", fontSize: "0.9rem" }}>🎂 Cumpleaños</span>
+                    <button
+                      type="button"
+                      onClick={() => navigator.clipboard.writeText(templates.cumpleanos)}
+                      style={{
+                        background: "var(--neon-green)",
+                        border: "none",
+                        color: "#000",
+                        padding: "0.25rem 0.75rem",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        fontSize: "0.75rem",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      📋 Copiar
+                    </button>
+                  </div>
+                  <pre style={{ 
+                    color: "var(--text-secondary)", 
+                    fontSize: "0.75rem", 
+                    background: "var(--bg-primary)", 
+                    padding: "0.5rem", 
+                    borderRadius: "6px",
+                    whiteSpace: "pre-wrap",
+                    margin: 0,
+                    maxHeight: "120px",
+                    overflow: "auto"
+                  }}>
+{templates.cumpleanos}
+                  </pre>
+                </div>
+
+                {/* Plantilla Recordatorio */}
+                <div className="mb-3">
+                  <div className="d-flex justify-content-between align-items-center mb-1">
+                    <span style={{ color: "var(--neon-yellow)", fontWeight: "bold", fontSize: "0.9rem" }}>📅 Recordatorio</span>
+                    <button
+                      type="button"
+                      onClick={() => navigator.clipboard.writeText(templates.recordatorio)}
+                      style={{
+                        background: "var(--neon-green)",
+                        border: "none",
+                        color: "#000",
+                        padding: "0.25rem 0.75rem",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        fontSize: "0.75rem",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      📋 Copiar
+                    </button>
+                  </div>
+                  <pre style={{ 
+                    color: "var(--text-secondary)", 
+                    fontSize: "0.75rem", 
+                    background: "var(--bg-primary)", 
+                    padding: "0.5rem", 
+                    borderRadius: "6px",
+                    whiteSpace: "pre-wrap",
+                    margin: 0,
+                    maxHeight: "100px",
+                    overflow: "auto"
+                  }}>
+{templates.recordatorio}
+                  </pre>
+                </div>
+
+                {/* Plantilla Promoción */}
+                <div>
+                  <div className="d-flex justify-content-between align-items-center mb-1">
+                    <span style={{ color: "var(--neon-cyan)", fontWeight: "bold", fontSize: "0.9rem" }}>🔥 Promoción</span>
+                    <button
+                      type="button"
+                      onClick={() => navigator.clipboard.writeText(templates.promocion)}
+                      style={{
+                        background: "var(--neon-green)",
+                        border: "none",
+                        color: "#000",
+                        padding: "0.25rem 0.75rem",
+                        borderRadius: "4px",
+                        cursor: "pointer",
+                        fontSize: "0.75rem",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      📋 Copiar
+                    </button>
+                  </div>
+                  <pre style={{ 
+                    color: "var(--text-secondary)", 
+                    fontSize: "0.75rem", 
+                    background: "var(--bg-primary)", 
+                    padding: "0.5rem", 
+                    borderRadius: "6px",
+                    whiteSpace: "pre-wrap",
+                    margin: 0,
+                    maxHeight: "100px",
+                    overflow: "auto"
+                  }}>
+{templates.promocion}
+                  </pre>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </Modal.Body>

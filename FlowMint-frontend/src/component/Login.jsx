@@ -60,12 +60,6 @@ const Login = () => {
     }
   };
 
-  const handleGoogleLogin = () => {
-    // Redirigir al endpoint de Google en el Backend
-    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3000';
-    window.location.href = `${backendUrl}/api/auth/google`;
-  };
-
   return (
     <div className="min-vh-100 d-flex align-items-center justify-content-center p-3">
       <motion.div
@@ -98,18 +92,9 @@ const Login = () => {
           </motion.div>
         )}
 
-        {/* GOOGLE LOGIN BUTTON (PRIMARY) */}
-        <button
-          type="button"
-          onClick={handleGoogleLogin}
-          className="btn btn-light w-100 mb-4 d-flex align-items-center justify-content-center gap-2 py-2 fw-bold"
-          style={{ border: '1px solid #ddd', borderRadius: '8px', background: 'white', color: '#333' }}
-        >
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="18" />
-          Continuar con Google
-        </button>
+        {/* GOOGLE LOGIN BUTTON - REMOVED */}
 
-        <div className="d-flex align-items-center mb-4 text-muted">
+        <div className="d-flex align-items-center mb-4 text-light opacity-75">
           <hr className="flex-grow-1" style={{ borderColor: 'rgba(255,255,255,0.1)' }} />
           <span className="px-3 small">O con usuario</span>
           <hr className="flex-grow-1" style={{ borderColor: 'rgba(255,255,255,0.1)' }} />
@@ -119,7 +104,7 @@ const Login = () => {
           <div className="mb-3">
             <label className="text-light small mb-1">Usuario</label>
             <div className="position-relative">
-              <span className="position-absolute start-0 top-50 translate-middle-y ps-3 text-muted">
+              <span className="position-absolute start-0 top-50 translate-middle-y ps-3 text-light opacity-75">
                 <User size={18} />
               </span>
               <input
@@ -137,7 +122,7 @@ const Login = () => {
           <div className="mb-4">
             <label className="text-light small mb-1">Contraseña</label>
             <div className="position-relative">
-              <span className="position-absolute start-0 top-50 translate-middle-y ps-3 text-muted">
+              <span className="position-absolute start-0 top-50 translate-middle-y ps-3 text-light opacity-75">
                 <Lock size={18} />
               </span>
               <input
@@ -171,7 +156,7 @@ const Login = () => {
         </form>
 
         <div className="text-center mt-4 pt-3 border-top border-secondary">
-          <p className="small text-muted mb-0">
+          <p className="small text-light opacity-75 mb-0">
             Al continuar, aceptas que FlowMint cree un espacio de trabajo para tu negocio.
           </p>
         </div>

@@ -180,7 +180,7 @@ const Usuarios = () => {
 
     return (
         <div className="container-fluid user-management-container animate__animated animate__fadeIn">
-            <h1 className="text-neon-cyan mb-4">Gestión de Usuarios {isSuperAdmin ? '(Global)' : ''}</h1>
+            <h1 className="mb-4" style={{ color: 'white', textShadow: '0 0 10px rgba(0, 243, 255, 0.3)' }}>Gestión de Usuarios {isSuperAdmin ? '(Global)' : ''}</h1>
             {error && <Alert variant="danger" onClose={() => setError('')} dismissible className="bg-dark text-danger border-danger">{error}</Alert>}
             
             <div className="d-flex justify-content-end mb-4">
@@ -192,7 +192,7 @@ const Usuarios = () => {
             <div className="table-responsive">
                 <Table hover variant="dark" className="border-secondary">
                     <thead>
-                        <tr className="border-bottom border-secondary text-neon-cyan text-uppercase small">
+                        <tr className="border-bottom border-secondary text-white text-uppercase small">
                             <th>Usuario</th>
                             <th>Nombre Completo</th>
                             <th>Email</th>
@@ -212,7 +212,7 @@ const Usuarios = () => {
                                         {usuario.comercio ? (
                                             <span className="text-info">{usuario.comercio.nombre}</span>
                                         ) : (
-                                            <span className="text-muted italic">Sistema</span>
+                                            <span className="text-light opacity-75 italic">Sistema</span>
                                         )}
                                     </td>
                                 )}
@@ -244,27 +244,27 @@ const Usuarios = () => {
                     <Form onSubmit={handleSaveChanges}>
                         <div className="row g-3">
                             <Col md={6}>
-                                <Form.Label className="small text-muted text-uppercase">Nombre</Form.Label>
+                                <Form.Label className="small text-light opacity-75 text-uppercase">Nombre</Form.Label>
                                 <Form.Control className="bg-black border-secondary text-white" type="text" name="nombre" value={modalData.nombre} onChange={handleFormChange} required />
                             </Col>
                             <Col md={6}>
-                                <Form.Label className="small text-muted text-uppercase">Apellido</Form.Label>
+                                <Form.Label className="small text-light opacity-75 text-uppercase">Apellido</Form.Label>
                                 <Form.Control className="bg-black border-secondary text-white" type="text" name="apellido" value={modalData.apellido} onChange={handleFormChange} required />
                             </Col>
                             <Col md={12}>
-                                <Form.Label className="small text-muted text-uppercase">Nombre de Usuario</Form.Label>
+                                <Form.Label className="small text-light opacity-75 text-uppercase">Nombre de Usuario</Form.Label>
                                 <Form.Control className="bg-black border-secondary text-white" type="text" name="user" value={modalData.user} onChange={handleFormChange} required />
                             </Col>
                             <Col md={12}>
-                                <Form.Label className="small text-muted text-uppercase">Correo Electrónico</Form.Label>
+                                <Form.Label className="small text-light opacity-75 text-uppercase">Correo Electrónico</Form.Label>
                                 <Form.Control className="bg-black border-secondary text-white" type="email" name="correo" value={modalData.correo} onChange={handleFormChange} />
                             </Col>
                             <Col md={12}>
-                                <Form.Label className="small text-muted text-uppercase">Contraseña {isEditMode && '(Dejar en blanco para no cambiar)'}</Form.Label>
+                                <Form.Label className="small text-light opacity-75 text-uppercase">Contraseña {isEditMode && '(Dejar en blanco para no cambiar)'}</Form.Label>
                                 <Form.Control className="bg-black border-secondary text-white" type="password" name="pass" value={modalData.pass} onChange={handleFormChange} required={!isEditMode} />
                             </Col>
                             <Col md={6}>
-                                <Form.Label className="small text-muted text-uppercase">Rol de Acceso</Form.Label>
+                                <Form.Label className="small text-light opacity-75 text-uppercase">Rol de Acceso</Form.Label>
                                 <Form.Select className="bg-black border-secondary text-white" name="rol_id" value={modalData.rol_id || ''} onChange={handleFormChange} required>
                                     <option value="" disabled>Seleccione...</option>
                                     {roles.map(rol => (
@@ -274,7 +274,7 @@ const Usuarios = () => {
                             </Col>
                             {isSuperAdmin && (
                                 <Col md={6}>
-                                    <Form.Label className="small text-muted text-uppercase">Asignar Comercio</Form.Label>
+                                    <Form.Label className="small text-light opacity-75 text-uppercase">Asignar Comercio</Form.Label>
                                     <Form.Select className="bg-black border-secondary text-white" name="comercio_id" value={modalData.comercio_id || ''} onChange={handleFormChange}>
                                         <option value="">Ninguno (SuperAdmin)</option>
                                         {comercios.map(c => (
@@ -300,7 +300,7 @@ const Usuarios = () => {
                 </Modal.Header>
                 <Modal.Body className="p-4">
                     ¿Estás seguro de que quieres eliminar al usuario <strong>{userToDelete?.user}</strong>? 
-                    <p className="mt-2 text-muted small">Esta acción no se puede deshacer.</p>
+                    <p className="mt-2 text-light opacity-75 small">Esta acción no se puede deshacer.</p>
                 </Modal.Body>
                 <Modal.Footer className="border-secondary">
                     <Button variant="outline-light" onClick={handleCloseConfirmDelete}>Cancelar</Button>

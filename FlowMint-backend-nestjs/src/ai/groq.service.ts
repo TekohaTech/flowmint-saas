@@ -6,39 +6,45 @@ import { Groq } from 'groq-sdk';
 export class GroqService {
   private readonly logger = new Logger(GroqService.name);
   private groq: Groq | null = null;
+  name = 'groq';
+  isConfigured = false;
 
   constructor(private configService: ConfigService) {
     const apiKey = this.configService.get<string>('GROQ_API_KEY');
     if (apiKey) {
       this.groq = new Groq({ apiKey });
+      this.isConfigured = true;
       this.logger.log('Groq service initialized');
     } else {
       this.logger.warn('GROQ_API_KEY is not configured. AI features using Groq will be disabled.');
     }
   }
 
-  async getChatCompletion(messages: any[]) {
+  async chat(messages: any[]): Promise<string> {
     if (!this.groq) {
       throw new Error('Groq AI service is not configured');
     }
-    return this.groq.chat.completions.create({
+    const completion: any = await this.groq.chat.completions.create({
       messages,
-      model: 'llama3-8b-8192',
+      model: 'llama-3.3-70b-versatile',
     });
+    return completion.choices[0]?.message?.content || '';
   }
 
-  async getChatStream(messages: any[]) {
+  async *chatStream(messages: any[]): AsyncGenerator<string> {
     if (!this.groq) {
       throw new Error('Groq AI service is not configured');
     }
-    return this.groq.chat.completions.create({
+    const stream: any = await this.groq.chat.completions.create({
       messages,
-      model: 'llama3-8b-8192',
+      model: 'llama-3.3-70b-versatile',
       stream: true,
     });
-  }
-
-  isAvailable(): boolean {
-    return this.groq !== null;
+    for await (const chunk of stream) {
+      const content = chunk.choices[0]?.delta?.content;
+      if (content) {
+        yield content;
+      }
+    }
   }
 }

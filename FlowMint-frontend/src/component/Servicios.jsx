@@ -161,7 +161,7 @@ const Servicios = () => {
           <div className="d-flex align-items-center gap-3 mb-3">
             <Scissors size={36} style={{ color: "var(--neon-pink)" }} />
             <div>
-              <h2 className="text-center" style={{ color: "var(--neon-pink)", marginBottom: "0" }}>
+              <h2 className="text-center" style={{ color: 'white', textShadow: '0 0 10px rgba(255, 0, 110, 0.3)', marginBottom: "0" }}>
                 SERVICIOS
               </h2>
               <small style={{ color: "var(--text-muted)" }}>

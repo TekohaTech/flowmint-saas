@@ -1,8 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './component/Home';
+import Landing from './component/Landing';
 import Login from './component/Login';
-import Registros from './component/Registros';
+import CompletarRegistro from './component/CompletarRegistro';
+import PendienteActivacion from './component/PendienteActivacion';
 import Clientes from './component/Clientes';
 import Empleados from './component/Empleados';
 import Servicios from './component/Servicios';
@@ -12,17 +13,17 @@ import Ganancias from './component/Ganancias';
 import Dashboard from './component/Dashboard';
 import Comercios from './component/Comercios';
 import ProtectedRoute from './component/ProtectedRoute';
-import DashboardHome from './component/DashboardHome'; // Import the new component
+import DashboardHome from './component/DashboardHome';
 
 function App() {
     return (
         <Router>
             <Routes>
-                <Route path='/' element={<Home />} />
+                <Route path='/' element={<Landing />} />
                 <Route path='/login' element={<Login />} />
-                <Route path='/registros' element={<Registros />} />
+                <Route path='/completar-registro' element={<CompletarRegistro />} />
+                <Route path='/pendiente-activacion' element={<PendienteActivacion />} />
 
-                {/* Protected Routes using Dashboard as Layout */}
                 <Route 
                     path='/dashboard' 
                     element={

@@ -5,7 +5,8 @@ import {
 } from 'react-bootstrap';
 import { 
     Store, CheckCircle, XCircle, Search, Trash2,
-    Phone, MapPin, Mail, RefreshCw, Plus, Edit, Building, Power, Crown
+    Phone, MapPin, Mail, RefreshCw, Plus, Edit, Building, Power, Crown,
+    Clock, User, Calendar, Tag
 } from 'lucide-react';
 import { comerciosAPI } from '../services/api';
 
@@ -15,6 +16,7 @@ const Comercios = () => {
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [actionLoading, setActionLoading] = useState(null);
+    const [filterEstado, setFilterEstado] = useState('todos');
 
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [comercioToDelete, setComercioToDelete] = useState(null);
@@ -26,7 +28,8 @@ const Comercios = () => {
         direccion: '',
         telefono: '',
         email: '',
-        activo: false
+        activo: false,
+        categoria: ''
     });
     const [isEditMode, setIsEditMode] = useState(false);
 
@@ -51,17 +54,20 @@ const Comercios = () => {
     const handleToggleStatus = async (comercio) => {
         console.log('=== DEBUG handleToggleStatus ===');
         console.log('Comercio:', comercio);
-        console.log('Token en localStorage:', localStorage.getItem('token'));
-        console.log('User en localStorage:', localStorage.getItem('user'));
+        console.log('Estado actual:', comercio.estado, 'Activo:', comercio.activo);
         
         setActionLoading(comercio.comercio_id);
         try {
-            console.log('Llamando a API:', comercio.activo ? 'desactivar' : 'activar', comercio.comercio_id);
-            if (comercio.activo) {
-                await comerciosAPI.desactivar(comercio.comercio_id);
-            } else {
-                await comerciosAPI.activar(comercio.comercio_id);
-            }
+            const nuevoActivo = !comercio.activo;
+            const nuevoEstado = nuevoActivo ? 'activo' : 'suspendido';
+            
+            console.log('Cambiando a:', { activo: nuevoActivo, estado: nuevoEstado });
+            
+            await comerciosAPI.update(comercio.comercio_id, { 
+                activo: nuevoActivo,
+                estado: nuevoEstado
+            });
+            
             console.log('API llamada exitosamente');
             await fetchComercios();
         } catch (err) {
@@ -144,13 +150,19 @@ const Comercios = () => {
         }
     };
 
-    const filteredComercios = comercios.filter(c => 
-        c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        c.email?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredComercios = comercios.filter(c => {
+        const matchSearch = c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            c.dueno_nombre?.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        const matchEstado = filterEstado === 'todos' || c.estado === filterEstado;
+        
+        return matchSearch && matchEstado;
+    });
 
-    const activos = comercios.filter(c => c.activo).length;
-    const inactivos = comercios.length - activos;
+    const pendientes = comercios.filter(c => c.estado === 'pendiente' || (!c.estado && !c.activo)).length;
+    const activos = comercios.filter(c => c.estado === 'activo' || (!c.estado && c.activo)).length;
+    const suspendidos = comercios.filter(c => c.estado === 'suspendido').length;
 
     if (loading) return (
         <div className="d-flex justify-content-center align-items-center vh-100">
@@ -165,7 +177,7 @@ const Comercios = () => {
                     <Crown size={32} className="text-warning" />
                     <div>
                         <h2 className="text-white mb-0 fs-4 fs-md-2">Administración de Licencias</h2>
-                        <p className="text-muted mb-0 small">Activa o desactiva el acceso de los comercios</p>
+                        <p className="text-light opacity-75 mb-0 small">Activa o desactiva el acceso de los comercios</p>
                     </div>
                 </div>
             </div>
@@ -176,36 +188,52 @@ const Comercios = () => {
                         <Card.Body className="py-3 py-md-4">
                             <Store size={24} className="text-info mb-2" />
                             <div className="fs-3 fw-bold text-white">{comercios.length}</div>
-                            <small className="text-muted">Total</small>
+                            <small className="text-light opacity-75">Total</small>
                         </Card.Body>
                     </Card>
                 </Col>
                 <Col xs={4}>
-                    <Card className="bg-dark border-0 text-center h-100">
+                    <Card 
+                        className="bg-dark border-0 text-center h-100" 
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setFilterEstado(filterEstado === 'activo' ? 'todos' : 'activo')}
+                    >
                         <Card.Body className="py-3 py-md-4">
                             <CheckCircle size={24} className="text-success mb-2" />
                             <div className="fs-3 fw-bold text-success">{activos}</div>
-                            <small className="text-muted">Activos</small>
+                            <small className="text-light opacity-75">Activos</small>
                         </Card.Body>
                     </Card>
                 </Col>
                 <Col xs={4}>
-                    <Card className="bg-dark border-0 text-center h-100">
+                    <Card 
+                        className="bg-dark border-0 text-center h-100"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => setFilterEstado(filterEstado === 'pendiente' ? 'todos' : 'pendiente')}
+                    >
                         <Card.Body className="py-3 py-md-4">
-                            <XCircle size={24} className="text-warning mb-2" />
-                            <div className="fs-3 fw-bold text-warning">{inactivos}</div>
-                            <small className="text-muted">Inactivos</small>
+                            <Clock size={24} className="text-warning mb-2" />
+                            <div className="fs-3 fw-bold text-warning">{pendientes}</div>
+                            <small className="text-light opacity-75">Pendientes</small>
                         </Card.Body>
                     </Card>
                 </Col>
             </Row>
+
+            {filterEstado !== 'todos' && (
+                <div className="mb-3">
+                    <Button variant="outline-secondary" size="sm" onClick={() => setFilterEstado('todos')}>
+                        ✕ Limpiar filtro: {filterEstado}
+                    </Button>
+                </div>
+            )}
 
             <Card className="bg-dark border-secondary mb-4">
                 <Card.Body className="py-3">
                     <Row className="g-2 align-items-center">
                         <Col xs={12} sm={6} lg={7}>
                             <InputGroup>
-                                <InputGroup.Text className="bg-black border-secondary text-muted">
+                                <InputGroup.Text className="bg-black border-secondary text-light opacity-75">
                                     <Search size={18} />
                                 </InputGroup.Text>
                                 <Form.Control
@@ -233,47 +261,84 @@ const Comercios = () => {
             {error && <Alert variant="danger">{error}</Alert>}
 
             <Row className="g-3">
-                {filteredComercios.map(comercio => (
+                {filteredComercios.map(comercio => {
+                    let estado = comercio.estado;
+                    if (!estado) {
+                        estado = comercio.activo ? 'activo' : 'pendiente';
+                    }
+                    const estadoConfig = {
+                        pendiente: { color: 'warning', bg: 'bg-warning', text: 'Pendiente', icon: Clock, btnVariant: 'success', btnText: 'Activar' },
+                        activo: { color: 'success', bg: 'bg-success', text: 'Activo', icon: CheckCircle, btnVariant: 'outline-danger', btnText: 'Suspender' },
+                        suspendido: { color: 'danger', bg: 'bg-danger', text: 'Suspendido', icon: XCircle, btnVariant: 'success', btnText: 'Reactivar' }
+                    };
+                    const config = estadoConfig[estado] || estadoConfig.pendiente;
+                    const EstadoIcon = config.icon;
+                    
+                    return (
                     <Col key={comercio.comercio_id} xs={12} md={6} xl={4}>
-                        <Card className={`h-100 border-2 ${comercio.activo ? 'bg-dark border-success' : 'bg-dark border-secondary'}`}>
+                        <Card className={`h-100 border-2 bg-dark ${estado === 'activo' ? 'border-success' : estado === 'pendiente' ? 'border-warning' : 'border-secondary'}`}>
                             <Card.Body className="p-3">
                                 <div className="d-flex justify-content-between align-items-start mb-3">
                                     <div className="d-flex align-items-center gap-2">
-                                        <div className={`rounded-circle p-2 ${comercio.activo ? 'bg-success' : 'bg-secondary'}`}>
+                                        <div className={`rounded-circle p-2 ${config.bg}`}>
                                             <Building size={18} className="text-white" />
                                         </div>
                                         <div>
                                             <h6 className="text-white mb-0">{comercio.nombre}</h6>
-                                            <small className="text-muted d-none d-sm-block">{comercio.email || 'Sin email'}</small>
+                                            {comercio.categoria && (
+                                                <small className="text-light opacity-75 d-flex align-items-center gap-1">
+                                                    <Tag size={12} /> {comercio.categoria}
+                                                </small>
+                                            )}
                                         </div>
                                     </div>
-                                    <Badge bg={comercio.activo ? 'success' : 'secondary'} pill>
-                                        {comercio.activo ? 'ON' : 'OFF'}
+                                    <Badge bg={config.color} pill className="d-flex align-items-center gap-1">
+                                        <EstadoIcon size={12} /> {config.text}
                                     </Badge>
                                 </div>
 
-                                <div className="d-sm-none mb-2">
-                                    <small className="text-muted">{comercio.email || 'Sin email'}</small>
-                                </div>
+                                {(comercio.dueno_nombre || comercio.dueno_email) && (
+                                    <div className="mb-3 p-2 rounded" style={{ background: 'rgba(0,0,0,0.3)' }}>
+                                        <div className="d-flex align-items-center gap-2 mb-1">
+                                            <User size={14} className="text-info" />
+                                            <small className="text-white">
+                                                {comercio.dueno_nombre} {comercio.dueno_apellido}
+                                            </small>
+                                        </div>
+                                        {comercio.dueno_email && (
+                                            <div className="d-flex align-items-center gap-2">
+                                                <Mail size={14} className="text-light opacity-75" />
+                                                <small className="text-light opacity-75">{comercio.dueno_email}</small>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {comercio.direccion && (
+                                    <div className="d-flex align-items-center gap-2 mb-2">
+                                        <MapPin size={14} className="text-light opacity-75" />
+                                        <small className="text-light opacity-75">{comercio.direccion}</small>
+                                    </div>
+                                )}
 
                                 <div className="d-flex gap-2 mb-3 text-center">
                                     <div className="flex-grow-1 py-2 bg-black rounded">
                                         <div className="fw-bold text-info fs-5">{comercio._count?.usuarios || 0}</div>
-                                        <small className="text-muted" style={{ fontSize: '0.7rem' }}>Usuarios</small>
+                                        <small className="text-light opacity-75" style={{ fontSize: '0.65rem' }}>Usuarios</small>
                                     </div>
                                     <div className="flex-grow-1 py-2 bg-black rounded">
                                         <div className="fw-bold text-warning fs-5">{comercio._count?.clientes || 0}</div>
-                                        <small className="text-muted" style={{ fontSize: '0.7rem' }}>Clientes</small>
+                                        <small className="text-light opacity-75" style={{ fontSize: '0.65rem' }}>Clientes</small>
                                     </div>
                                     <div className="flex-grow-1 py-2 bg-black rounded">
                                         <div className="fw-bold text-info fs-5">{comercio._count?.turnos || 0}</div>
-                                        <small className="text-muted" style={{ fontSize: '0.7rem' }}>Turnos</small>
+                                        <small className="text-light opacity-75" style={{ fontSize: '0.65rem' }}>Turnos</small>
                                     </div>
                                 </div>
 
                                 <Button
                                     type="button"
-                                    variant={comercio.activo ? 'outline-danger' : 'success'}
+                                    variant={config.btnVariant}
                                     className="w-100 mb-2"
                                     disabled={actionLoading === comercio.comercio_id}
                                     onClick={() => handleToggleStatus(comercio)}
@@ -283,7 +348,7 @@ const Comercios = () => {
                                     ) : (
                                         <>
                                             <Power size={18} className="me-2" />
-                                            {comercio.activo ? 'Desactivar Acceso' : 'Activar Acceso'}
+                                            {config.btnText}
                                         </>
                                     )}
                                 </Button>
@@ -311,11 +376,12 @@ const Comercios = () => {
                             </Card.Body>
                         </Card>
                     </Col>
-                ))}
+                    );
+                })}
             </Row>
 
             {filteredComercios.length === 0 && (
-                <div className="text-center py-5 text-muted">
+                <div className="text-center py-5 text-light opacity-75">
                     <Store size={48} className="mb-3 opacity-50" />
                     <p>No hay comercios</p>
                 </div>
@@ -331,7 +397,7 @@ const Comercios = () => {
                     <Modal.Body className="p-3 p-md-4">
                         <Row className="g-3">
                             <Col xs={12}>
-                                <Form.Label className="text-muted small">Nombre *</Form.Label>
+                                <Form.Label className="text-light opacity-75 small">Nombre *</Form.Label>
                                 <Form.Control 
                                     className="bg-black border-secondary text-white" 
                                     type="text" 
@@ -343,7 +409,7 @@ const Comercios = () => {
                                 />
                             </Col>
                             <Col xs={12}>
-                                <Form.Label className="text-muted small">Email</Form.Label>
+                                <Form.Label className="text-light opacity-75 small">Email</Form.Label>
                                 <Form.Control 
                                     className="bg-black border-secondary text-white" 
                                     type="email" 
@@ -354,7 +420,7 @@ const Comercios = () => {
                                 />
                             </Col>
                             <Col xs={6}>
-                                <Form.Label className="text-muted small">Teléfono</Form.Label>
+                                <Form.Label className="text-light opacity-75 small">Teléfono</Form.Label>
                                 <Form.Control 
                                     className="bg-black border-secondary text-white" 
                                     type="text" 
@@ -365,7 +431,7 @@ const Comercios = () => {
                                 />
                             </Col>
                             <Col xs={6}>
-                                <Form.Label className="text-muted small">Dirección</Form.Label>
+                                <Form.Label className="text-light opacity-75 small">Dirección</Form.Label>
                                 <Form.Control 
                                     className="bg-black border-secondary text-white" 
                                     type="text" 

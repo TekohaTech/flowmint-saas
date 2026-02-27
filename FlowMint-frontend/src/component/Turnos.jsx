@@ -817,7 +817,7 @@ const Turnos = ({ visible = true }) => {
     <>
       <style>{customStyles}</style>
       <Container fluid className="px-4 py-4">
-        <h2 className="text-neon-cyan mb-4 text-center">
+        <h2 className="mb-4 text-center" style={{ color: 'white', textShadow: '0 0 10px rgba(0, 243, 255, 0.3)' }}>
           Calendario de Turnos
         </h2>
 

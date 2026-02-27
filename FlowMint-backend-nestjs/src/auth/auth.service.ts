@@ -1,8 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { UsuariosService } from 'src/usuarios/usuarios.service';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { CompletarRegistroDto } from './dto/completar-registro.dto';
 
 @Injectable()
 export class AuthService {
@@ -32,57 +33,65 @@ export class AuthService {
     return null;
   }
 
-  async validateGoogleUser(googleUser: any) {
-    const { email, googleId, firstName, lastName } = googleUser;
-
-    // 1. Buscar si el usuario ya existe por correo
-    let user = await this.prisma.usuario.findFirst({
-      where: { correo: email },
-      include: { rol: true, comercio: true },
+  async completarRegistro(dto: CompletarRegistroDto) {
+    const user = await this.prisma.usuario.findFirst({
+      where: { correo: dto.email },
+      include: { comercio: true },
     });
 
-    // 2. Si no existe, es un NUEVO COMERCIO (SaaS Registration)
     if (!user) {
-      // Crear Comercio Inactivo
-      const nuevoComercio = await this.prisma.comercio.create({
-        data: {
-          nombre: `Negocio de ${firstName}`,
-          activo: false,
-        },
-      });
-
-      // Crear Usuario Dueño
-      user = await this.prisma.usuario.create({
-        data: {
-          correo: email,
-          googleId: googleId,
-          nombre: firstName,
-          apellido: lastName,
-          rol_id: 2, // DUENO
-          comercio_id: nuevoComercio.comercio_id,
-          estado: 'A',
-        },
-        include: { rol: true, comercio: true },
-      });
-    } else {
-      // Si existe pero no tenía googleId, lo vinculamos
-      if (!user.googleId) {
-        user = await this.prisma.usuario.update({
-          where: { usuario_id: user.usuario_id },
-          data: { googleId: googleId } as any,
-          include: { rol: true, comercio: true },
-        });
-      }
-      
-      // Validar si el comercio está activo (excepto SuperAdmin)
-      if (user && user.rol?.nombre !== 'SUPERADMIN') {
-        if (!user.comercio || !user.comercio.activo) {
-          throw new UnauthorizedException('Tu comercio se encuentra inactivo. Contacta al administrador.');
-        }
-      }
+      throw new BadRequestException('Usuario no encontrado');
     }
 
-    return user;
+    if (user.comercio_id) {
+      throw new BadRequestException('El usuario ya tiene un comercio asociado');
+    }
+
+    const comercio = await this.prisma.comercio.create({
+      data: {
+        nombre: dto.nombreComercio,
+        direccion: dto.direccion,
+        telefono: dto.telefono,
+        email: dto.emailComercio,
+        categoria: dto.categoria,
+        activo: false,
+        estado: 'pendiente',
+        dueno_nombre: user.nombre,
+        dueno_apellido: user.apellido,
+        dueno_email: user.correo,
+      },
+    });
+
+    await this.prisma.usuario.update({
+      where: { usuario_id: user.usuario_id },
+      data: { comercio_id: comercio.comercio_id },
+    });
+
+    return {
+      mensaje: 'Registro completado. Su cuenta está pendiente de activación.',
+      comercio: {
+        comercio_id: comercio.comercio_id,
+        nombre: comercio.nombre,
+        estado: comercio.estado,
+      },
+    };
+  }
+
+  async getProfile(usuarioId: number) {
+    const user = await this.prisma.usuario.findUnique({
+      where: { usuario_id: usuarioId },
+      include: { 
+        rol: true, 
+        comercio: true,
+      },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Usuario no encontrado');
+    }
+
+    const { pass, ...result } = user;
+    return result;
   }
 
   async login(user: any) {

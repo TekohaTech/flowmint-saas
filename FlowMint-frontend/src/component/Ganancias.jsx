@@ -277,9 +277,9 @@ const dataLabelsPlugin = {
             ctx.lineWidth = 6; // Aumentar aún más el ancho del contorno
             ctx.strokeText(text, position.x, position.y - 8); // Ajustar posición
 
-            // Dibujar texto principal en color negro para mayor contraste con el contorno
-            ctx.fillStyle = 'black';
-            ctx.fillText(text, position.x, position.y - 8); // Ajustar posición
+            // Dibujar texto principal en color blanco para mayor contraste con el fondo oscuro
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(text, position.x, position.y - 8);
           }
         });
       }
@@ -486,12 +486,12 @@ const Ganancias = () => {
 
   const chartOptions = {
     responsive: true,
-    maintainAspectRatio: false, // Permite que los gráficos se adapten al contenedor
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top',
         labels: {
-          color: 'var(--neon-cyan)', // Mejor contraste con color neon
+          color: '#ffffff',
           font: {
             size: 13,
             weight: 'bold'
@@ -500,8 +500,8 @@ const Ganancias = () => {
         },
       },
       title: {
-        display: false, // Ahora no mostramos título duplicado
-        color: 'var(--neon-cyan)',
+        display: false,
+        color: '#ffffff',
         font: {
           size: 16,
           weight: 'bold',
@@ -512,22 +512,22 @@ const Ganancias = () => {
         }
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 243, 255, 0.9)', // Fondo con color neon cyan semi-transparente
-        titleColor: 'black', // Título en negro para mejor contraste
+        backgroundColor: 'rgba(20, 20, 40, 0.95)',
+        titleColor: '#ffffff',
         titleFont: {
-          size: 16,
+          size: 14,
           weight: 'bold'
         },
-        bodyColor: 'black', // Cuerpo en negro para mejor contraste
+        bodyColor: '#e0e0e0',
         bodyFont: {
-          size: 16,
-          weight: 'bold'
+          size: 13,
+          weight: 'normal'
         },
-        borderColor: 'white',
-        borderWidth: 2,
-        padding: 12,
-        displayColors: false, // Ocultar los cuadros de color para mayor limpieza
-        boxPadding: 6, // Espaciado interno
+        borderColor: 'rgba(0, 243, 255, 0.5)',
+        borderWidth: 1,
+        padding: 10,
+        displayColors: true,
+        boxPadding: 4,
         callbacks: {
           label: function(context) {
             let label = context.dataset.label || '';
@@ -545,22 +545,22 @@ const Ganancias = () => {
     scales: {
       x: {
         ticks: {
-          color: 'var(--neon-green)', // Mejor contraste en neon
+          color: '#e0e0e0',
           maxRotation: 45,
           minRotation: 0,
           font: {
-            size: 14, // Aumentar tamaño
-            weight: 'bold'
+            size: 12,
+            weight: 'normal'
           }
         },
         grid: {
-          color: 'rgba(0, 243, 255, 0.2)', // Ligeramente más opaco para mejor visibilidad
+          color: 'rgba(255, 255, 255, 0.1)',
           drawBorder: false,
         },
         title: {
           display: false,
           text: 'Período',
-          color: 'var(--text-secondary)',
+          color: '#ffffff',
           font: {
             size: 14,
             weight: 'bold'
@@ -569,12 +569,11 @@ const Ganancias = () => {
       },
       y: {
         ticks: {
-          color: 'var(--neon-purple)', // Mejor contraste en neon
+          color: '#e0e0e0',
           font: {
-            size: 14, // Aumentar tamaño
-            weight: 'bold'
+            size: 12,
+            weight: 'normal'
           },
-          // Formato de número para los valores del eje Y
           callback: function(value) {
             if (value >= 1000) {
               return '$' + (value / 1000).toFixed(1) + 'k';
@@ -583,13 +582,13 @@ const Ganancias = () => {
           }
         },
         grid: {
-          color: 'rgba(0, 243, 255, 0.2)', // Ligeramente más opaco para mejor visibilidad
+          color: 'rgba(255, 255, 255, 0.1)',
           drawBorder: false,
         },
         title: {
           display: false,
           text: 'Monto ($)',
-          color: 'var(--text-secondary)',
+          color: '#ffffff',
           font: {
             size: 14,
             weight: 'bold'
@@ -605,7 +604,7 @@ const Ganancias = () => {
 
   return (
     <Container fluid className="p-4">
-      <h1 className="text-center mb-4 text-neon-cyan">Reporte de Ganancias</h1>
+      <h1 className="text-center mb-4" style={{ color: 'white', textShadow: '0 0 10px rgba(0, 243, 255, 0.3)' }}>Reporte de Ganancias</h1>
 
       {/* Controles de fecha */}
       <Card className="mb-4" style={{ background: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
@@ -729,9 +728,9 @@ const Ganancias = () => {
               <Col md={4}>
                 <Card className="text-center h-100 border-0" style={{ background: 'rgba(0, 243, 255, 0.05)', border: '1px solid rgba(0, 243, 255, 0.2)', borderRadius: '12px' }}>
                   <Card.Body className="d-flex flex-column justify-content-center">
-                    <Card.Title className="text-neon-green mb-3">Total</Card.Title>
+                    <Card.Title className="text-white mb-3" style={{ opacity: 0.8 }}>Total</Card.Title>
                     <div className="mt-auto">
-                      <Card.Text className="display-5 fw-bold text-neon-cyan mb-0">
+                      <Card.Text className="display-5 fw-bold text-white mb-0">
                         ${resumen.total?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
                       </Card.Text>
                     </div>
@@ -741,9 +740,9 @@ const Ganancias = () => {
               <Col md={4}>
                 <Card className="text-center h-100 border-0" style={{ background: 'rgba(22, 242, 179, 0.05)', border: '1px solid rgba(22, 242, 179, 0.2)', borderRadius: '12px' }}>
                   <Card.Body className="d-flex flex-column justify-content-center">
-                    <Card.Title className="text-neon-green mb-3">Promedio Diario</Card.Title>
+                    <Card.Title className="text-white mb-3" style={{ opacity: 0.8 }}>Promedio Diario</Card.Title>
                     <div className="mt-auto">
-                      <Card.Text className="display-5 fw-bold text-neon-purple mb-0">
+                      <Card.Text className="display-5 fw-bold text-white mb-0">
                         ${resumen.promedioPorDia?.toFixed(2) || '0.00'}
                       </Card.Text>
                     </div>
@@ -753,9 +752,9 @@ const Ganancias = () => {
               <Col md={4}>
                 <Card className="text-center h-100 border-0" style={{ background: 'rgba(255, 0, 110, 0.05)', border: '1px solid rgba(255, 0, 110, 0.2)', borderRadius: '12px' }}>
                   <Card.Body className="d-flex flex-column justify-content-center">
-                    <Card.Title className="text-neon-green mb-3">Turnos</Card.Title>
+                    <Card.Title className="text-white mb-3" style={{ opacity: 0.8 }}>Turnos</Card.Title>
                     <div className="mt-auto">
-                      <Card.Text className="display-5 fw-bold text-neon-pink mb-0">
+                      <Card.Text className="display-5 fw-bold text-white mb-0">
                         {resumen.totalTurnos || 0}
                       </Card.Text>
                     </div>
@@ -771,7 +770,7 @@ const Ganancias = () => {
       <Row className="mb-4">
         <Col xs={12} md={6}>
           <Card style={{ background: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-            <Card.Header style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--neon-cyan)' }}>
+            <Card.Header style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: '#ffffff' }}>
               Ganancias Diarias
             </Card.Header>
             <Card.Body>
@@ -782,7 +781,7 @@ const Ganancias = () => {
                     options={{ ...chartOptions, plugins: { ...chartOptions.plugins, title: { ...chartOptions.plugins.title, display: false } } }}
                   />
                 ) : (
-                  <div className="d-flex align-items-center justify-content-center h-100 text-center text-muted">
+                  <div className="d-flex align-items-center justify-content-center h-100 text-center text-light opacity-75">
                     <p className="mb-0">No hay datos disponibles para este período</p>
                   </div>
                 )}
@@ -792,7 +791,7 @@ const Ganancias = () => {
         </Col>
         <Col xs={12} md={6}>
           <Card style={{ background: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-            <Card.Header style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--neon-cyan)' }}>
+            <Card.Header style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: '#ffffff' }}>
               Ganancias Semanales
             </Card.Header>
             <Card.Body>
@@ -803,7 +802,7 @@ const Ganancias = () => {
                     options={{ ...chartOptions, plugins: { ...chartOptions.plugins, title: { ...chartOptions.plugins.title, display: false } } }}
                   />
                 ) : (
-                  <div className="d-flex align-items-center justify-content-center h-100 text-center text-muted">
+                  <div className="d-flex align-items-center justify-content-center h-100 text-center text-light opacity-75">
                     <p className="mb-0">No hay datos disponibles para este período</p>
                   </div>
                 )}
@@ -816,7 +815,7 @@ const Ganancias = () => {
       <Row className="mb-4">
         <Col xs={12} md={6}>
           <Card style={{ background: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-            <Card.Header style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--neon-cyan)' }}>
+            <Card.Header style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: '#ffffff' }}>
               Ganancias Mensuales
             </Card.Header>
             <Card.Body>
@@ -827,7 +826,7 @@ const Ganancias = () => {
                     options={{ ...chartOptions, plugins: { ...chartOptions.plugins, title: { ...chartOptions.plugins.title, display: false } } }}
                   />
                 ) : (
-                  <div className="d-flex align-items-center justify-content-center h-100 text-center text-muted">
+                  <div className="d-flex align-items-center justify-content-center h-100 text-center text-light opacity-75">
                     <p className="mb-0">No hay datos disponibles para este período</p>
                   </div>
                 )}
@@ -837,7 +836,7 @@ const Ganancias = () => {
         </Col>
         <Col xs={12} md={6}>
           <Card style={{ background: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-            <Card.Header style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--neon-cyan)' }}>
+            <Card.Header style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: '#ffffff' }}>
               Ganancias Anuales
             </Card.Header>
             <Card.Body>
@@ -848,7 +847,7 @@ const Ganancias = () => {
                     options={{ ...chartOptions, plugins: { ...chartOptions.plugins, title: { ...chartOptions.plugins.title, display: false } } }}
                   />
                 ) : (
-                  <div className="d-flex align-items-center justify-content-center h-100 text-center text-muted">
+                  <div className="d-flex align-items-center justify-content-center h-100 text-center text-light opacity-75">
                     <p className="mb-0">No hay datos disponibles para este período</p>
                   </div>
                 )}
@@ -861,7 +860,7 @@ const Ganancias = () => {
       <Row className="mb-4">
         <Col xs={12} md={6}>
           <Card style={{ background: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-            <Card.Header style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--neon-cyan)' }}>
+            <Card.Header style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: '#ffffff' }}>
               Ganancias Mensuales por Servicio
             </Card.Header>
             <Card.Body>
@@ -872,7 +871,7 @@ const Ganancias = () => {
                     options={{ ...chartOptions, plugins: { ...chartOptions.plugins, title: { ...chartOptions.plugins.title, display: false } } }}
                   />
                 ) : (
-                  <div className="d-flex align-items-center justify-content-center h-100 text-center text-muted">
+                  <div className="d-flex align-items-center justify-content-center h-100 text-center text-light opacity-75">
                     <p className="mb-0">No hay datos disponibles para este período</p>
                   </div>
                 )}
@@ -882,7 +881,7 @@ const Ganancias = () => {
         </Col>
         <Col xs={12} md={6}>
           <Card style={{ background: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-            <Card.Header style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--neon-cyan)' }}>
+            <Card.Header style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: '#ffffff' }}>
               Ganancias Anuales por Servicio
             </Card.Header>
             <Card.Body>
@@ -893,7 +892,7 @@ const Ganancias = () => {
                     options={{ ...chartOptions, plugins: { ...chartOptions.plugins, title: { ...chartOptions.plugins.title, display: false } } }}
                   />
                 ) : (
-                  <div className="d-flex align-items-center justify-content-center h-100 text-center text-muted">
+                  <div className="d-flex align-items-center justify-content-center h-100 text-center text-light opacity-75">
                     <p className="mb-0">No hay datos disponibles para este período</p>
                   </div>
                 )}
@@ -906,7 +905,7 @@ const Ganancias = () => {
       <Row className="mb-4">
         <Col xs={12} md={6}>
           <Card style={{ background: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-            <Card.Header style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--neon-cyan)' }}>
+            <Card.Header style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: '#ffffff' }}>
               Ganancias Mensuales por Empleado
             </Card.Header>
             <Card.Body>
@@ -917,7 +916,7 @@ const Ganancias = () => {
                     options={{ ...chartOptions, plugins: { ...chartOptions.plugins, title: { ...chartOptions.plugins.title, display: false } } }}
                   />
                 ) : (
-                  <div className="d-flex align-items-center justify-content-center h-100 text-center text-muted">
+                  <div className="d-flex align-items-center justify-content-center h-100 text-center text-light opacity-75">
                     <p className="mb-0">No hay datos disponibles para este período</p>
                   </div>
                 )}
@@ -927,7 +926,7 @@ const Ganancias = () => {
         </Col>
         <Col xs={12} md={6}>
           <Card style={{ background: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-            <Card.Header style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: 'var(--neon-cyan)' }}>
+            <Card.Header style={{ background: 'var(--bg-tertiary)', borderColor: 'var(--border-color)', color: '#ffffff' }}>
               Ganancias Anuales por Empleado
             </Card.Header>
             <Card.Body>
@@ -938,7 +937,7 @@ const Ganancias = () => {
                     options={{ ...chartOptions, plugins: { ...chartOptions.plugins, title: { ...chartOptions.plugins.title, display: false } } }}
                   />
                 ) : (
-                  <div className="d-flex align-items-center justify-content-center h-100 text-center text-muted">
+                  <div className="d-flex align-items-center justify-content-center h-100 text-center text-light opacity-75">
                     <p className="mb-0">No hay datos disponibles para este período</p>
                   </div>
                 )}

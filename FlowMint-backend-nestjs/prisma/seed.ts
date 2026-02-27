@@ -42,7 +42,14 @@ async function main() {
       nombre: 'Barbería Posadas',
       direccion: 'Calle Falsa 123',
       telefono: '3764000001',
-      activo: true, // Ya validado por vos
+      email: 'contacto@barberiaposadas.com',
+      categoria: 'barberia',
+      activo: true,
+      estado: 'activo',
+      dueno_nombre: 'Carlos',
+      dueno_apellido: 'Barbero',
+      dueno_email: 'carlos@barberia.com',
+      dueno_telefono: '3764000001',
     },
   });
 
@@ -106,7 +113,12 @@ async function main() {
     data: {
       nombre: 'Estética Glow',
       direccion: 'Av. Corrientes 456',
-      activo: false, // Esperando tu botón de OK
+      categoria: 'peluqueria',
+      activo: false,
+      estado: 'pendiente',
+      dueno_nombre: 'Lucía',
+      dueno_apellido: 'Estética',
+      dueno_email: 'lucia@esteticaglow.com',
     },
   });
 

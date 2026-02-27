@@ -107,46 +107,46 @@ function DashboardHome() {
             <Crown size={32} className="text-warning" />
             <div>
               <h2 className="text-white mb-0 fs-4 fs-md-2">Panel de SuperAdmin</h2>
-              <p className="text-muted mb-0 small">Gestiona las licencias de los comercios suscriptos</p>
+              <p className="text-light mb-0 small opacity-75">Gestiona las licencias de los comercios suscriptos</p>
             </div>
           </div>
         </div>
 
         <Row className="g-3 mb-4">
           <Col xs={12} sm={4}>
-            <Card className="bg-dark border-0 h-100">
+            <Card className="border-0 h-100" style={{ background: 'var(--bg-card)' }}>
               <Card.Body className="d-flex align-items-center gap-3 py-3">
                 <div className="rounded-circle bg-success bg-opacity-25 p-2 p-md-3">
                   <CheckCircle size={24} className="text-success" />
                 </div>
                 <div>
-                  <div className="text-muted small">Activos</div>
+                  <div className="text-light small">Activos</div>
                   <div className="fs-2 fw-bold text-success">{stats.comerciosActivos}</div>
                 </div>
               </Card.Body>
             </Card>
           </Col>
           <Col xs={12} sm={4}>
-            <Card className="bg-dark border-0 h-100">
+            <Card className="border-0 h-100" style={{ background: 'var(--bg-card)' }}>
               <Card.Body className="d-flex align-items-center gap-3 py-3">
                 <div className="rounded-circle bg-warning bg-opacity-25 p-2 p-md-3">
                   <XCircle size={24} className="text-warning" />
                 </div>
                 <div>
-                  <div className="text-muted small">Inactivos</div>
+                  <div className="text-light small">Inactivos</div>
                   <div className="fs-2 fw-bold text-warning">{stats.totalComercios - stats.comerciosActivos}</div>
                 </div>
               </Card.Body>
             </Card>
           </Col>
           <Col xs={12} sm={4}>
-            <Card className="bg-dark border-0 h-100">
+            <Card className="border-0 h-100" style={{ background: 'var(--bg-card)' }}>
               <Card.Body className="d-flex align-items-center gap-3 py-3">
                 <div className="rounded-circle bg-info bg-opacity-25 p-2 p-md-3">
                   <Users size={24} className="text-info" />
                 </div>
                 <div>
-                  <div className="text-muted small">Usuarios</div>
+                  <div className="text-light small">Usuarios</div>
                   <div className="fs-2 fw-bold text-info">{stats.totalUsuariosGlobal}</div>
                 </div>
               </Card.Body>
@@ -154,7 +154,7 @@ function DashboardHome() {
           </Col>
         </Row>
 
-        <Card className="bg-dark border-secondary mb-4">
+        <Card className="border-secondary mb-4" style={{ background: 'var(--bg-card)' }}>
           <Card.Body className="p-3 p-md-4">
             <h5 className="text-white mb-3 d-flex align-items-center gap-2">
               <Power size={18} className="text-success" />
@@ -166,7 +166,7 @@ function DashboardHome() {
                   <CheckCircle size={18} className="text-success mt-1 flex-shrink-0" />
                   <div>
                     <div className="text-white fw-bold">Activar Licencias</div>
-                    <small className="text-muted">Habilita acceso a nuevos comercios</small>
+                    <small className="text-light opacity-75">Habilita acceso a nuevos comercios</small>
                   </div>
                 </div>
               </Col>
@@ -175,7 +175,7 @@ function DashboardHome() {
                   <XCircle size={18} className="text-warning mt-1 flex-shrink-0" />
                   <div>
                     <div className="text-white fw-bold">Suspender Acceso</div>
-                    <small className="text-muted">Desactiva comercios sin suscripción</small>
+                    <small className="text-light opacity-75">Desactiva comercios sin suscripción</small>
                   </div>
                 </div>
               </Col>
@@ -184,7 +184,7 @@ function DashboardHome() {
                   <Users size={18} className="text-info mt-1 flex-shrink-0" />
                   <div>
                     <div className="text-white fw-bold">Gestionar Usuarios</div>
-                    <small className="text-muted">Administra cuentas de todos</small>
+                    <small className="text-light opacity-75">Administra cuentas de todos</small>
                   </div>
                 </div>
               </Col>
@@ -196,7 +196,7 @@ function DashboardHome() {
           <Card.Body className="p-4 text-center">
             <Store size={40} className="text-info mb-3" />
             <h4 className="text-white mb-2">Gestionar Comercios</h4>
-            <p className="text-muted mb-3 small">Activa o desactiva el acceso de los negocios</p>
+            <p className="text-light opacity-75 mb-3 small">Activa o desactiva el acceso de los negocios</p>
             <Button variant="success" size="lg" className="w-100 w-sm-auto" href="/dashboard/comercios">
               <Store size={18} className="me-2" />
               Ir a Comercios
@@ -215,44 +215,44 @@ function DashboardHome() {
 
       <Row className="g-3 mb-4">
         <Col xs={6} lg={3}>
-          <Card className="bg-dark text-white h-100">
+          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }}>
             <Card.Body className="py-3">
               <div className="d-flex align-items-center gap-2 mb-2">
                 <FaUserFriends className="text-info" />
-                <small className="text-muted">Clientes</small>
+                <small className="text-light opacity-75">Clientes</small>
               </div>
               <div className="fs-2 fw-bold text-white">{stats.totalClientes}</div>
             </Card.Body>
           </Card>
         </Col>
         <Col xs={6} lg={3}>
-          <Card className="bg-dark text-white h-100">
+          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }}>
             <Card.Body className="py-3">
               <div className="d-flex align-items-center gap-2 mb-2">
                 <FaCalendarAlt className="text-warning" />
-                <small className="text-muted">Turnos Hoy</small>
+                <small className="text-light opacity-75">Turnos Hoy</small>
               </div>
               <div className="fs-2 fw-bold text-white">{stats.turnosHoy}</div>
             </Card.Body>
           </Card>
         </Col>
         <Col xs={6} lg={3}>
-          <Card className="bg-dark text-white h-100">
+          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }}>
             <Card.Body className="py-3">
               <div className="d-flex align-items-center gap-2 mb-2">
                 <FaCut className="text-pink" />
-                <small className="text-muted">Servicios</small>
+                <small className="text-light opacity-75">Servicios</small>
               </div>
               <div className="fs-2 fw-bold text-white">{stats.totalServicios}</div>
             </Card.Body>
           </Card>
         </Col>
         <Col xs={6} lg={3}>
-          <Card className="bg-dark text-white h-100">
+          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }}>
             <Card.Body className="py-3">
               <div className="d-flex align-items-center gap-2 mb-2">
                 <FaUserTie className="text-success" />
-                <small className="text-muted">Empleados</small>
+                <small className="text-light opacity-75">Empleados</small>
               </div>
               <div className="fs-2 fw-bold text-white">{stats.totalEmpleados}</div>
             </Card.Body>
@@ -262,32 +262,32 @@ function DashboardHome() {
 
       <Row className="g-3 mb-4">
         <Col xs={12} lg={6}>
-          <Card className="bg-dark text-white h-100">
+          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }}>
             <Card.Body className="py-3">
               <div className="d-flex align-items-center gap-2 mb-2">
                 <FaDollarSign className="text-success" />
-                <small className="text-muted">Ingresos del Mes</small>
+                <small className="text-light opacity-75">Ingresos del Mes</small>
               </div>
               <div className="fs-1 fw-bold text-success">${stats.ingresosMensuales?.toLocaleString() || '0'}</div>
             </Card.Body>
           </Card>
         </Col>
         <Col xs={12} lg={6}>
-          <Card className="bg-dark text-white h-100">
+          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }}>
             <Card.Body className="py-3">
               <div className="d-flex align-items-center gap-2 mb-3">
                 <FaCalendarAlt className="text-info" />
-                <small className="text-muted">Próximos Turnos</small>
+                <small className="text-light opacity-75">Próximos Turnos</small>
               </div>
               {stats.proximosTurnos.length > 0 ? (
                 stats.proximosTurnos.map((turno, i) => (
                   <div key={turno.turno_id} className={`d-flex justify-content-between ${i > 0 ? 'mt-2 pt-2 border-top border-secondary' : ''}`}>
                     <span className="text-white small">{turno.fechaFormateada}</span>
-                    <span className="text-muted small">Cliente #{turno.cliente_id}</span>
+                    <span className="text-light opacity-75 small">Cliente #{turno.cliente_id}</span>
                   </div>
                 ))
               ) : (
-                <div className="text-muted small">No hay turnos próximos</div>
+                <div className="text-light opacity-50 small">No hay turnos próximos</div>
               )}
             </Card.Body>
           </Card>

@@ -1,11 +1,12 @@
-import { Controller, Post, Body, UseGuards, Get, Res, StreamableFile } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Res } from '@nestjs/common';
 import type { Response } from 'express';
 import { AiService } from './ai.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AiOrchestratorService } from './ai-orchestrator.service';
 
 export interface ChatRequest {
-  message: string;
+  message?: string;
+  messages?: Array<{ role: string; content: string }>;
 }
 
 export interface ChatResponse {
@@ -22,8 +23,18 @@ export class AiController {
   @Post('chat')
   @UseGuards(JwtAuthGuard)
   async chat(@Body() chatRequest: ChatRequest): Promise<ChatResponse> {
-    const response = await this.aiService.getAIResponse(chatRequest.message);
-    return { response };
+    if (chatRequest.messages && chatRequest.messages.length > 0) {
+      const lastMessage = chatRequest.messages[chatRequest.messages.length - 1];
+      const response = await this.aiService.getAIResponse(lastMessage.content);
+      return { response };
+    }
+    
+    if (chatRequest.message) {
+      const response = await this.aiService.getAIResponse(chatRequest.message);
+      return { response };
+    }
+    
+    return { response: 'No message provided' };
   }
 
   @Post('chat/stream')
@@ -34,10 +45,12 @@ export class AiController {
     res.setHeader('Connection', 'keep-alive');
     res.setHeader('Access-Control-Allow-Origin', '*');
 
+    const message = chatRequest.messages?.[chatRequest.messages.length - 1]?.content || chatRequest.message || '';
+
     try {
       for await (const chunk of this.aiOrchestratorService.generateStream(
-        chatRequest.message,
-        "Eres un asistente útil para FlowMint, un sistema de gestión de turnos. Ayuda a los usuarios con preguntas sobre cómo usar la aplicación, gestionar turnos, clientes, empleados, servicios y reportes de ganancias. Responde en español de forma clara, directa y concisa. No proporciones análisis interno ni expliques tu proceso de pensamiento. Para preguntas simples, responde directamente sin rodeos."
+        message,
+        "Eres un asistente útil para FlowMint, un sistema de gestión de turnos. Ayuda a los usuarios con preguntas sobre cómo usar la aplicación, gestionar turnos, clientes, empleados, servicios y reportes de ganancias. Responde en español de forma clara, directa y concisa."
       )) {
         res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
       }

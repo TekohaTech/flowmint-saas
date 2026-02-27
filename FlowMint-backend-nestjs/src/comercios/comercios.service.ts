@@ -24,10 +24,25 @@ export class ComerciosService {
   }
 
   create(data: any) {
+    if (data.activo !== undefined && !data.estado) {
+      data.estado = data.activo ? 'activo' : 'pendiente';
+    }
     return this.prisma.comercio.create({ data });
   }
 
-  update(id: number, data: any) {
+  async update(id: number, data: any) {
+    if (data.activo !== undefined) {
+      if (data.activo === true) {
+        data.estado = 'activo';
+        data.fecha_activacion = new Date();
+        data.fecha_suspension = null;
+        data.motivo_suspension = null;
+      } else {
+        data.estado = 'suspendido';
+        data.fecha_suspension = new Date();
+      }
+    }
+    
     return this.prisma.comercio.update({
       where: { comercio_id: id },
       data
@@ -35,14 +50,12 @@ export class ComerciosService {
   }
 
   async remove(id: number) {
-    // 1. Delete all related entities first (Manual cascade if not set in DB)
     await this.prisma.turno.deleteMany({ where: { comercio_id: id } });
     await this.prisma.servicio.deleteMany({ where: { comercio_id: id } });
     await this.prisma.empleado.deleteMany({ where: { comercio_id: id } });
     await this.prisma.cliente.deleteMany({ where: { comercio_id: id } });
     await this.prisma.usuario.deleteMany({ where: { comercio_id: id } });
 
-    // 2. Finally delete the commerce
     return this.prisma.comercio.delete({
       where: { comercio_id: id }
     });

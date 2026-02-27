@@ -138,7 +138,7 @@ const Clientes = () => {
           <div className="d-flex align-items-center gap-3 mb-3">
             <Users size={36} style={{ color: "var(--neon-green)" }} />
             <div>
-              <h2 className="text-center" style={{ color: "var(--neon-green)", marginBottom: "0" }}>
+              <h2 className="text-center" style={{ color: 'white', textShadow: '0 0 10px rgba(22, 242, 179, 0.3)', marginBottom: "0" }}>
                 CLIENTES
               </h2>
               <small style={{ color: "var(--text-muted)" }}>
