@@ -134,3 +134,13 @@ model Turno {
   servicio_id Int
   servicio    Servicio @relation(fields: [servicio_id], references: [servicio_id])
 }
+
+// Control de intentos de registro por IP
+model RegistroIP {
+  id              Int      @id @default(autoincrement())
+  ip              String
+  correo          String
+  intento         DateTime @default(now())
+
+  @@index([ip, intento])
+}

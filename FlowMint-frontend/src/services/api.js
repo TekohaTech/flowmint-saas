@@ -15,12 +15,20 @@ const api = axios.create({
 });
 
 // Request interceptor to add token
+const PUBLIC_ENDPOINTS = ['/auth/login', '/auth/register', '/auth/completar-registro'];
+
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('token');
-        console.log('[API Request]', config.method?.toUpperCase(), config.url, 'Token:', token ? 'YES' : 'NO');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+        const isPublicEndpoint = PUBLIC_ENDPOINTS.some(endpoint => config.url.includes(endpoint));
+        
+        if (!isPublicEndpoint) {
+            const token = localStorage.getItem('token');
+            console.log('[API Request]', config.method?.toUpperCase(), config.url, 'Token:', token ? 'YES' : 'NO');
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+        } else {
+            console.log('[API Request - PUBLIC]', config.method?.toUpperCase(), config.url);
         }
         return config;
     },
@@ -70,6 +78,11 @@ export const authAPI = {
         localStorage.removeItem('user');
         localStorage.removeItem('isLoggedIn');
         window.location.href = '/login';
+    },
+
+    register: async (userData) => {
+        const response = await api.post('/auth/register', userData);
+        return response.data;
     },
 
     getProfile: async () => {

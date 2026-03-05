@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Landing from './component/Landing';
 import Login from './component/Login';
+import Registros from './component/Registros';
 import CompletarRegistro from './component/CompletarRegistro';
 import PendienteActivacion from './component/PendienteActivacion';
 import Clientes from './component/Clientes';
@@ -21,6 +22,7 @@ function App() {
             <Routes>
                 <Route path='/' element={<Landing />} />
                 <Route path='/login' element={<Login />} />
+                <Route path='/registro' element={<Registros />} />
                 <Route path='/completar-registro' element={<CompletarRegistro />} />
                 <Route path='/pendiente-activacion' element={<PendienteActivacion />} />
 

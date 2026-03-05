@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { usersAPI } from "../services/api";
+import { authAPI } from "../services/api";
 import { motion } from "framer-motion";
 import {
   Zap,
@@ -12,6 +12,10 @@ import {
   Eye,
   EyeOff,
   CreditCard,
+  Building2,
+  MapPin,
+  Phone,
+  Store,
 } from "lucide-react";
 import "../index.css";
 
@@ -23,6 +27,10 @@ const Registros = () => {
     user: "",
     pass: "",
     correo: "",
+    nombreComercio: "",
+    categoria: "",
+    direccion: "",
+    telefono: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -43,33 +51,42 @@ const Registros = () => {
     setSuccess("");
     setLoading(true);
 
-    // Basic validation
     if (formData.pass.length < 6) {
       setError("La contraseña debe tener al menos 6 caracteres");
       setLoading(false);
       return;
     }
 
+    if (!formData.nombreComercio || formData.nombreComercio.trim().length < 2) {
+      setError("El nombre del comercio es obligatorio");
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.categoria) {
+      setError("Selecciona una categoría para tu comercio");
+      setLoading(false);
+      return;
+    }
+
     try {
-      // Add default role_id for new users
-      const userData = {
-        ...formData,
-        rol_id: 2, // Default user role
-        estado: "A", // Active status
-      };
+      await authAPI.register(formData);
+      setSuccess("¡Tu comercio ha sido creado! Está pendiente de activación. Te notificaremos cuando esté listo.");
 
-      await usersAPI.create(userData);
-      setSuccess("Account created successfully! Redirecting to login...");
-
-      // Redirect to login after 2 seconds
       setTimeout(() => {
-        navigate("/login");
-      }, 2000);
+        navigate("/pendiente-activacion");
+      }, 4000);
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Failed to create account. Please try again.",
-      );
+      const status = err.response?.status;
+      const message = err.response?.data?.message || err.response?.data?.error;
+      
+      if (status === 429) {
+        setError(message || "Demasiados intentos. Intenta de nuevo en unos minutos.");
+      } else if (status === 400) {
+        setError(message || "Los datos proporcionados ya están en uso.");
+      } else {
+        setError(message || "Error al crear la cuenta. Intenta de nuevo.");
+      }
     } finally {
       setLoading(false);
     }
@@ -344,6 +361,98 @@ const Registros = () => {
             </small>
           </div>
 
+          {/* Commerce Fields */}
+          <div className="mb-3">
+            <label htmlFor="nombreComercio" className="mb-2">
+              <Building2
+                size={16}
+                style={{ marginRight: "8px", verticalAlign: "middle" }}
+              />
+              Nombre del Comercio *
+            </label>
+            <input
+              type="text"
+              id="nombreComercio"
+              name="nombreComercio"
+              value={formData.nombreComercio}
+              onChange={handleChange}
+              placeholder="Ej: Barbería Juan"
+              required
+              disabled={loading}
+            />
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="categoria" className="mb-2">
+              <Store
+                size={16}
+                style={{ marginRight: "8px", verticalAlign: "middle" }}
+              />
+              Categoría *
+            </label>
+            <select
+              id="categoria"
+              name="categoria"
+              value={formData.categoria}
+              onChange={handleChange}
+              required
+              disabled={loading}
+              style={{
+                width: "100%",
+                padding: "0.625rem",
+                borderRadius: "8px",
+                backgroundColor: "var(--bg-dark)",
+                color: "var(--text-primary)",
+                border: "1px solid var(--border-color)",
+              }}
+            >
+              <option value="">Selecciona una categoría</option>
+              <option value="barberia">Barbería</option>
+              <option value="peluqueria">Peluquería</option>
+              <option value="spa">Spa</option>
+              <option value="estetica">Estética</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+
+          <div className="mb-3">
+            <label htmlFor="telefono" className="mb-2">
+              <Phone
+                size={16}
+                style={{ marginRight: "8px", verticalAlign: "middle" }}
+              />
+              Teléfono (WhatsApp)
+            </label>
+            <input
+              type="tel"
+              id="telefono"
+              name="telefono"
+              value={formData.telefono}
+              onChange={handleChange}
+              placeholder="+54 9 11 1234 5678"
+              disabled={loading}
+            />
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="direccion" className="mb-2">
+              <MapPin
+                size={16}
+                style={{ marginRight: "8px", verticalAlign: "middle" }}
+              />
+              Dirección
+            </label>
+            <input
+              type="text"
+              id="direccion"
+              name="direccion"
+              value={formData.direccion}
+              onChange={handleChange}
+              placeholder="Av. Principal 123, Ciudad"
+              disabled={loading}
+            />
+          </div>
+
           <button
             type="submit"
             className="btn btn-success w-100 mb-3"
@@ -362,15 +471,15 @@ const Registros = () => {
                     verticalAlign: "middle",
                   }}
                 ></div>
-                Creando Cuenta...
+                Creando tu comercio...
               </>
             ) : (
               <>
-                <UserPlus
+                <Building2
                   size={18}
                   style={{ marginRight: "8px", verticalAlign: "middle" }}
                 />
-                Crear Cuenta
+                Crear Mi Comercio
               </>
             )}
           </button>

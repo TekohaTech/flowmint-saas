@@ -156,6 +156,12 @@ const Login = () => {
         </form>
 
         <div className="text-center mt-4 pt-3 border-top border-secondary">
+          <Link to="/registro" className="text-decoration-none" style={{ color: "var(--neon-cyan)" }}>
+            ¿No tienes cuenta? <strong>Regístrate aquí</strong>
+          </Link>
+        </div>
+
+        <div className="text-center mt-4 pt-3 border-top border-secondary">
           <p className="small text-light opacity-75 mb-0">
             Al continuar, aceptas que FlowMint cree un espacio de trabajo para tu negocio.
           </p>

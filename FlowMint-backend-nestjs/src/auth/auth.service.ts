@@ -1,9 +1,12 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { UsuariosService } from 'src/usuarios/usuarios.service';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { CompletarRegistroDto } from './dto/completar-registro.dto';
+import { RegisterDto } from './dto/register.dto';
+
+const REGISTRO_IP_BLOQUEO_HORAS = 2;
 
 @Injectable()
 export class AuthService {
@@ -112,5 +115,135 @@ export class AuthService {
         comercio_id: user?.comercio_id
       },
     };
+  }
+
+  async register(dto: RegisterDto, ip: string) {
+    const { nombre, apellido, user, correo, pass, dni, nombreComercio, categoria, direccion, telefono } = dto;
+
+    const usuarioExistente = await this.prisma.usuario.findFirst({
+      where: {
+        OR: [
+          { user },
+          { correo },
+        ],
+      },
+    });
+
+    if (usuarioExistente) {
+      if (usuarioExistente.user === user) {
+        throw new BadRequestException('El nombre de usuario ya está en uso');
+      }
+      if (usuarioExistente.correo === correo) {
+        throw new BadRequestException('El correo electrónico ya está registrado');
+      }
+    }
+
+    const controlIP = await this.verificarControlIP(ip, correo);
+    if (!controlIP.puedeRegistrar) {
+      const minutosRestantes = controlIP.minutosRestantes;
+      throw new HttpException(
+        `Ya realizaste un intento de registro. Intenta nuevamente en ${minutosRestantes} minutos`,
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(pass, 10);
+
+    const nuevoComercio = await this.prisma.comercio.create({
+      data: {
+        nombre: nombreComercio,
+        categoria,
+        direccion: direccion || null,
+        telefono: telefono || null,
+        email: correo,
+        activo: false,
+        estado: 'pendiente',
+        dueno_nombre: nombre,
+        dueno_apellido: apellido,
+        dueno_email: correo,
+      },
+    });
+
+    const nuevoUsuario = await this.prisma.usuario.create({
+      data: {
+        nombre,
+        apellido,
+        user,
+        correo,
+        pass: hashedPassword,
+        dni: dni || null,
+        rol_id: 2,
+        estado: 'A',
+        comercio_id: nuevoComercio.comercio_id,
+      },
+    });
+
+    await this.prisma.registroIP.create({
+      data: {
+        ip,
+        correo,
+      },
+    });
+
+    return {
+      message: 'Tu comercio ha sido creado exitosamente. Está pendiente de activación. Te notificaremos cuando esté listo.',
+      comercio: {
+        comercio_id: nuevoComercio.comercio_id,
+        nombre: nuevoComercio.nombre,
+        estado: nuevoComercio.estado,
+      },
+      usuario: {
+        usuario_id: nuevoUsuario.usuario_id,
+        nombre: nuevoUsuario.nombre,
+        apellido: nuevoUsuario.apellido,
+        user: nuevoUsuario.user,
+        correo: nuevoUsuario.correo,
+      },
+    };
+  }
+
+  private async verificarControlIP(ip: string, correo: string) {
+    const haceDosHoras = new Date();
+    haceDosHoras.setHours(haceDosHoras.getHours() - REGISTRO_IP_BLOQUEO_HORAS);
+
+    const ultimoRegistroIP = await this.prisma.registroIP.findFirst({
+      where: {
+        ip,
+        intento: { gte: haceDosHoras },
+      },
+      orderBy: { intento: 'desc' },
+    });
+
+    if (ultimoRegistroIP) {
+      const tiempoTranscurrido = Date.now() - ultimoRegistroIP.intento.getTime();
+      const dosHorasEnMs = REGISTRO_IP_BLOQUEO_HORAS * 60 * 60 * 1000;
+      const minutosRestantes = Math.ceil((dosHorasEnMs - tiempoTranscurrido) / (1000 * 60));
+      
+      return {
+        puedeRegistrar: false,
+        minutosRestantes,
+      };
+    }
+
+    const ultimoRegistroCorreo = await this.prisma.registroIP.findFirst({
+      where: {
+        correo,
+        intento: { gte: haceDosHoras },
+      },
+      orderBy: { intento: 'desc' },
+    });
+
+    if (ultimoRegistroCorreo) {
+      const tiempoTranscurrido = Date.now() - ultimoRegistroCorreo.intento.getTime();
+      const dosHorasEnMs = REGISTRO_IP_BLOQUEO_HORAS * 60 * 60 * 1000;
+      const minutosRestantes = Math.ceil((dosHorasEnMs - tiempoTranscurrido) / (1000 * 60));
+      
+      return {
+        puedeRegistrar: false,
+        minutosRestantes,
+      };
+    }
+
+    return { puedeRegistrar: true, minutosRestantes: 0 };
   }
 }
