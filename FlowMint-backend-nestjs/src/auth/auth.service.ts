@@ -1,10 +1,12 @@
 import { Injectable, UnauthorizedException, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { UsuariosService } from 'src/usuarios/usuarios.service';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { CompletarRegistroDto } from './dto/completar-registro.dto';
 import { RegisterDto } from './dto/register.dto';
+import { EmailService } from '../email/email.service';
+import * as crypto from 'crypto';
 
 const REGISTRO_IP_BLOQUEO_HORAS = 2;
 
@@ -14,6 +16,7 @@ export class AuthService {
     private usuariosService: UsuariosService,
     private jwtService: JwtService,
     private prisma: PrismaService,
+    private emailService: EmailService,
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
@@ -139,7 +142,7 @@ export class AuthService {
     }
 
     const controlIP = await this.verificarControlIP(ip, correo);
-    if (!controlIP.puedeRegistrar) {
+    if (!controlIP.puedeRegistrar && process.env.NODE_ENV === 'production') {
       const minutosRestantes = controlIP.minutosRestantes;
       throw new HttpException(
         `Ya realizaste un intento de registro. Intenta nuevamente en ${minutosRestantes} minutos`,
@@ -164,6 +167,8 @@ export class AuthService {
       },
     });
 
+    const tokenVerificacion = crypto.randomBytes(32).toString('hex');
+
     const nuevoUsuario = await this.prisma.usuario.create({
       data: {
         nombre,
@@ -175,6 +180,8 @@ export class AuthService {
         rol_id: 2,
         estado: 'A',
         comercio_id: nuevoComercio.comercio_id,
+        token_verificacion: tokenVerificacion,
+        email_verificado: false,
       },
     });
 
@@ -185,8 +192,11 @@ export class AuthService {
       },
     });
 
+    // Enviar email de verificación
+    await this.emailService.sendVerificationEmail(correo, tokenVerificacion);
+
     return {
-      message: 'Tu comercio ha sido creado exitosamente. Está pendiente de activación. Te notificaremos cuando esté listo.',
+      message: 'Tu comercio ha sido creado exitosamente. Está pendiente de activación. Te notificaremos cuando esté listo. Se ha enviado un correo de verificación.',
       comercio: {
         comercio_id: nuevoComercio.comercio_id,
         nombre: nuevoComercio.nombre,
@@ -198,8 +208,30 @@ export class AuthService {
         apellido: nuevoUsuario.apellido,
         user: nuevoUsuario.user,
         correo: nuevoUsuario.correo,
+        rol_id: nuevoUsuario.rol_id,
+        email_verificado: nuevoUsuario.email_verificado,
       },
     };
+  }
+
+  async verificarEmail(token: string) {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { token_verificacion: token },
+    });
+
+    if (!usuario) {
+      throw new BadRequestException('Token de verificación inválido o expirado.');
+    }
+
+    await this.prisma.usuario.update({
+      where: { usuario_id: usuario.usuario_id },
+      data: {
+        email_verificado: true,
+        token_verificacion: null,
+      },
+    });
+
+    return { message: 'Email verificado exitosamente. Ya puedes iniciar sesión.' };
   }
 
   private async verificarControlIP(ip: string, correo: string) {

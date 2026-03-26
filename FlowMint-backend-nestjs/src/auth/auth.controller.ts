@@ -1,4 +1,4 @@
-import { Controller, Post, UseGuards, Request, Get, Res, Body, Ip, UseGuards as UseThrottler } from '@nestjs/common';
+import { Controller, Post, UseGuards, Request, Get, Res, Body, Ip, Query, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './local-auth.guard';
 import { Public } from './public.decorator';
@@ -7,6 +7,7 @@ import { LoginDto } from './dto/login.dto';
 import { CompletarRegistroDto } from './dto/completar-registro.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -55,9 +56,20 @@ export class AuthController {
     return this.authService.completarRegistro(dto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('me')
   @ApiOperation({ summary: 'Obtener datos del usuario actual' })
   async getProfile(@Request() req) {
     return this.authService.getProfile(req.user.usuario_id);
+  }
+
+  @Public()
+  @Get('verificar-email')
+  @ApiOperation({ summary: 'Verificar correo electrónico mediante token' })
+  async verificarEmail(@Query('token') token: string) {
+    if (!token) {
+      throw new BadRequestException('Token es requerido.');
+    }
+    return this.authService.verificarEmail(token);
   }
 }

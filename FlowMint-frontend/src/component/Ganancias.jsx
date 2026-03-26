@@ -249,37 +249,45 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import dayjs from 'dayjs'; // A library to handle dates
 import api, { revenueAPI } from '../services/api';
 
-// Plugin personalizado para mostrar valores en los gráficos
+// Plugin personalizado para mostrar valores en los gráficos de forma inteligente
 const dataLabelsPlugin = {
   id: 'dataLabels',
   afterDatasetsDraw: function(chart) {
-    const { ctx, data } = chart;
-    const fontSize = 14; // Aumentar el tamaño
-    const fontFamily = 'Arial, sans-serif';
-    const fontWeight = 'bold';
+    const { ctx, data, chartArea: { width } } = chart;
+    
+    // Ajustar tamaño de fuente según el ancho del gráfico
+    const fontSize = width < 500 ? 12 : 15; 
+    const fontFamily = "'Inter', sans-serif";
+    const fontWeight = '800';
 
     ctx.save();
     data.datasets.forEach((dataset, i) => {
       const meta = chart.getDatasetMeta(i);
       if (!meta.hidden) {
+        // Reducir etiquetas si hay demasiados puntos
+        const skipStep = dataset.data.length > 20 ? (width < 600 ? 4 : 2) : 1;
+        
         meta.data.forEach((element, j) => {
-          if (dataset.data[j] !== null) {
-            // Dibujar texto con contorno para mejor visibilidad
+          if (dataset.data[j] !== null && dataset.data[j] !== 0 && j % skipStep === 0) {
             ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
 
-            const text = '$' + dataset.data[j].toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            const text = '$' + Math.round(dataset.data[j]).toLocaleString();
+            
+            // Determinar posición vertical óptima
             const position = element.tooltipPosition();
+            // Si es barra, asegurar que no se salga por arriba añadiendo padding interno al gráfico o bajando el texto
+            const yOffset = chart.config.type === 'bar' ? -8 : -12;
 
-            // Dibujar contorno amarillo neon para mejor contraste
-            ctx.strokeStyle = '#ffde0a'; // neon-yellow para mejor contraste
-            ctx.lineWidth = 6; // Aumentar aún más el ancho del contorno
-            ctx.strokeText(text, position.x, position.y - 8); // Ajustar posición
+            // Sombra para contraste extremo en fondo oscuro
+            ctx.strokeStyle = 'rgba(0, 0, 0, 1)';
+            ctx.lineWidth = 5;
+            ctx.strokeText(text, position.x, Math.max(25, position.y + yOffset));
 
-            // Dibujar texto principal en color blanco para mayor contraste con el fondo oscuro
-            ctx.fillStyle = '#ffffff';
-            ctx.fillText(text, position.x, position.y - 8);
+            // Texto principal con color neon brillante
+            ctx.fillStyle = i === 0 ? '#00f3ff' : '#16f2b3';
+            ctx.fillText(text, position.x, Math.max(25, position.y + yOffset));
           }
         });
       }
@@ -489,14 +497,14 @@ const Ganancias = () => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top',
+        position: 'bottom',
         labels: {
           color: '#ffffff',
           font: {
-            size: 13,
+            size: 11,
             weight: 'bold'
           },
-          padding: 15,
+          padding: 20,
         },
       },
       title: {
@@ -604,7 +612,8 @@ const Ganancias = () => {
 
   return (
     <Container fluid className="p-4">
-      <h1 className="text-center mb-4" style={{ color: 'white', textShadow: '0 0 10px rgba(0, 243, 255, 0.3)' }}>Reporte de Ganancias</h1>
+      <h1 className="text-center mb-0" style={{ color: 'white', textShadow: '0 0 10px rgba(0, 243, 255, 0.3)' }}>Reporte de Ganancias</h1>
+      <p className="text-center mb-4 text-muted small">Sólo se contabilizan turnos con estado <span className="text-neon-cyan fw-bold">"confirmado"</span></p>
 
       {/* Controles de fecha */}
       <Card className="mb-4" style={{ background: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
@@ -720,44 +729,48 @@ const Ganancias = () => {
       {/* Resumen de Ganancias */}
       {resumen && (
         <Card className="mb-4 shadow-lg" style={{ background: 'var(--bg-card)', borderColor: 'var(--border-color)' }}>
-          <Card.Header className="text-center py-4" style={{ background: 'linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-card) 100%)', borderColor: 'var(--border-color)', color: 'var(--neon-cyan)' }}>
+          <Card.Header className="text-center py-3" style={{ background: 'linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-card) 100%)', borderColor: 'var(--border-color)', color: 'var(--neon-cyan)' }}>
             <h4 className="mb-0 text-neon-cyan">Resumen de Ganancias</h4>
           </Card.Header>
           <Card.Body>
             <Row className="g-4">
-              <Col md={4}>
+              <Col md={3}>
                 <Card className="text-center h-100 border-0" style={{ background: 'rgba(0, 243, 255, 0.05)', border: '1px solid rgba(0, 243, 255, 0.2)', borderRadius: '12px' }}>
-                  <Card.Body className="d-flex flex-column justify-content-center">
-                    <Card.Title className="text-white mb-3" style={{ opacity: 0.8 }}>Total</Card.Title>
-                    <div className="mt-auto">
-                      <Card.Text className="display-5 fw-bold text-white mb-0">
-                        ${resumen.total?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
-                      </Card.Text>
-                    </div>
+                  <Card.Body className="p-3 d-flex flex-column justify-content-center">
+                    <Card.Title className="text-white mb-2" style={{ opacity: 0.8, fontSize: '0.9rem' }}>Confirmado</Card.Title>
+                    <Card.Text className="fs-3 fw-bold text-white mb-0">
+                      ${resumen.total?.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 }) || '0'}
+                    </Card.Text>
                   </Card.Body>
                 </Card>
               </Col>
-              <Col md={4}>
+              <Col md={3}>
+                <Card className="text-center h-100 border-0" style={{ background: 'rgba(255, 109, 0, 0.05)', border: '1px solid rgba(255, 109, 0, 0.2)', borderRadius: '12px' }}>
+                  <Card.Body className="p-3 d-flex flex-column justify-content-center">
+                    <Card.Title className="text-white mb-2" style={{ opacity: 0.8, fontSize: '0.9rem' }}>Pendiente</Card.Title>
+                    <Card.Text className="fs-3 fw-bold text-neon-orange mb-0">
+                      ${resumen.totalPendiente?.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 }) || '0'}
+                    </Card.Text>
+                  </Card.Body>
+                </Card>
+              </Col>
+              <Col md={3}>
                 <Card className="text-center h-100 border-0" style={{ background: 'rgba(22, 242, 179, 0.05)', border: '1px solid rgba(22, 242, 179, 0.2)', borderRadius: '12px' }}>
-                  <Card.Body className="d-flex flex-column justify-content-center">
-                    <Card.Title className="text-white mb-3" style={{ opacity: 0.8 }}>Promedio Diario</Card.Title>
-                    <div className="mt-auto">
-                      <Card.Text className="display-5 fw-bold text-white mb-0">
-                        ${resumen.promedioPorDia?.toFixed(2) || '0.00'}
-                      </Card.Text>
-                    </div>
+                  <Card.Body className="p-3 d-flex flex-column justify-content-center">
+                    <Card.Title className="text-white mb-2" style={{ opacity: 0.8, fontSize: '0.9rem' }}>Proyectado</Card.Title>
+                    <Card.Text className="fs-3 fw-bold text-neon-green mb-0">
+                      ${resumen.totalProyectado?.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 }) || '0'}
+                    </Card.Text>
                   </Card.Body>
                 </Card>
               </Col>
-              <Col md={4}>
+              <Col md={3}>
                 <Card className="text-center h-100 border-0" style={{ background: 'rgba(255, 0, 110, 0.05)', border: '1px solid rgba(255, 0, 110, 0.2)', borderRadius: '12px' }}>
-                  <Card.Body className="d-flex flex-column justify-content-center">
-                    <Card.Title className="text-white mb-3" style={{ opacity: 0.8 }}>Turnos</Card.Title>
-                    <div className="mt-auto">
-                      <Card.Text className="display-5 fw-bold text-white mb-0">
-                        {resumen.totalTurnos || 0}
-                      </Card.Text>
-                    </div>
+                  <Card.Body className="p-3 d-flex flex-column justify-content-center">
+                    <Card.Title className="text-white mb-2" style={{ opacity: 0.8, fontSize: '0.9rem' }}>Turnos (Cnf/Total)</Card.Title>
+                    <Card.Text className="fs-3 fw-bold text-neon-pink mb-0">
+                      {resumen.totalTurnos}/{resumen.totalTurnos + (resumen.totalTurnosPendientes || 0)}
+                    </Card.Text>
                   </Card.Body>
                 </Card>
               </Col>
@@ -774,7 +787,7 @@ const Ganancias = () => {
               Ganancias Diarias
             </Card.Header>
             <Card.Body>
-              <div style={{ height: '400px' }}>
+              <div style={{ height: '300px', minHeight: '300px' }}>
                 {diarias && diarias.length > 0 ? (
                   <Line
                     data={getChartData(diarias, 'Ganancias Diarias', true)}
@@ -795,7 +808,7 @@ const Ganancias = () => {
               Ganancias Semanales
             </Card.Header>
             <Card.Body>
-              <div style={{ height: '400px' }}>
+              <div style={{ height: '300px', minHeight: '300px' }}>
                 {semanales && semanales.length > 0 ? (
                   <Bar
                     data={getChartData(semanales, 'Ganancias Semanales')}
@@ -819,7 +832,7 @@ const Ganancias = () => {
               Ganancias Mensuales
             </Card.Header>
             <Card.Body>
-              <div style={{ height: '400px' }}>
+              <div style={{ height: '300px', minHeight: '300px' }}>
                 {mensuales && mensuales.length > 0 ? (
                   <Bar
                     data={getChartData(mensuales, 'Ganancias Mensuales')}
@@ -840,7 +853,7 @@ const Ganancias = () => {
               Ganancias Anuales
             </Card.Header>
             <Card.Body>
-              <div style={{ height: '400px' }}>
+              <div style={{ height: '300px', minHeight: '300px' }}>
                 {anuales && anuales.length > 0 ? (
                   <Bar
                     data={getChartData(anuales, 'Ganancias Anuales')}
@@ -864,7 +877,7 @@ const Ganancias = () => {
               Ganancias Mensuales por Servicio
             </Card.Header>
             <Card.Body>
-              <div style={{ height: '400px' }}>
+              <div style={{ height: '300px', minHeight: '300px' }}>
                 {mensualesPorServicio && mensualesPorServicio.length > 0 ? (
                   <Bar
                     data={getChartDataWithColors(mensualesPorServicio, 'Ganancias Mensuales por Servicio')}
@@ -885,7 +898,7 @@ const Ganancias = () => {
               Ganancias Anuales por Servicio
             </Card.Header>
             <Card.Body>
-              <div style={{ height: '400px' }}>
+              <div style={{ height: '300px', minHeight: '300px' }}>
                 {anualesPorServicio && anualesPorServicio.length > 0 ? (
                   <Bar
                     data={getChartDataWithColors(anualesPorServicio, 'Ganancias Anuales por Servicio')}
@@ -909,7 +922,7 @@ const Ganancias = () => {
               Ganancias Mensuales por Empleado
             </Card.Header>
             <Card.Body>
-              <div style={{ height: '400px' }}>
+              <div style={{ height: '300px', minHeight: '300px' }}>
                 {mensualesPorEmpleado && mensualesPorEmpleado.length > 0 ? (
                   <Bar
                     data={getChartDataWithColors(mensualesPorEmpleado, 'Ganancias Mensuales por Empleado')}
@@ -930,7 +943,7 @@ const Ganancias = () => {
               Ganancias Anuales por Empleado
             </Card.Header>
             <Card.Body>
-              <div style={{ height: '400px' }}>
+              <div style={{ height: '300px', minHeight: '300px' }}>
                 {anualesPorEmpleado && anualesPorEmpleado.length > 0 ? (
                   <Bar
                     data={getChartDataWithColors(anualesPorEmpleado, 'Ganancias Anuales por Empleado')}

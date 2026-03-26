@@ -18,6 +18,7 @@ import {
   Store,
 } from "lucide-react";
 import "../index.css";
+import { Logo } from "./VisualAssets";
 
 const Registros = () => {
   const [formData, setFormData] = useState({
@@ -113,12 +114,9 @@ const Registros = () => {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            className="d-flex justify-content-center"
           >
-            <Zap
-              size={64}
-              className="neon-pulse"
-              style={{ color: "var(--neon-cyan)" }}
-            />
+            <Logo size={80} showText={false} />
           </motion.div>
           <h1 className="mt-3 mb-1">FlowMint</h1>
           <p style={{ color: "var(--text-secondary)" }}>

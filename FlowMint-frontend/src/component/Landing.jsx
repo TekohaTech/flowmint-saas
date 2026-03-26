@@ -5,6 +5,7 @@ import {
   Calendar, Users, DollarSign, Smartphone, Zap, 
   CheckCircle, ArrowRight, Store, Scissors, Sparkles
 } from 'lucide-react';
+import { Logo, HeroIllustration } from './VisualAssets';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -64,10 +65,7 @@ const Landing = () => {
     <div className="min-vh-100" style={{ background: 'linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%)' }}>
       {/* Header */}
       <nav className="d-flex justify-content-between align-items-center px-4 py-3" style={{ background: 'rgba(0,0,0,0.3)' }}>
-        <div className="d-flex align-items-center gap-2">
-          <Zap size={32} style={{ color: 'var(--neon-cyan)' }} />
-          <span className="fs-4 fw-bold text-white">FlowMint</span>
-        </div>
+        <Logo />
         <div className="d-flex gap-3">
           <button 
             className="btn btn-outline-info"
@@ -120,27 +118,7 @@ const Landing = () => {
 
           {/* Preview Image */}
           <div className="position-relative" style={{ maxWidth: '900px', margin: '0 auto' }}>
-            <div 
-              className="rounded-4 p-2"
-              style={{ 
-                background: 'rgba(0, 243, 255, 0.05)', 
-                border: '1px solid rgba(0, 243, 255, 0.2)',
-                boxShadow: '0 0 60px rgba(0, 243, 255, 0.1)'
-              }}
-            >
-              <div 
-                className="rounded-3 d-flex align-items-center justify-content-center"
-                style={{ 
-                  background: 'var(--bg-card)', 
-                  minHeight: '400px',
-                }}
-              >
-                <div className="text-center">
-                  <Store size={80} className="mb-3" style={{ color: 'var(--neon-cyan)', opacity: 0.5 }} />
-                  <p className="text-light opacity-75">Vista previa del dashboard</p>
-                </div>
-              </div>
-            </div>
+            <HeroIllustration />
           </div>
         </motion.div>
       </section>

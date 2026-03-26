@@ -5,14 +5,27 @@ import { PrismaService } from '../prisma/prisma.service';
 export class GananciasService {
   constructor(private prisma: PrismaService) {}
 
+  private adjustDate(d: Date | string, isEnd: boolean): Date {
+    const date = new Date(d);
+    // Extraer componentes UTC para tratarlos como locales
+    const year = date.getUTCFullYear();
+    const month = date.getUTCMonth();
+    const day = date.getUTCDate();
+    if (isEnd) return new Date(year, month, day, 23, 59, 59, 999);
+    return new Date(year, month, day, 0, 0, 0, 0);
+  }
+
   async getGananciasDiarias(comercioId?: number, startDate?: Date, endDate?: Date) {
+    const startLocal = startDate ? this.adjustDate(startDate, false) : undefined;
+    const endLocal = endDate ? this.adjustDate(endDate, true) : undefined;
+
     const whereClause = {
       estado: 'confirmado',
       ...(comercioId && { comercio_id: comercioId }),
-      ...(startDate && endDate && {
+      ...(startLocal && endLocal && {
         fecha_hora: {
-          gte: startDate,
-          lte: endDate,
+          gte: startLocal,
+          lte: endLocal,
         },
       }),
     };
@@ -38,13 +51,16 @@ export class GananciasService {
   }
 
   async getGananciasSemanales(comercioId?: number, startDate?: Date, endDate?: Date) {
+    const startLocal = startDate ? this.adjustDate(startDate, false) : undefined;
+    const endLocal = endDate ? this.adjustDate(endDate, true) : undefined;
+
     const whereClause = {
       estado: 'confirmado',
       ...(comercioId && { comercio_id: comercioId }),
-      ...(startDate && endDate && {
+      ...(startLocal && endLocal && {
         fecha_hora: {
-          gte: startDate,
-          lte: endDate,
+          gte: startLocal,
+          lte: endLocal,
         },
       }),
     };
@@ -74,13 +90,16 @@ export class GananciasService {
   }
 
   async getGananciasMensuales(comercioId?: number, startDate?: Date, endDate?: Date) {
+    const startLocal = startDate ? this.adjustDate(startDate, false) : undefined;
+    const endLocal = endDate ? this.adjustDate(endDate, true) : undefined;
+
     const whereClause = {
       estado: 'confirmado',
       ...(comercioId && { comercio_id: comercioId }),
-      ...(startDate && endDate && {
+      ...(startLocal && endLocal && {
         fecha_hora: {
-          gte: startDate,
-          lte: endDate,
+          gte: startLocal,
+          lte: endLocal,
         },
       }),
     };
@@ -108,13 +127,16 @@ export class GananciasService {
   }
 
   async getGananciasAnuales(comercioId?: number, startDate?: Date, endDate?: Date) {
+    const startLocal = startDate ? this.adjustDate(startDate, false) : undefined;
+    const endLocal = endDate ? this.adjustDate(endDate, true) : undefined;
+
     const whereClause = {
       estado: 'confirmado',
       ...(comercioId && { comercio_id: comercioId }),
-      ...(startDate && endDate && {
+      ...(startLocal && endLocal && {
         fecha_hora: {
-          gte: startDate,
-          lte: endDate,
+          gte: startLocal,
+          lte: endLocal,
         },
       }),
     };
@@ -137,13 +159,16 @@ export class GananciasService {
   }
 
   async getGananciasMensualesPorServicio(comercioId?: number, startDate?: Date, endDate?: Date) {
+    const startLocal = startDate ? this.adjustDate(startDate, false) : undefined;
+    const endLocal = endDate ? this.adjustDate(endDate, true) : undefined;
+
     const whereClause = {
       estado: 'confirmado',
       ...(comercioId && { comercio_id: comercioId }),
-      ...(startDate && endDate && {
+      ...(startLocal && endLocal && {
         fecha_hora: {
-          gte: startDate,
-          lte: endDate,
+          gte: startLocal,
+          lte: endLocal,
         },
       }),
     };
@@ -174,13 +199,16 @@ export class GananciasService {
   }
 
   async getGananciasMensualesPorEmpleado(comercioId?: number, startDate?: Date, endDate?: Date) {
+    const startLocal = startDate ? this.adjustDate(startDate, false) : undefined;
+    const endLocal = endDate ? this.adjustDate(endDate, true) : undefined;
+
     const whereClause = {
       estado: 'confirmado',
       ...(comercioId && { comercio_id: comercioId }),
-      ...(startDate && endDate && {
+      ...(startLocal && endLocal && {
         fecha_hora: {
-          gte: startDate,
-          lte: endDate,
+          gte: startLocal,
+          lte: endLocal,
         },
       }),
     };
@@ -211,42 +239,63 @@ export class GananciasService {
   }
 
   async getResumenGanancias(comercioId?: number, startDate?: Date, endDate?: Date) {
-    const whereClause = {
-      estado: 'confirmado',
-      ...(comercioId && { comercio_id: comercioId }),
-      ...(startDate && endDate && {
-        fecha_hora: {
-          gte: startDate,
-          lte: endDate,
-        },
-      }),
-    };
+    const startLocal = startDate ? this.adjustDate(startDate, false) : new Date(new Date().setHours(0,0,0,0));
+    const endLocal = endDate ? this.adjustDate(endDate, true) : new Date(new Date().setHours(23,59,59,999));
 
-    const turnos = await this.prisma.turno.findMany({
-      where: whereClause,
+    // Obtener turnos confirmados
+    const turnosConfirmados = await this.prisma.turno.findMany({
+      where: {
+        estado: 'confirmado',
+        ...(comercioId && { comercio_id: comercioId }),
+        fecha_hora: { 
+          gte: startLocal, 
+          lte: endLocal 
+        },
+      },
       include: { servicio: true },
     });
 
-    const total = turnos.reduce((sum, turno) => sum + turno.servicio.precio, 0);
-    const promedioPorDia = turnos.length > 0 ? total / (endDate && startDate 
-      ? Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) || 1 
-      : 1) : 0;
+    // Obtener turnos pendientes
+    const turnosPendientes = await this.prisma.turno.findMany({
+      where: {
+        estado: 'pendiente',
+        ...(comercioId && { comercio_id: comercioId }),
+        fecha_hora: { 
+          gte: startLocal, 
+          lte: endLocal 
+        },
+      },
+      include: { servicio: true },
+    });
+
+    const totalConfirmado = turnosConfirmados.reduce((sum, turno) => sum + (turno.servicio?.precio || 0), 0);
+    const totalPendiente = turnosPendientes.reduce((sum, turno) => sum + (turno.servicio?.precio || 0), 0);
     
+    // Calcular días para el promedio
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const dias = Math.max(1, Math.ceil((endLocal.getTime() - startLocal.getTime()) / msPerDay));
+
     return {
-      total,
-      totalTurnos: turnos.length,
-      promedioPorDia,
+      total: totalConfirmado,
+      totalPendiente,
+      totalProyectado: totalConfirmado + totalPendiente,
+      totalTurnos: turnosConfirmados.length,
+      totalTurnosPendientes: turnosPendientes.length,
+      promedioPorDia: totalConfirmado / dias,
     };
   }
 
   async getGananciasAnualesPorServicio(comercioId?: number, startDate?: Date, endDate?: Date) {
+    const startLocal = startDate ? this.adjustDate(startDate, false) : undefined;
+    const endLocal = endDate ? this.adjustDate(endDate, true) : undefined;
+
     const whereClause = {
       estado: 'confirmado',
       ...(comercioId && { comercio_id: comercioId }),
-      ...(startDate && endDate && {
+      ...(startLocal && endLocal && {
         fecha_hora: {
-          gte: startDate,
-          lte: endDate,
+          gte: startLocal,
+          lte: endLocal,
         },
       }),
     };
@@ -278,13 +327,16 @@ export class GananciasService {
   }
 
   async getGananciasAnualesPorEmpleado(comercioId?: number, startDate?: Date, endDate?: Date) {
+    const startLocal = startDate ? this.adjustDate(startDate, false) : undefined;
+    const endLocal = endDate ? this.adjustDate(endDate, true) : undefined;
+
     const whereClause = {
       estado: 'confirmado',
       ...(comercioId && { comercio_id: comercioId }),
-      ...(startDate && endDate && {
+      ...(startLocal && endLocal && {
         fecha_hora: {
-          gte: startDate,
-          lte: endDate,
+          gte: startLocal,
+          lte: endLocal,
         },
       }),
     };

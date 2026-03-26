@@ -24,6 +24,7 @@ import {
   Store,
 } from "lucide-react";
 import AIChat from "./AIChat";
+import { Logo } from "./VisualAssets";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -121,30 +122,13 @@ const Dashboard = () => {
     >
       {/* Logo */}
       <div
-        className="p-4 text-center border-bottom"
+        className="p-4 border-bottom d-flex flex-column align-items-center"
         style={{ borderColor: "var(--border-color)" }}
       >
-        <Zap
-          size={48}
-          className="neon-pulse mb-2"
-          style={{ color: "var(--neon-cyan)", cursor: "pointer" }}
-          onClick={() => navigate('/dashboard')}
-        />
-        <h2
-          className="mb-0"
-          style={{
-            background:
-              "linear-gradient(90deg, var(--neon-cyan), var(--neon-pink))",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            fontSize: "1.5rem",
-            cursor: "pointer"
-          }}
-          onClick={() => navigate('/dashboard')}
-        >
-          FlowMint
-        </h2>
-        <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
+        <div onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>
+          <Logo size={60} />
+        </div>
+        <small className="mt-2" style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
           v1.0.0
         </small>
       </div>
@@ -326,12 +310,10 @@ const Dashboard = () => {
               <Menu size={24} />
             </Button>
 
-            <Navbar.Brand className="d-flex align-items-center gap-2 mb-0">
-              <Zap
-                size={32}
-                style={{ color: "var(--neon-cyan)" }}
-                className="d-md-none"
-              />
+            <Navbar.Brand className="d-flex align-items-center gap-2 mb-0" onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>
+              <div className="d-md-none">
+                <Logo size={32} showText={false} />
+              </div>
               <h3
                 className="mb-0"
                 style={{

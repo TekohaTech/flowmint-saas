@@ -7,13 +7,18 @@ async function main() {
   console.log('🌱 Iniciando seed SaaS Multi-tenant...');
 
   // Limpiar datos
-  await prisma.turno.deleteMany();
-  await prisma.servicio.deleteMany();
-  await prisma.empleado.deleteMany();
-  await prisma.cliente.deleteMany();
-  await prisma.usuario.deleteMany();
-  await prisma.rol.deleteMany();
-  await prisma.comercio.deleteMany();
+  try {
+    await prisma.registroIP.deleteMany();
+    await prisma.turno.deleteMany();
+    await prisma.servicio.deleteMany();
+    await prisma.empleado.deleteMany();
+    await prisma.cliente.deleteMany();
+    await prisma.usuario.deleteMany();
+    await prisma.rol.deleteMany();
+    await prisma.comercio.deleteMany();
+  } catch (e) {
+    console.log('⚠️  No se pudieron limpiar las tablas (posiblemente no existan aún).');
+  }
 
   // 1. Crear Roles
   const rolSuperAdmin = await prisma.rol.create({ data: { rol_id: 1, nombre: 'SUPERADMIN' } });

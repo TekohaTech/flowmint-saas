@@ -138,7 +138,7 @@ echo ""
 echo -n "🔍 Probando login admin... "
 login_response=$(curl -s -X POST "$BASE_URL/api/auth/login" \
     -H "Content-Type: application/json" \
-    -d '{"user":"admin","pass":"admin123"}')
+    -d '{"user":"carlos","pass":"admin123"}')
 
 if echo "$login_response" | grep -q "access_token"; then
     echo -e "${GREEN}✅ PASSED${NC}"
@@ -204,7 +204,7 @@ echo "=========================================="
 echo ""
 
 if [ -n "$TOKEN" ]; then
-    test_with_token "GET" "/api/auth/profile" "$TOKEN" "Obtener perfil autenticado"
+    test_with_token "GET" "/api/auth/me" "$TOKEN" "Obtener perfil autenticado"
 
     echo ""
     echo "=========================================="

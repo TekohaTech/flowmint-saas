@@ -15,6 +15,8 @@ import Dashboard from './component/Dashboard';
 import Comercios from './component/Comercios';
 import ProtectedRoute from './component/ProtectedRoute';
 import DashboardHome from './component/DashboardHome';
+import VerificarEmail from './component/VerificarEmail';
+import NotFound from './component/NotFound';
 
 function App() {
     return (
@@ -25,6 +27,7 @@ function App() {
                 <Route path='/registro' element={<Registros />} />
                 <Route path='/completar-registro' element={<CompletarRegistro />} />
                 <Route path='/pendiente-activacion' element={<PendienteActivacion />} />
+                <Route path='/verificar-email' element={<VerificarEmail />} />
 
                 <Route 
                     path='/dashboard' 
@@ -43,6 +46,9 @@ function App() {
                     <Route path='ganancias' element={<Ganancias />} />
                     <Route path='comercios' element={<Comercios />} />
                 </Route>
+
+                {/* Catch-all 404 Route */}
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </Router>
     );

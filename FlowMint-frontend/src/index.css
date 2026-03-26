@@ -1291,3 +1291,59 @@ tbody tr:hover {
     border-color: var(--neon-cyan) !important;
     color: var(--bg-primary) !important;
 }
+
+/* --- Mobile Responsiveness Enhancements --- */
+@media (max-width: 768px) {
+    h1 { font-size: 1.8rem; }
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.2rem; }
+
+    .card {
+        padding: 1rem !important;
+        margin-bottom: 1rem;
+    }
+
+    .modal-content {
+        padding: 1rem !important;
+        width: 95%;
+    }
+
+    /* Responsive Tables */
+    .table-responsive {
+        border: none !important;
+        margin-bottom: 1rem;
+    }
+
+    table {
+        font-size: 0.85rem;
+    }
+
+    th, td {
+        padding: 0.75rem 0.5rem !important;
+    }
+
+    /* Stack buttons on mobile if needed */
+    .d-flex.gap-2 {
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.85rem !important;
+    }
+
+    /* Chart Overlap Prevention */
+    canvas {
+        max-width: 100% !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .container-fluid {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+
+    .display-4 { font-size: 2rem !important; }
+    .display-5 { font-size: 1.5rem !important; }
+}

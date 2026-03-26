@@ -4,6 +4,7 @@ import { authAPI } from "../services/api";
 import { motion } from "framer-motion";
 import { Zap, Lock, User, AlertCircle, Eye, EyeOff } from "lucide-react";
 import "../index.css";
+import { Logo } from "./VisualAssets";
 
 const Login = () => {
   const [credentials, setCredentials] = useState({ user: "", pass: "" });
@@ -74,8 +75,9 @@ const Login = () => {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            className="d-flex justify-content-center"
           >
-            <Zap size={64} className="neon-pulse" style={{ color: "var(--neon-cyan)" }} />
+            <Logo size={80} showText={false} />
           </motion.div>
           <h1 className="mt-3 mb-1 text-white">FlowMint</h1>
           <p style={{ color: "var(--text-secondary)" }}>Plataforma SaaS de Gestión de Negocios</p>
