@@ -15,7 +15,8 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Public()
-  @UseGuards(LocalAuthGuard)
+  @UseGuards(ThrottlerGuard, LocalAuthGuard)
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
   @Post('login')
   @ApiOperation({ summary: 'User login with username and password' })
   @ApiBody({ type: LoginDto })
