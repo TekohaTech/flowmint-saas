@@ -48,7 +48,7 @@ const Landing = () => {
     },
     {
       nombre: 'Profesional',
-      precio: '$2.999',
+      precio: '$25.000',
       periodo: '/mes',
       features: [
         'Turnos ilimitados',

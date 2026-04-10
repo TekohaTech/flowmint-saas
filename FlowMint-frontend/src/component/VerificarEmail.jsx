@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { api } from '../services/api';
 import './Usuarios.css'; // Reusing styles
 
 const VerificarEmail = () => {
@@ -19,7 +19,7 @@ const VerificarEmail = () => {
             }
 
             try {
-                const response = await axios.get(`http://localhost:3000/api/auth/verificar-email?token=${token}`);
+                const response = await api.get(`/auth/verificar-email?token=${token}`);
                 setStatus('success');
                 setMessage(response.data.message || 'Email verificado con éxito.');
                 

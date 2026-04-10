@@ -106,8 +106,8 @@ const PendienteActivacion = () => {
                 <div className="mt-4 pt-4 border-top border-secondary">
                   <p className="text-light opacity-75 small mb-0">
                     ¿Tenés dudas? Contactanos a{' '}
-                    <a href="mailto:contacto@flowmint.com" style={{ color: 'var(--neon-cyan)' }}>
-                      contacto@flowmint.com
+                    <a href="mailto:tekohatech@gmail.com" style={{ color: 'var(--neon-cyan)' }}>
+                      tekohatech@gmail.com
                     </a>
                   </p>
                 </div>
