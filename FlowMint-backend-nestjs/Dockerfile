@@ -3,10 +3,10 @@ FROM node:22 AS builder
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY FlowMint-backend-nestjs/package*.json ./
 RUN npm install --include=dev
 
-COPY . .
+COPY FlowMint-backend-nestjs/ ./
 
 # Generate Prisma Client (uses local binary, won't connect to DB)
 ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
