@@ -15,20 +15,17 @@ RUN ./node_modules/.bin/prisma generate
 RUN npm run build
 
 # Stage 2: Create the production image
-FROM node:22-alpine
+FROM node:22-slim
 
 WORKDIR /usr/src/app
 
 # Install OpenSSL for Prisma compatibility
-RUN apk add --no-cache openssl
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 COPY --from=builder /usr/src/app/package*.json ./
 COPY --from=builder /usr/src/app/prisma ./prisma
-
-# Ensure Prisma Client is generated in production
-RUN ./node_modules/.bin/prisma generate
 
 EXPOSE 3000
 
