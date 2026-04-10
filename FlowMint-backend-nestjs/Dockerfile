@@ -29,4 +29,5 @@ COPY --from=builder /usr/src/app/prisma ./prisma
 
 EXPOSE 3000
 
-CMD ["node", "dist/src/main"]
+# Run migrations first, then start the app
+CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && node dist/src/main"]
