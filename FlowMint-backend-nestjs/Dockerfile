@@ -31,5 +31,4 @@ COPY --from=builder /usr/src/app/package*.json ./
 
 EXPOSE 3000
 
-# Run migrations and start the server
-CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && node dist/src/main"]
+CMD ["node", "dist/src/main"]
