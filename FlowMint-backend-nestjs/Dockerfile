@@ -10,9 +10,9 @@ RUN npm install --include=dev
 # Copy the entire backend source
 COPY FlowMint-backend-nestjs/ ./
 
-# Generate Prisma Client (DATABASE_URL needed for schema validation)
+# Generate Prisma Client (uses local binary, won't connect to DB)
 ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
-RUN npx prisma generate
+RUN ./node_modules/.bin/prisma generate
 
 RUN npm run build
 
