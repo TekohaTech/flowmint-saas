@@ -4,23 +4,31 @@ import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class EmailService {
-  private transporter: nodemailer.Transporter;
+  private transporter: nodemailer.Transporter | null = null;
 
   constructor(private configService: ConfigService) {
-    this.transporter = nodemailer.createTransport({
-      host: this.configService.get<string>('SMTP_HOST'),
-      port: this.configService.get<number>('SMTP_PORT'),
-      secure: this.configService.get<boolean>('SMTP_SECURE') || false,
-      auth: {
-        user: this.configService.get<string>('SMTP_USER'),
-        pass: this.configService.get<string>('SMTP_PASS'),
-      },
-    });
+    const smtpHost = this.configService.get<string>('SMTP_HOST');
+    if (smtpHost) {
+      this.transporter = nodemailer.createTransport({
+        host: smtpHost,
+        port: this.configService.get<number>('SMTP_PORT'),
+        secure: this.configService.get<boolean>('SMTP_SECURE') || false,
+        auth: {
+          user: this.configService.get<string>('SMTP_USER'),
+          pass: this.configService.get<string>('SMTP_PASS'),
+        },
+      });
+    }
   }
 
   async sendVerificationEmail(to: string, token: string) {
     const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:5173';
     const verificationUrl = `${frontendUrl}/verificar-email?token=${token}`;
+
+    if (!this.transporter) {
+      console.warn('⚠️ SMTP no configurado. Email de verificación no enviado. Token:', token.substring(0, 8) + '...');
+      return;
+    }
 
     const mailOptions = {
       from: `"FlowMint" <${this.configService.get<string>('SMTP_USER')}>`,

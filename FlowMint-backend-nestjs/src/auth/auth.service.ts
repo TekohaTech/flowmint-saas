@@ -192,8 +192,12 @@ export class AuthService {
       },
     });
 
-    // Enviar email de verificación
-    await this.emailService.sendVerificationEmail(correo, tokenVerificacion);
+    // Enviar email de verificación (fallo silencioso si SMTP no está configurado)
+    try {
+      await this.emailService.sendVerificationEmail(correo, tokenVerificacion);
+    } catch (emailError) {
+      console.warn('⚠️ Email de verificación no enviado (SMTP no configurado). El usuario puede verificar desde el panel.');
+    }
 
     return {
       message: 'Tu comercio ha sido creado exitosamente. Está pendiente de activación. Te notificaremos cuando esté listo. Se ha enviado un correo de verificación.',
