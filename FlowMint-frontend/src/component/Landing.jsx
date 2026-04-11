@@ -14,22 +14,22 @@ const Landing = () => {
     {
       icon: Calendar,
       title: 'Gestión de Turnos',
-      description: 'Agenda turnos de forma simple y visual. Nunca más te olvidés de una cita.'
+      description: 'Agendá turnos de forma simple y visual.'
     },
     {
       icon: Users,
       title: 'Clientes y Empleados',
-      description: 'Mantené organizados tus clientes y empleados en un solo lugar.'
+      description: 'Mantené todo organizado en un solo lugar.'
     },
     {
       icon: DollarSign,
       title: 'Reportes de Ganancias',
-      description: 'Visualizá tus ingresos diarios, semanales y mensuales con gráficos claros.'
+      description: 'Visualizá tus ingresos con gráficos claros.'
     },
     {
       icon: Smartphone,
-      title: 'Accedé desde cualquier lado',
-      description: 'Funciona en celular, tablet y computadora. Siempre disponible.'
+      title: 'Desde cualquier lado',
+      description: 'Funciona en celular, tablet y computadora.'
     }
   ];
 
@@ -62,9 +62,9 @@ const Landing = () => {
   ];
 
   return (
-    <div className="min-vh-100" style={{ background: 'linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%)' }}>
+    <div className="min-vh-100 overflow-hidden" style={{ background: 'linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%)' }}>
       {/* Header */}
-      <nav className="d-flex justify-content-between align-items-center px-4 py-3" style={{ background: 'rgba(0,0,0,0.3)' }}>
+      <nav className="d-flex justify-content-between align-items-center px-3 px-md-4 py-3" style={{ background: 'rgba(0,0,0,0.3)' }}>
         <Logo />
         <div className="d-flex gap-3">
           <button 
@@ -92,18 +92,20 @@ const Landing = () => {
         >
           <div className="mb-4">
             <span className="badge px-3 py-2" style={{ background: 'rgba(0, 243, 255, 0.1)', color: 'var(--neon-cyan)', border: '1px solid var(--neon-cyan)' }}>
-              <Sparkles size={14} className="me-1" /> Sistema de gestión para peluquerías y barberías
+              <Sparkles size={14} className="me-1" /> Sistema de gestión de negocios
             </span>
           </div>
           
-          <h1 className="display-3 fw-bold text-white mb-4">
+          <h1 className="display-4 display-md-3 fw-bold text-white mb-4">
             Gestioná tu negocio<br />
             <span style={{ color: 'var(--neon-cyan)' }}>de forma simple</span>
           </h1>
-          
-          <p className="lead text-light opacity-75 mb-5" style={{ maxWidth: '600px', margin: '0 auto' }}>
-            Turnos, clientes, empleados y ganancias. Todo en un solo lugar. 
-            Diseñado especialmente para peluquerías, barberías y centros de belleza.
+
+          <p className="lead text-light opacity-75 mb-5 d-none d-md-block" style={{ maxWidth: '600px', margin: '0 auto' }}>
+            Turnos, clientes, empleados y ganancias. Todo en un solo lugar.
+          </p>
+          <p className="lead text-light opacity-75 mb-5 d-md-none px-3">
+            Turnos, clientes y ganancias en un solo lugar.
           </p>
 
           <div className="d-flex gap-3 justify-content-center mb-5">
@@ -235,7 +237,7 @@ const Landing = () => {
       {/* Footer */}
       <footer className="py-4 text-center" style={{ background: 'rgba(0,0,0,0.3)' }}>
         <p className="text-light opacity-75 mb-0 small">
-          © 2026 FlowMint. Sistema de gestión para peluquerías y barberías.
+          © 2026 FlowMint. Sistema de gestión de turnos y clientes.
         </p>
       </footer>
     </div>
