@@ -51,6 +51,9 @@ lerna-debug.log*
 postgres_data/
 prisma/migrations/*_*/
 
+# Database dumps (potentially contain real data)
+dump-*.sql
+
 # ============================================================
 # IDE & EDITORS
 # ============================================================
