@@ -15,7 +15,7 @@ const api = axios.create({
 });
 
 // Request interceptor to add token
-const PUBLIC_ENDPOINTS = ['/auth/login', '/auth/register', '/auth/completar-registro'];
+const PUBLIC_ENDPOINTS = ['/auth/login', '/auth/register', '/auth/completar-registro', '/auth/forgot-password', '/auth/reset-password'];
 
 api.interceptors.request.use(
     (config) => {
@@ -101,8 +101,17 @@ export const authAPI = {
         }
     },
 
+    forgotPassword: async (correo) => {
+        const response = await api.post('/auth/forgot-password', { correo });
+        return response.data;
+    },
+
+    resetPassword: async (token, pass) => {
+        const response = await api.post('/auth/reset-password', { token, pass });
+        return response.data;
+    },
+
     isAuthenticated: () => {
-        // Now checking 'isLoggedIn' because token is in HttpOnly cookie
         return localStorage.getItem('isLoggedIn') === 'true';
     },
 };

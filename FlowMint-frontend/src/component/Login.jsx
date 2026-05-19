@@ -155,6 +155,12 @@ const Login = () => {
               </span>
             ) : "Entrar al Sistema"}
           </button>
+
+          <div className="text-center mt-3">
+            <Link to="/forgot-password" className="text-decoration-none small" style={{ color: "var(--neon-cyan)" }}>
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
         </form>
 
         <div className="text-center mt-4 pt-3 border-top border-secondary">

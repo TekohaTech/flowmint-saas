@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
+import api from '../services/api';
 import './Usuarios.css'; // Reusing styles
 
 const VerificarEmail = () => {

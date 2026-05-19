@@ -21,6 +21,48 @@ export class EmailService {
     }
   }
 
+  async sendResetPasswordEmail(to: string, resetUrl: string) {
+    if (!this.transporter) {
+      console.warn('⚠️ SMTP no configurado. Email de recuperación no enviado.');
+      return;
+    }
+
+    const mailOptions = {
+      from: `"FlowMint" <${this.configService.get<string>('SMTP_USER')}>`,
+      to,
+      subject: 'Recuperación de contraseña - FlowMint',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+          <h2 style="color: #16f2b3; text-align: center;">Recuperación de contraseña</h2>
+          <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en FlowMint.</p>
+          <p>Haz clic en el siguiente botón para crear una nueva contraseña:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetUrl}" style="background-color: #16f2b3; color: #1a1a2e; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;">Restablecer contraseña</a>
+          </div>
+          <p>O copia y pega este enlace en tu navegador:</p>
+          <p style="word-break: break-all; color: #666;">${resetUrl}</p>
+          <p style="color: #999; font-size: 12px;">Este enlace expirará en 15 minutos.</p>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+          <p style="font-size: 12px; color: #999; text-align: center;">Si no solicitaste este cambio, ignorá este mensaje.</p>
+        </div>
+      `,
+    };
+
+    try {
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('--- SIMULACIÓN DE ENVÍO DE EMAIL DE RECUPERACIÓN ---');
+        console.log(`Para: ${to}`);
+        console.log(`URL de recuperación: ${resetUrl}`);
+        console.log('------------------------------------');
+        return;
+      }
+      await this.transporter.sendMail(mailOptions);
+    } catch (error) {
+      console.error('Error enviando email de recuperación:', error);
+      if (process.env.NODE_ENV === 'production') throw error;
+    }
+  }
+
   async sendVerificationEmail(to: string, token: string) {
     const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:5173';
     const verificationUrl = `${frontendUrl}/verificar-email?token=${token}`;

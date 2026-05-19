@@ -16,6 +16,8 @@ import Comercios from './component/Comercios';
 import ProtectedRoute from './component/ProtectedRoute';
 import DashboardHome from './component/DashboardHome';
 import VerificarEmail from './component/VerificarEmail';
+import ForgotPassword from './component/ForgotPassword';
+import ResetPassword from './component/ResetPassword';
 import NotFound from './component/NotFound';
 
 function App() {
@@ -28,6 +30,8 @@ function App() {
                 <Route path='/completar-registro' element={<CompletarRegistro />} />
                 <Route path='/pendiente-activacion' element={<PendienteActivacion />} />
                 <Route path='/verificar-email' element={<VerificarEmail />} />
+                <Route path='/forgot-password' element={<ForgotPassword />} />
+                <Route path='/reset-password' element={<ResetPassword />} />
 
                 <Route 
                     path='/dashboard' 

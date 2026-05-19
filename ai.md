@@ -102,6 +102,18 @@ Access flow: `JwtAuthGuard` (extracts user from Bearer/cookie) -> `RolesGuard` (
 | **AiModule** | AI chat with dual-provider orchestrator + SSE streaming | `src/ai/ai-orchestrator.service.ts`, `groq.service.ts`, `cerebras.service.ts`, `ai.controller.ts`, `ai.service.ts` |
 | **EmailModule** | `@Global()` - Nodemailer verification emails | `src/email/email.service.ts` |
 
+### SMTP / Email (Brevo)
+- **Provider:** Brevo (formerly Sendinblue), free plan: 300 emails/day
+- **SMTP Host:** `smtp-relay.brevo.com`, **Port:** `587`, **Secure:** `false`
+- **EmailService** (`src/email/email.service.ts`): Nodemailer-based, sends verification and password reset emails
+- **Methods:** `sendVerificationEmail(to, token)` | `sendResetPasswordEmail(to, resetUrl)`
+- **Config (env):** `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `FRONTEND_URL`
+
+### Forgot / Reset Password Flow
+1. `POST /auth/forgot-password` (public, throttled 3/min) - Takes `{ correo }`, generates JWT (15 min expiry, type `reset_password`), sends email with link to `FRONTEND_URL/reset-password?token=...`. Always returns same message regardless of whether email exists (no info leakage).
+2. `POST /auth/reset-password` (public, throttled 5/min) - Takes `{ token, pass }`, verifies JWT, hashes new pass with bcrypt, updates user. Token type is validated as `reset_password`.
+3. **Security:** JWT with 15-min expiry, bcrypt hashing, rate limiting, generic error messages.
+
 ### Authentication Flow
 ```
 POST /api/auth/login
@@ -167,6 +179,8 @@ THE ONLY source of truth for API communication. Axios-based, `withCredentials: t
 /completar-registro    -> CompletarRegistro.jsx
 /pendiente-activacion  -> PendienteActivacion.jsx
 /verificar-email       -> VerificarEmail.jsx
+/forgot-password       -> ForgotPassword.jsx (public, ingresa email para recuperar)
+/reset-password        -> ResetPassword.jsx (public, toma ?token= de la URL)
 /dashboard (protected) -> Dashboard.jsx (shell: inline sidebar + topbar + Outlet)
   /dashboard           -> DashboardHome.jsx (stats cards)
   /dashboard/clientes  -> Clientes.jsx (CRUD + modal)

@@ -1,7 +1,8 @@
-import { Injectable, UnauthorizedException, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, HttpException, HttpStatus, GoneException } from '@nestjs/common';
 import { UsuariosService } from 'src/usuarios/usuarios.service';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { CompletarRegistroDto } from './dto/completar-registro.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -17,6 +18,7 @@ export class AuthService {
     private jwtService: JwtService,
     private prisma: PrismaService,
     private emailService: EmailService,
+    private configService: ConfigService,
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
@@ -236,6 +238,50 @@ export class AuthService {
     });
 
     return { message: 'Email verificado exitosamente. Ya puedes iniciar sesión.' };
+  }
+
+  async forgotPassword(correo: string) {
+    const user = await this.prisma.usuario.findFirst({
+      where: { correo, estado: 'A' },
+    });
+
+    if (!user) {
+      return { message: 'Si el correo existe, recibirás un enlace de recuperación.' };
+    }
+
+    const resetToken = this.jwtService.sign(
+      { sub: user.usuario_id, type: 'reset_password' },
+      { expiresIn: '15m' },
+    );
+
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:5173';
+    const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
+
+    await this.emailService.sendResetPasswordEmail(correo, resetUrl);
+
+    return { message: 'Si el correo existe, recibirás un enlace de recuperación.' };
+  }
+
+  async resetPassword(token: string, newPass: string) {
+    let payload: { sub: number; type: string };
+    try {
+      payload = this.jwtService.verify(token);
+    } catch {
+      throw new BadRequestException('El enlace de recuperación es inválido o expiró.');
+    }
+
+    if (payload.type !== 'reset_password') {
+      throw new BadRequestException('Token inválido.');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPass, 10);
+
+    await this.prisma.usuario.update({
+      where: { usuario_id: payload.sub },
+      data: { pass: hashedPassword },
+    });
+
+    return { message: 'Contraseña actualizada exitosamente. Ya podés iniciar sesión.' };
   }
 
   private async verificarControlIP(ip: string, correo: string) {
