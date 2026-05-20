@@ -12,7 +12,9 @@ export class EmailService {
       this.transporter = nodemailer.createTransport({
         host: smtpHost,
         port: this.configService.get<number>('SMTP_PORT'),
-        secure: this.configService.get<boolean>('SMTP_SECURE') || false,
+        secure: this.configService.get<string>('SMTP_SECURE') === 'true',
+        connectionTimeout: 10000,
+        greetingTimeout: 5000,
         auth: {
           user: this.configService.get<string>('SMTP_USER'),
           pass: this.configService.get<string>('SMTP_PASS'),
@@ -27,8 +29,10 @@ export class EmailService {
       return;
     }
 
+    const fromEmail = this.configService.get<string>('EMAIL_FROM') || this.configService.get<string>('SMTP_USER');
+
     const mailOptions = {
-      from: `"FlowMint" <${this.configService.get<string>('SMTP_USER')}>`,
+      from: `"FlowMint" <${fromEmail}>`,
       to,
       subject: 'Recuperación de contraseña - FlowMint',
       html: `
@@ -49,17 +53,10 @@ export class EmailService {
     };
 
     try {
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('--- SIMULACIÓN DE ENVÍO DE EMAIL DE RECUPERACIÓN ---');
-        console.log(`Para: ${to}`);
-        console.log(`URL de recuperación: ${resetUrl}`);
-        console.log('------------------------------------');
-        return;
-      }
       await this.transporter.sendMail(mailOptions);
+      console.log('✅ Email de recuperación enviado a:', to);
     } catch (error) {
       console.error('Error enviando email de recuperación:', error);
-      if (process.env.NODE_ENV === 'production') throw error;
     }
   }
 
@@ -72,8 +69,10 @@ export class EmailService {
       return;
     }
 
+    const fromEmail = this.configService.get<string>('EMAIL_FROM') || this.configService.get<string>('SMTP_USER');
+
     const mailOptions = {
-      from: `"FlowMint" <${this.configService.get<string>('SMTP_USER')}>`,
+      from: `"FlowMint" <${fromEmail}>`,
       to,
       subject: 'Verifica tu correo electrónico - FlowMint',
       html: `
@@ -92,18 +91,10 @@ export class EmailService {
     };
 
     try {
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('--- SIMULACIÓN DE ENVÍO DE EMAIL ---');
-        console.log(`Para: ${to}`);
-        console.log(`URL de verificación: ${verificationUrl}`);
-        console.log('------------------------------------');
-        return;
-      }
       await this.transporter.sendMail(mailOptions);
+      console.log('✅ Email de verificación enviado a:', to);
     } catch (error) {
       console.error('Error enviando email:', error);
-      // No lanzamos error en dev para no bloquear el flujo
-      if (process.env.NODE_ENV === 'production') throw error;
     }
   }
 }
