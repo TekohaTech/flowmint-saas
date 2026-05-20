@@ -245,6 +245,8 @@ export class AuthService {
       where: { correo, estado: 'A' },
     });
 
+    console.log(`[forgotPassword] Buscando: ${correo} → ${user ? 'ENCONTRADO' : 'NO EXISTE'}`);
+
     if (!user) {
       return { message: 'Si el correo existe, recibirás un enlace de recuperación.' };
     }

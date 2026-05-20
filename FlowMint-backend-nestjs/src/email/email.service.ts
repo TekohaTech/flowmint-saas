@@ -8,18 +8,23 @@ export class EmailService {
 
   constructor(private configService: ConfigService) {
     const smtpHost = this.configService.get<string>('SMTP_HOST');
+    const smtpPort = Number(this.configService.get<string>('SMTP_PORT'));
+    const smtpUser = this.configService.get<string>('SMTP_USER');
     if (smtpHost) {
+      console.log(`[EmailService] Creando transporter: ${smtpHost}:${smtpPort} user=${smtpUser}`);
       this.transporter = nodemailer.createTransport({
         host: smtpHost,
-        port: this.configService.get<number>('SMTP_PORT'),
+        port: smtpPort,
         secure: this.configService.get<string>('SMTP_SECURE') === 'true',
         connectionTimeout: 10000,
         greetingTimeout: 5000,
         auth: {
-          user: this.configService.get<string>('SMTP_USER'),
+          user: smtpUser,
           pass: this.configService.get<string>('SMTP_PASS'),
         },
       });
+    } else {
+      console.warn('[EmailService] SMTP_HOST no configurado');
     }
   }
 
@@ -30,6 +35,7 @@ export class EmailService {
     }
 
     const fromEmail = this.configService.get<string>('EMAIL_FROM') || this.configService.get<string>('SMTP_USER');
+    console.log(`[EmailService] Enviando email a: ${to} desde: ${fromEmail}`);
 
     const mailOptions = {
       from: `"FlowMint" <${fromEmail}>`,
@@ -54,9 +60,10 @@ export class EmailService {
 
     try {
       await this.transporter.sendMail(mailOptions);
-      console.log('✅ Email de recuperación enviado a:', to);
+      console.log('[EmailService] Email enviado exitosamente a:', to);
     } catch (error) {
-      console.error('Error enviando email de recuperación:', error);
+      console.error('[EmailService] Error enviando email:', error.message);
+      console.error('[EmailService] Stack:', error.stack);
     }
   }
 
@@ -92,9 +99,9 @@ export class EmailService {
 
     try {
       await this.transporter.sendMail(mailOptions);
-      console.log('✅ Email de verificación enviado a:', to);
+      console.log('[EmailService] Email de verificación enviado a:', to);
     } catch (error) {
-      console.error('Error enviando email:', error);
+      console.error('[EmailService] Error enviando verificación:', error.message);
     }
   }
 }
