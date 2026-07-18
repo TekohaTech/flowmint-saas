@@ -86,7 +86,6 @@ const CompletarRegistro = () => {
         }
       });
 
-      console.log('[CompletarRegistro] Response:', response.data);
       setSuccess(true);
 
       setTimeout(() => {

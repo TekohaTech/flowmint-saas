@@ -1,8 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateComercioDto } from './dto/create-comercio.dto';
+import { UpdateComercioDto } from './dto/update-comercio.dto';
 
 @Injectable()
 export class ComerciosService {
+  private readonly logger = new Logger(ComerciosService.name);
+
   constructor(private prisma: PrismaService) {}
 
   findAll() {
@@ -23,41 +27,74 @@ export class ComerciosService {
     });
   }
 
-  create(data: any) {
-    if (data.activo !== undefined && !data.estado) {
-      data.estado = data.activo ? 'activo' : 'pendiente';
-    }
-    return this.prisma.comercio.create({ data });
+  create(dto: CreateComercioDto) {
+    return this.prisma.comercio.create({
+      data: {
+        nombre: dto.nombre,
+        ...(dto.direccion && { direccion: dto.direccion }),
+        ...(dto.telefono && { telefono: dto.telefono }),
+        ...(dto.email && { email: dto.email }),
+        ...(dto.categoria && { categoria: dto.categoria }),
+        ...(dto.logo_url && { logo_url: dto.logo_url }),
+        ...(dto.dueno_nombre && { dueno_nombre: dto.dueno_nombre }),
+        ...(dto.dueno_apellido && { dueno_apellido: dto.dueno_apellido }),
+        ...(dto.dueno_email && { dueno_email: dto.dueno_email }),
+        ...(dto.dueno_telefono && { dueno_telefono: dto.dueno_telefono }),
+        activo: dto.activo ?? false,
+        estado: dto.activo ? 'activo' : 'pendiente',
+      },
+    });
   }
 
-  async update(id: number, data: any) {
-    if (data.activo !== undefined) {
-      if (data.activo === true) {
-        data.estado = 'activo';
-        data.fecha_activacion = new Date();
-        data.fecha_suspension = null;
-        data.motivo_suspension = null;
+  async update(id: number, dto: UpdateComercioDto) {
+    const updateData: Record<string, unknown> = {};
+
+    if (dto.nombre !== undefined) updateData.nombre = dto.nombre;
+    if (dto.direccion !== undefined) updateData.direccion = dto.direccion;
+    if (dto.telefono !== undefined) updateData.telefono = dto.telefono;
+    if (dto.email !== undefined) updateData.email = dto.email;
+    if (dto.categoria !== undefined) updateData.categoria = dto.categoria;
+    if (dto.logo_url !== undefined) updateData.logo_url = dto.logo_url;
+    if (dto.dueno_nombre !== undefined) updateData.dueno_nombre = dto.dueno_nombre;
+    if (dto.dueno_apellido !== undefined) updateData.dueno_apellido = dto.dueno_apellido;
+    if (dto.dueno_email !== undefined) updateData.dueno_email = dto.dueno_email;
+    if (dto.dueno_telefono !== undefined) updateData.dueno_telefono = dto.dueno_telefono;
+
+    if (dto.activo !== undefined) {
+      if (dto.activo === true) {
+        updateData.estado = 'activo';
+        updateData.fecha_activacion = new Date();
+        updateData.fecha_suspension = null;
+        updateData.motivo_suspension = null;
       } else {
-        data.estado = 'suspendido';
-        data.fecha_suspension = new Date();
+        updateData.estado = 'suspendido';
+        updateData.fecha_suspension = new Date();
       }
     }
-    
+
+    if (dto.estado !== undefined) updateData.estado = dto.estado;
+    if (dto.motivo_suspension !== undefined) updateData.motivo_suspension = dto.motivo_suspension;
+
     return this.prisma.comercio.update({
       where: { comercio_id: id },
-      data
+      data: updateData,
     });
   }
 
   async remove(id: number) {
-    await this.prisma.turno.deleteMany({ where: { comercio_id: id } });
-    await this.prisma.servicio.deleteMany({ where: { comercio_id: id } });
-    await this.prisma.empleado.deleteMany({ where: { comercio_id: id } });
-    await this.prisma.cliente.deleteMany({ where: { comercio_id: id } });
-    await this.prisma.usuario.deleteMany({ where: { comercio_id: id } });
+    // Delete related records in a transaction to prevent partial deletion
+    return this.prisma.$transaction(async (tx) => {
+      await tx.turno.deleteMany({ where: { comercio_id: id } });
+      await tx.servicio.deleteMany({ where: { comercio_id: id } });
+      await tx.empleado.deleteMany({ where: { comercio_id: id } });
+      await tx.cliente.deleteMany({ where: { comercio_id: id } });
+      await tx.usuario.deleteMany({ where: { comercio_id: id } });
 
-    return this.prisma.comercio.delete({
-      where: { comercio_id: id }
+      this.logger.log(`Comercio ${id} and all related records deleted`);
+
+      return tx.comercio.delete({
+        where: { comercio_id: id }
+      });
     });
   }
 }

@@ -357,7 +357,6 @@ const Ganancias = () => {
         revenueAPI.getSummary(fechaInicio, fechaFin)
       ]);
 
-      console.log('[Ganancias] Respuestas recibidas:', responses);
       setDiarias(responses[0]);
       setSemanales(responses[1]);
       setMensuales(responses[2]);

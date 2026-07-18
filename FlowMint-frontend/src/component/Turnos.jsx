@@ -198,13 +198,6 @@ const Turnos = ({ visible = true }) => {
         api.get("/servicios"),
       ]);
 
-      console.log('[Turnos] Datos cargados:', {
-        turnos: turnosResponse.data,
-        clientes: clientesResponse.data,
-        empleados: empleadosResponse.data,
-        servicios: serviciosResponse.data
-      });
-
       setTurnos(turnosResponse.data);
       setClientes(clientesResponse.data);
       setEmpleados(empleadosResponse.data);

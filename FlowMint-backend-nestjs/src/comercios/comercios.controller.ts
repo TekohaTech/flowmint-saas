@@ -1,5 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { ComerciosService } from './comercios.service';
+import { CreateComercioDto } from './dto/create-comercio.dto';
+import { UpdateComercioDto } from './dto/update-comercio.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/roles.guard';
 import { Roles } from 'src/auth/roles.decorator';
@@ -27,14 +29,14 @@ export class ComerciosController {
 
   @Post()
   @Roles(RolNombre.SUPERADMIN)
-  create(@Body() data: any) {
-    return this.comerciosService.create(data);
+  create(@Body() createComercioDto: CreateComercioDto) {
+    return this.comerciosService.create(createComercioDto);
   }
 
   @Patch(':id')
   @Roles(RolNombre.SUPERADMIN)
-  update(@Param('id', ParseIntPipe) id: number, @Body() data: any) {
-    return this.comerciosService.update(id, data);
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateComercioDto: UpdateComercioDto) {
+    return this.comerciosService.update(id, updateComercioDto);
   }
 
   @Delete(':id')
