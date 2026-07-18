@@ -344,10 +344,6 @@ const Ganancias = () => {
   const fetchGanancias = async () => {
     setLoading(true);
     setError('');
-    console.log('[Ganancias] Iniciando fetch...');
-    console.log('[Ganancias] Token:', localStorage.getItem('token'));
-    console.log('[Ganancias] Fechas:', fechaInicio, fechaFin);
-    
     try {
       const responses = await Promise.all([
         revenueAPI.getDaily(fechaInicio, fechaFin),

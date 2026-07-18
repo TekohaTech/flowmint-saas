@@ -46,9 +46,6 @@ const Login = () => {
 
     try {
       const response = await authAPI.login(credentials);
-      console.log('[Login] Response:', response);
-      console.log('[Login] Token guardado:', localStorage.getItem('token'));
-      console.log('[Login] User guardado:', localStorage.getItem('user'));
       window.location.href = "/dashboard";
     } catch (err) {
       console.error('[Login] Error:', err);

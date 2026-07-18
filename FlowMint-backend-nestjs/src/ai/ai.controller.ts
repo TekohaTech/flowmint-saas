@@ -43,7 +43,6 @@ export class AiController {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
-    res.setHeader('Access-Control-Allow-Origin', '*');
 
     const message = chatRequest.messages?.[chatRequest.messages.length - 1]?.content || chatRequest.message || '';
 

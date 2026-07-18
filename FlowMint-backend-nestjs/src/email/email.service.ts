@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class EmailService {
+  private readonly logger = new Logger(EmailService.name);
   private transporter: nodemailer.Transporter | null = null;
 
   constructor(private configService: ConfigService) {
@@ -11,7 +12,7 @@ export class EmailService {
     const smtpPort = Number(this.configService.get<string>('SMTP_PORT'));
     const smtpUser = this.configService.get<string>('SMTP_USER');
     if (smtpHost) {
-      console.log(`[EmailService] Creando transporter: ${smtpHost}:${smtpPort} user=${smtpUser}`);
+      this.logger.log(`SMTP configured: ${smtpHost}:${smtpPort}`);
       this.transporter = nodemailer.createTransport({
         host: smtpHost,
         port: smtpPort,
@@ -24,18 +25,17 @@ export class EmailService {
         },
       });
     } else {
-      console.warn('[EmailService] SMTP_HOST no configurado');
+      this.logger.warn('SMTP_HOST not configured. Emails will not be sent.');
     }
   }
 
   async sendResetPasswordEmail(to: string, resetUrl: string) {
     if (!this.transporter) {
-      console.warn('⚠️ SMTP no configurado. Email de recuperación no enviado.');
+      this.logger.warn('SMTP not configured. Reset password email not sent.');
       return;
     }
 
     const fromEmail = this.configService.get<string>('EMAIL_FROM') || this.configService.get<string>('SMTP_USER');
-    console.log(`[EmailService] Enviando email a: ${to} desde: ${fromEmail}`);
 
     const mailOptions = {
       from: `"FlowMint" <${fromEmail}>`,
@@ -60,10 +60,9 @@ export class EmailService {
 
     try {
       await this.transporter.sendMail(mailOptions);
-      console.log('[EmailService] Email enviado exitosamente a:', to);
+      this.logger.log('Reset password email sent successfully');
     } catch (error) {
-      console.error('[EmailService] Error enviando email:', error.message);
-      console.error('[EmailService] Stack:', error.stack);
+      this.logger.error(`Error sending reset password email: ${error.message}`);
     }
   }
 
@@ -72,7 +71,7 @@ export class EmailService {
     const verificationUrl = `${frontendUrl}/verificar-email?token=${token}`;
 
     if (!this.transporter) {
-      console.warn('⚠️ SMTP no configurado. Email de verificación no enviado. Token:', token.substring(0, 8) + '...');
+      this.logger.warn('SMTP not configured. Verification email not sent.');
       return;
     }
 
@@ -99,9 +98,9 @@ export class EmailService {
 
     try {
       await this.transporter.sendMail(mailOptions);
-      console.log('[EmailService] Email de verificación enviado a:', to);
+      this.logger.log('Verification email sent successfully');
     } catch (error) {
-      console.error('[EmailService] Error enviando verificación:', error.message);
+      this.logger.error(`Error sending verification email: ${error.message}`);
     }
   }
 }

@@ -52,7 +52,11 @@ postgres_data/
 prisma/migrations/*_*/
 
 # Database dumps (potentially contain real data)
-dump-*.sql
+*.sql
+!FlowMint-backend-nestjs/prisma/migrations/**/*.sql
+
+# SQL backup files
+backup_*.sql
 
 # ============================================================
 # IDE & EDITORS
@@ -96,6 +100,8 @@ lib-cov/
 tmp/
 temp/
 .cache/
+FlowMint-backend-nestjs-temp/
+FlowMint-backend-nestjs/dist_dev/
 .parcel-cache/
 .eslintcache
 

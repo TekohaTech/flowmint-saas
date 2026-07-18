@@ -1,15 +1,20 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { PrismaService } from './prisma/prisma.service';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import * as dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 
 dotenv.config();
 
 async function bootstrap() {
+  const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
+
+  // Security headers
+  app.use(helmet());
 
   // Enable Cookie Parser
   app.use(cookieParser());
@@ -25,55 +30,58 @@ async function bootstrap() {
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'set-cookie'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   // Configure global validation
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true, // Remove properties not defined in DTO
-      forbidNonWhitelisted: true, // Throw error if extra properties exist
-      transform: true, // Transform types automatically
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
     }),
   );
 
   // Configure global prefix for API routes
   app.setGlobalPrefix('api');
 
-  // Configure Swagger documentation
-  const config = new DocumentBuilder()
-    .setTitle('FlowMint API')
-    .setDescription('FlowMint appointment management system REST API')
-    .setVersion('1.0')
-    .addTag('auth', 'Authentication endpoints')
-    .addTag('users', 'User management')
-    .addTag('roles', 'Role management')
-    .addTag('clients', 'Client management')
-    .addTag('employees', 'Employee management')
-    .addTag('services', 'Service management')
-    .addTag('appointments', 'Appointment management')
-    .addBearerAuth(
-      {
-        type: 'http',
-        scheme: 'bearer',
-        bearerFormat: 'JWT',
-        name: 'JWT',
-        description: 'Enter JWT token',
-        in: 'header',
-      },
-      'JWT-auth',
-    )
-    .build();
+  // Configure Swagger documentation — ONLY in non-production
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('FlowMint API')
+      .setDescription('FlowMint appointment management system REST API')
+      .setVersion('1.0')
+      .addTag('auth', 'Authentication endpoints')
+      .addTag('users', 'User management')
+      .addTag('roles', 'Role management')
+      .addTag('clients', 'Client management')
+      .addTag('employees', 'Employee management')
+      .addTag('services', 'Service management')
+      .addTag('appointments', 'Appointment management')
+      .addBearerAuth(
+        {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+          name: 'JWT',
+          description: 'Enter JWT token',
+          in: 'header',
+        },
+        'JWT-auth',
+      )
+      .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document, {
-    customSiteTitle: 'FlowMint API Documentation',
-    customfavIcon: 'https://nestjs.com/img/logo_text.svg',
-    customCss: `
-      .swagger-ui .topbar { background-color: #1a1a2e; }
-      .swagger-ui .info .title { color: #16f2b3; }
-    `,
-  });
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, document, {
+      customSiteTitle: 'FlowMint API Documentation',
+      customfavIcon: 'https://nestjs.com/img/logo_text.svg',
+      customCss: `
+        .swagger-ui .topbar { background-color: #1a1a2e; }
+        .swagger-ui .info .title { color: #16f2b3; }
+      `,
+    });
+    logger.log('Swagger docs available at /api/docs');
+  }
 
   // Configure Prisma
   const prismaService = app.get(PrismaService);
@@ -82,13 +90,8 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
 
-  console.log(`
-    🚀 Server running at: http://localhost:${port}
-    📚 API available at: http://localhost:${port}/api
-    📖 Swagger docs at: http://localhost:${port}/api/docs
-    🗄️  Database: Supabase Local (PostgreSQL)
-    🎨 Supabase Studio: http://localhost:54323
-  `);
+  logger.log(`Server running at: http://localhost:${port}`);
+  logger.log(`API available at: http://localhost:${port}/api`);
 }
 
 bootstrap();

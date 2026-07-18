@@ -2,11 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(private prisma: PrismaService) {
+  constructor(
+    private prisma: PrismaService,
+    private configService: ConfigService,
+  ) {
+    const jwtSecret = configService.get<string>('JWT_SECRET');
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET is required but not configured.');
+    }
+
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -15,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         },
       ]),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET as string,
+      secretOrKey: jwtSecret,
     });
   }
 

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException, HttpException, HttpStatus, GoneException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, HttpException, HttpStatus, GoneException, Logger } from '@nestjs/common';
 import { UsuariosService } from 'src/usuarios/usuarios.service';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -13,6 +13,7 @@ const REGISTRO_IP_BLOQUEO_HORAS = 2;
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     private usuariosService: UsuariosService,
     private jwtService: JwtService,
@@ -198,7 +199,7 @@ export class AuthService {
     try {
       await this.emailService.sendVerificationEmail(correo, tokenVerificacion);
     } catch (emailError) {
-      console.warn('⚠️ Email de verificación no enviado (SMTP no configurado). El usuario puede verificar desde el panel.');
+      this.logger.warn('Verification email not sent (SMTP not configured). User can verify from the panel.');
     }
 
     return {
@@ -245,7 +246,8 @@ export class AuthService {
       where: { correo, estado: 'A' },
     });
 
-    console.log(`[forgotPassword] Buscando: ${correo} → ${user ? 'ENCONTRADO' : 'NO EXISTE'}`);
+    // Log only the fact of the lookup, never the email or whether user exists (prevents user enumeration)
+    this.logger.debug('[forgotPassword] Password reset requested');
 
     if (!user) {
       return { message: 'Si el correo existe, recibirás un enlace de recuperación.' };
