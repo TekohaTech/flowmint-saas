@@ -1,0 +1,47 @@
+import React from "react";
+import { Row, Col, InputGroup, Form, Button } from "react-bootstrap";
+import { Search, Plus } from "lucide-react";
+
+const SearchBar = ({ placeholder, searchTerm, onSearchChange, onAdd, addLabel }) => {
+  return (
+    <Row className="mb-4">
+      <Col md={8}>
+        <InputGroup>
+          <InputGroup.Text
+            style={{
+              background: "var(--bg-card)",
+              borderColor: "var(--border-color)",
+              color: "var(--neon-cyan)",
+            }}
+          >
+            <Search size={20} />
+          </InputGroup.Text>
+          <Form.Control
+            type="text"
+            placeholder={placeholder}
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            style={{
+              background: "var(--bg-card)",
+              borderColor: "var(--border-color)",
+              color: "var(--text-primary)",
+            }}
+          />
+        </InputGroup>
+      </Col>
+      <Col md={4} className="text-end">
+        <Button
+          variant="success"
+          onClick={onAdd}
+          className="btn-success"
+          style={{ textTransform: "uppercase", fontWeight: "bold" }}
+        >
+          <Plus size={20} className="me-2" />
+          {addLabel}
+        </Button>
+      </Col>
+    </Row>
+  );
+};
+
+export default SearchBar;
