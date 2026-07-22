@@ -383,5 +383,13 @@ export const revenueAPI = {
     },
 };
 
+// AI API
+export const aiAPI = {
+    chat: async (message) => {
+        const response = await api.post('/ai/chat', { message });
+        return response.data;
+    },
+};
+
 // Export default api instance
 export default api;

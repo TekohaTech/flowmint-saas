@@ -31,6 +31,7 @@ const Empleados = () => {
     formData,
     handleChange,
     handleShowModal,
+    handleCloseModal,
     handleSubmit,
     handleDelete,
   } = useCrud({

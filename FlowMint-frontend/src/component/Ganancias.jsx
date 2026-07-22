@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, Container, Row, Col, Form, Alert, Button } from 'react-bootstrap';
 import { Bar, Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, LineElement, PointElement } from 'chart.js';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { format, parseISO } from 'date-fns';
-import api, { revenueAPI } from '../services/api';
+import { revenueAPI } from '../services/api';
 
 // Plugin personalizado para mostrar valores en los gráficos de forma inteligente
 const dataLabelsPlugin = {

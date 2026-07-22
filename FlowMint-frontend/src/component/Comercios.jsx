@@ -5,8 +5,8 @@ import {
 } from 'react-bootstrap';
 import { 
     Store, CheckCircle, XCircle, Search, Trash2,
-    Phone, MapPin, Mail, RefreshCw, Plus, Edit, Building, Power, Crown,
-    Clock, User, Calendar, Tag
+    MapPin, Mail, RefreshCw, Plus, Edit, Building, Power, Crown,
+    Clock, User, Tag
 } from 'lucide-react';
 import { comerciosAPI } from '../services/api';
 

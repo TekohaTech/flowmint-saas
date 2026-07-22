@@ -31,6 +31,7 @@ const Clientes = () => {
     formData,
     handleChange,
     handleShowModal,
+    handleCloseModal,
     handleSubmit,
     handleDelete,
   } = useCrud({

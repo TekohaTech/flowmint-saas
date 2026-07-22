@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { aiAPI } from "../services/api";
 
 const WELCOME_MESSAGE = {
   id: 1,
@@ -61,33 +62,12 @@ const useAIChat = () => {
 
   const getAIResponse = async (userMessage) => {
     try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        return "No estás autenticado. Por favor, inicia sesión para usar el asistente de IA.";
-      }
-
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ message: userMessage }),
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          localStorage.removeItem("token");
-          return "Sesión expirada. Por favor, inicia sesión nuevamente.";
-        }
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await aiAPI.chat(userMessage);
       return data.response || "Lo siento, no pude procesar tu solicitud en este momento.";
     } catch (error) {
-      console.error("Error calling backend AI API:", error);
+      if (error.response?.status === 401) {
+        return "Sesión expirada. Por favor, inicia sesión nuevamente.";
+      }
       return "Lo siento, tuve un problema al procesar tu solicitud. Por favor, inténtalo de nuevo.";
     }
   };

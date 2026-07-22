@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { authAPI } from "../services/api";
 import { motion } from "framer-motion";
-import { Zap, Lock, User, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Lock, User, AlertCircle, Eye, EyeOff } from "lucide-react";
 import "../index.css";
 import { Logo } from "./VisualAssets";
 

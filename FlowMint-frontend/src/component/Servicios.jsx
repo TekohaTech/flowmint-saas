@@ -32,6 +32,7 @@ const Servicios = () => {
     formData,
     handleChange,
     handleShowModal,
+    handleCloseModal,
     handleSubmit,
     handleDelete,
   } = useCrud({
