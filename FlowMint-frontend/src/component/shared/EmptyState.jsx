@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 
 const EmptyState = ({ IconComponent, entityName, searchTerm, onAdd, addLabel }) => {
   return (
-    <div className="text-center p-5">
+    <div className="text-center p-5" aria-live="polite">
       <IconComponent
         size={64}
         style={{ color: "var(--text-muted)", opacity: 0.3 }}

@@ -22,6 +22,7 @@ const SearchBar = ({ placeholder, searchTerm, onSearchChange, onAdd, addLabel })
             placeholder={placeholder}
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
+            aria-label={placeholder || "Buscar"}
             style={{
               background: "var(--bg-card)",
               borderColor: "var(--border-color)",
@@ -35,6 +36,7 @@ const SearchBar = ({ placeholder, searchTerm, onSearchChange, onAdd, addLabel })
           variant="success"
           onClick={onAdd}
           className="btn-success"
+          aria-label={addLabel || "Agregar nuevo"}
           style={{ textTransform: "uppercase", fontWeight: "bold" }}
         >
           <Plus size={20} className="me-2" />

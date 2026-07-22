@@ -83,6 +83,8 @@ const Login = () => {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
+            id="login-error"
+            role="alert"
             className="alert alert-danger mb-3 py-2 small d-flex align-items-center"
           >
             <AlertCircle size={16} className="me-2" />
@@ -111,6 +113,8 @@ const Login = () => {
                 value={credentials.user}
                 onChange={handleChange}
                 placeholder="admin"
+                aria-label="Usuario"
+                aria-describedby={error ? "login-error" : undefined}
                 className="form-control bg-dark text-white border-secondary ps-5 py-2"
                 style={{ borderRadius: '8px' }}
               />
@@ -129,12 +133,15 @@ const Login = () => {
                 value={credentials.pass}
                 onChange={handleChange}
                 placeholder="••••••••"
+                aria-label="Contraseña"
+                aria-describedby={error ? "login-error" : undefined}
                 className="form-control bg-dark text-white border-secondary ps-5 pe-5 py-2"
                 style={{ borderRadius: '8px' }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                 className="position-absolute end-0 top-50 translate-middle-y bg-transparent border-0 text-neon-cyan pe-3"
                 style={{ zIndex: 10, cursor: 'pointer' }}
               >

@@ -9,9 +9,9 @@ const TurnoConfirmDelete = ({
   selectedTurno,
   cargando,
 }) => (
-  <Modal show={show} onHide={handleClose}>
+  <Modal show={show} onHide={handleClose} role="alertdialog" aria-labelledby="turno-delete-title">
     <Modal.Header closeButton>
-      <Modal.Title>Confirmar Eliminación</Modal.Title>
+      <Modal.Title id="turno-delete-title">Confirmar Eliminación</Modal.Title>
     </Modal.Header>
     <Modal.Body>
       <p>¿Estás seguro de que deseas eliminar este turno?</p>

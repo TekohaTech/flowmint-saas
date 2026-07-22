@@ -13,12 +13,12 @@ const TurnoCreateModal = ({
   cargando,
   handleCrearTurno,
 }) => (
-  <Modal show={show} onHide={handleClose} size="lg">
+  <Modal show={show} onHide={handleClose} size="lg" role="dialog" aria-labelledby="turno-create-title">
     <Modal.Header closeButton>
-      <Modal.Title>Crear Nuevo Turno</Modal.Title>
+      <Modal.Title id="turno-create-title">Crear Nuevo Turno</Modal.Title>
     </Modal.Header>
     <Modal.Body>
-      <Form>
+      <Form aria-label="Formulario de creación de turno">
         <Row>
           <Col md={6}>
             <Form.Group className="mb-3">

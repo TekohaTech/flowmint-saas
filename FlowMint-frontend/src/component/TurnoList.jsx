@@ -46,6 +46,7 @@ const TurnoList = ({
             view={currentView}
             onView={setCurrentView}
             views={["month", "week", "day"]}
+            aria-label="Calendario de turnos"
             messages={{
               date: "Fecha",
               time: "Hora",

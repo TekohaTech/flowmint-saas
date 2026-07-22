@@ -215,7 +215,7 @@ function DashboardHome() {
 
       <Row className="g-3 mb-4">
         <Col xs={6} lg={3}>
-          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }}>
+          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }} aria-label="Estadística de clientes">
             <Card.Body className="py-3">
               <div className="d-flex align-items-center gap-2 mb-2">
                 <FaUserFriends className="text-info" />
@@ -226,7 +226,7 @@ function DashboardHome() {
           </Card>
         </Col>
         <Col xs={6} lg={3}>
-          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }}>
+          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }} aria-label="Estadística de turnos hoy">
             <Card.Body className="py-3">
               <div className="d-flex align-items-center gap-2 mb-2">
                 <FaCalendarAlt className="text-warning" />
@@ -237,7 +237,7 @@ function DashboardHome() {
           </Card>
         </Col>
         <Col xs={6} lg={3}>
-          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }}>
+          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }} aria-label="Estadística de servicios">
             <Card.Body className="py-3">
               <div className="d-flex align-items-center gap-2 mb-2">
                 <FaCut className="text-pink" />
@@ -248,7 +248,7 @@ function DashboardHome() {
           </Card>
         </Col>
         <Col xs={6} lg={3}>
-          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }}>
+          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }} aria-label="Estadística de empleados">
             <Card.Body className="py-3">
               <div className="d-flex align-items-center gap-2 mb-2">
                 <FaUserTie className="text-success" />
@@ -262,7 +262,7 @@ function DashboardHome() {
 
       <Row className="g-3 mb-4">
         <Col xs={12} lg={6}>
-          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }}>
+          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }} aria-label="Estadística de ingresos del mes">
             <Card.Body className="py-3">
               <div className="d-flex align-items-center gap-2 mb-2">
                 <FaDollarSign className="text-success" />

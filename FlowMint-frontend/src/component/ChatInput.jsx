@@ -13,6 +13,7 @@ const ChatInput = ({ inputMessage, setInputMessage, handleSendMessage, isTyping 
           value={inputMessage}
           onChange={(e) => setInputMessage(e.target.value)}
           disabled={isTyping}
+          aria-label="Escribe tu mensaje"
           style={{
             background: "var(--bg-primary)",
             border: "2px solid var(--border-color)",
@@ -24,6 +25,7 @@ const ChatInput = ({ inputMessage, setInputMessage, handleSendMessage, isTyping 
           type="submit"
           disabled={!inputMessage.trim() || isTyping}
           className="btn-primary"
+          aria-label="Enviar mensaje"
           style={{
             borderColor: "var(--neon-cyan)",
             background: "var(--neon-cyan)",

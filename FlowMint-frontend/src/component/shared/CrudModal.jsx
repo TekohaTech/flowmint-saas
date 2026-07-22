@@ -15,7 +15,7 @@ const CrudModal = ({
   const displayTitle = title || (editingItem ? `EDITAR ${entityName}` : `NUEVO ${entityName}`);
 
   return (
-    <Modal show={show} onHide={onHide} centered contentClassName="modal-content">
+    <Modal show={show} onHide={onHide} centered contentClassName="modal-content" role="dialog" aria-labelledby="crud-modal-title">
       <Modal.Header
         closeButton
         style={{
@@ -23,7 +23,7 @@ const CrudModal = ({
           borderBottom: "2px solid var(--border-color)",
         }}
       >
-        <Modal.Title style={{ color: accentColor }}>
+        <Modal.Title id="crud-modal-title" style={{ color: accentColor }}>
           {displayTitle}
         </Modal.Title>
       </Modal.Header>

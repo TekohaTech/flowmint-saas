@@ -41,6 +41,7 @@ const CustomNavbar = () => {
             expand="lg"
             expanded={expanded}
             className="p-0"
+            aria-label="Navegación principal"
             style={{ backgroundColor: expanded ? 'rgba(0, 123, 255, 0.5)' : 'info' }}
         >
             <Navbar.Brand as={Link} to="/" className="d-lg-none">
@@ -49,6 +50,8 @@ const CustomNavbar = () => {
             <div className="d-lg-none ml-auto">
                 <Navbar.Toggle
                     aria-controls="basic-navbar-nav"
+                    aria-expanded={expanded}
+                    aria-label="Menú de navegación"
                     onClick={handleToggle}
                     style={{ backgroundColor: 'rgba(0, 123, 255, 0.5)' }}
                 />

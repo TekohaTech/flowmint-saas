@@ -5,6 +5,9 @@ import PropTypes from 'prop-types';
 function LoadingSpinner() {
   return (
     <div
+      role="status"
+      aria-busy="true"
+      aria-label="Cargando contenido"
       style={{
         display: 'flex',
         justifyContent: 'center',
