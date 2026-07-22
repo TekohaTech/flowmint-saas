@@ -1,5 +1,6 @@
 import React from "react";
 import { Button, Modal } from "react-bootstrap";
+import PropTypes from "prop-types";
 
 const TurnoDetailsModal = ({
   show,
@@ -56,6 +57,13 @@ const TurnoDetailsModal = ({
       </Modal.Footer>
     </Modal>
   );
+};
+
+TurnoDetailsModal.propTypes = {
+  show: PropTypes.bool.isRequired,
+  handleClose: PropTypes.func.isRequired,
+  turno: PropTypes.object,
+  onEditarClick: PropTypes.func.isRequired,
 };
 
 export default TurnoDetailsModal;

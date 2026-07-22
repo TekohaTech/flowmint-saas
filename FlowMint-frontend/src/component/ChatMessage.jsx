@@ -1,5 +1,6 @@
 import React from "react";
 import { Bot, User } from "lucide-react";
+import PropTypes from "prop-types";
 
 const ChatMessage = ({ message, formatTime }) => {
   const isUser = message.sender === "user";
@@ -73,6 +74,11 @@ const ChatMessage = ({ message, formatTime }) => {
       )}
     </div>
   );
+};
+
+ChatMessage.propTypes = {
+  message: PropTypes.object.isRequired,
+  formatTime: PropTypes.func.isRequired,
 };
 
 export default ChatMessage;

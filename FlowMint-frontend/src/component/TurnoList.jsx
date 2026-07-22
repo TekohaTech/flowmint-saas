@@ -1,10 +1,12 @@
 import React from "react";
 import { Container, Row, Col } from "react-bootstrap";
-import { Calendar, momentLocalizer } from "react-big-calendar";
-import moment from "moment";
+import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import { format, parse, startOfWeek, getDay } from "date-fns";
+import { es } from "date-fns/locale";
+import PropTypes from "prop-types";
 
-moment.locale("es-ES");
-const localizer = momentLocalizer(moment);
+const locales = { es };
+const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
 
 const TurnoList = ({
   turnos,
@@ -79,6 +81,14 @@ const TurnoList = ({
       </Col>
     </Row>
   );
+};
+
+TurnoList.propTypes = {
+  turnos: PropTypes.array.isRequired,
+  currentView: PropTypes.string.isRequired,
+  setCurrentView: PropTypes.func.isRequired,
+  onSelectEvent: PropTypes.func.isRequired,
+  onSelectSlot: PropTypes.func.isRequired,
 };
 
 export default TurnoList;

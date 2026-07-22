@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 const TEMPLATE_META = [
   { key: "cumpleanos", label: "🎂 Cumpleaños", color: "var(--neon-pink)" },
@@ -99,6 +100,12 @@ const ChatTemplates = ({ showTemplates, setShowTemplates, templates }) => {
       )}
     </div>
   );
+};
+
+ChatTemplates.propTypes = {
+  showTemplates: PropTypes.bool.isRequired,
+  setShowTemplates: PropTypes.func.isRequired,
+  templates: PropTypes.object.isRequired,
 };
 
 export default ChatTemplates;

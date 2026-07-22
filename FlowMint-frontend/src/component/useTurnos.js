@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
-import moment from "moment";
+import { format, parse, startOfDay, addHours, isWithinInterval, isValid } from "date-fns";
 import api from "../services/api";
-
-// Configurar localización en español
-moment.locale("es-ES");
 
 const useTurnos = () => {
   const [turnos, setTurnos] = useState([]);
@@ -112,12 +109,12 @@ const useTurnos = () => {
     try {
       setCargando(true);
 
-      const fechaMoment = moment(
+      const fechaParsed = parse(
         nuevoTurno.fecha_hora,
-        "YYYY-MM-DDTHH:mm",
-        true,
+        "yyyy-MM-dd'T'HH:mm",
+        new Date(),
       );
-      if (!fechaMoment.isValid()) {
+      if (!isValid(fechaParsed)) {
         showToastMessage(
           "El formato de la fecha y hora no es válido. Por favor, utilice el selector o el formato AAAA-MM-DDTHH:mm.",
           "error",
@@ -130,7 +127,7 @@ const useTurnos = () => {
         cliente_id: parseInt(nuevoTurno.cliente_id),
         empleado_id: parseInt(nuevoTurno.empleado_id),
         servicio_id: parseInt(nuevoTurno.servicio_id),
-        fecha_hora: fechaMoment.toISOString(),
+        fecha_hora: fechaParsed.toISOString(),
         estado: nuevoTurno.estado,
       };
 
@@ -171,12 +168,12 @@ const useTurnos = () => {
     try {
       setCargando(true);
 
-      const fechaMoment = moment(
+      const fechaParsed = parse(
         turnoEditando.fecha_hora,
-        "YYYY-MM-DDTHH:mm",
-        true,
+        "yyyy-MM-dd'T'HH:mm",
+        new Date(),
       );
-      if (!fechaMoment.isValid()) {
+      if (!isValid(fechaParsed)) {
         showToastMessage(
           "El formato de la fecha y hora no es válido. Por favor, utilice el selector o el formato AAAA-MM-DDTHH:mm.",
           "error",
@@ -189,7 +186,7 @@ const useTurnos = () => {
         cliente_id: parseInt(turnoEditando.cliente_id),
         empleado_id: parseInt(turnoEditando.empleado_id),
         servicio_id: parseInt(turnoEditando.servicio_id),
-        fecha_hora: fechaMoment.toISOString(),
+        fecha_hora: fechaParsed.toISOString(),
         estado: turnoEditando.estado,
       };
 
@@ -241,14 +238,14 @@ const useTurnos = () => {
       cliente_id: turno.cliente_id,
       empleado_id: turno.empleado_id,
       servicio_id: turno.servicio_id,
-      fecha_hora: moment(turno.fecha_hora).format("YYYY-MM-DDTHH:mm"),
+      fecha_hora: format(new Date(turno.fecha_hora), "yyyy-MM-dd'T'HH:mm"),
       estado: turno.estado,
     });
     setShowEditarTurnoModal(true);
   };
 
   const handleSlotClick = (slotInfo) => {
-    const clickedTime = moment(slotInfo.start);
+    const clickedTime = new Date(slotInfo.start);
     const existingEvent = turnos.map((turno) => {
       const startDate = new Date(turno.fecha_hora);
       const duracion = turno.servicio?.duracion || 60;
@@ -259,13 +256,13 @@ const useTurnos = () => {
         turno_data: turno,
       };
     }).find((event) =>
-      clickedTime.isBetween(moment(event.start), moment(event.end), null, "[]"),
+      isWithinInterval(clickedTime, { start: event.start, end: event.end }),
     );
 
     if (existingEvent) {
       handleSeleccionarTurno(existingEvent);
     } else {
-      const inicio = clickedTime.format("YYYY-MM-DDTHH:mm");
+      const inicio = format(clickedTime, "yyyy-MM-dd'T'HH:mm");
       setNuevoTurno((prev) => ({
         ...prev,
         fecha_hora: inicio,
@@ -276,11 +273,10 @@ const useTurnos = () => {
 
   const handleDateSelect = ({ start }) => {
     setCurrentView("day");
-    const today = moment(start);
-    const firstSlot = today.startOf("day").add(8, "hours");
+    const firstSlot = addHours(startOfDay(new Date(start)), 8);
     setNuevoTurno((prev) => ({
       ...prev,
-      fecha_hora: firstSlot.format("YYYY-MM-DDTHH:mm"),
+      fecha_hora: format(firstSlot, "yyyy-MM-dd'T'HH:mm"),
     }));
   };
 

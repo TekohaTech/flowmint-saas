@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "react-bootstrap";
 import { Plus } from "lucide-react";
+import PropTypes from "prop-types";
 
 const EmptyState = ({ IconComponent, entityName, searchTerm, onAdd, addLabel }) => {
   return (
@@ -26,6 +27,14 @@ const EmptyState = ({ IconComponent, entityName, searchTerm, onAdd, addLabel }) 
       )}
     </div>
   );
+};
+
+EmptyState.propTypes = {
+  IconComponent: PropTypes.elementType.isRequired,
+  entityName: PropTypes.string.isRequired,
+  searchTerm: PropTypes.string,
+  onAdd: PropTypes.func.isRequired,
+  addLabel: PropTypes.string.isRequired,
 };
 
 export default EmptyState;

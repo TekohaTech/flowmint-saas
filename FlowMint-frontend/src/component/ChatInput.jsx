@@ -1,6 +1,7 @@
 import React from "react";
 import { Form, InputGroup, Button } from "react-bootstrap";
 import { Send, Sparkles } from "lucide-react";
+import PropTypes from "prop-types";
 
 const ChatInput = ({ inputMessage, setInputMessage, handleSendMessage, isTyping }) => {
   return (
@@ -44,6 +45,13 @@ const ChatInput = ({ inputMessage, setInputMessage, handleSendMessage, isTyping 
       </div>
     </Form>
   );
+};
+
+ChatInput.propTypes = {
+  inputMessage: PropTypes.string.isRequired,
+  setInputMessage: PropTypes.func.isRequired,
+  handleSendMessage: PropTypes.func.isRequired,
+  isTyping: PropTypes.bool.isRequired,
 };
 
 export default ChatInput;

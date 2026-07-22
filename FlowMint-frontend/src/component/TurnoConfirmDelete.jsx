@@ -1,5 +1,6 @@
 import React from "react";
 import { Button, Modal } from "react-bootstrap";
+import PropTypes from "prop-types";
 
 const TurnoConfirmDelete = ({
   show,
@@ -48,5 +49,13 @@ const TurnoConfirmDelete = ({
     </Modal.Footer>
   </Modal>
 );
+
+TurnoConfirmDelete.propTypes = {
+  show: PropTypes.bool.isRequired,
+  handleClose: PropTypes.func.isRequired,
+  handleEliminar: PropTypes.func.isRequired,
+  selectedTurno: PropTypes.object,
+  cargando: PropTypes.bool.isRequired,
+};
 
 export default TurnoConfirmDelete;

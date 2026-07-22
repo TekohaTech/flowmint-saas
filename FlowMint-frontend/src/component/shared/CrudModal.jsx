@@ -1,5 +1,6 @@
 import React from "react";
 import { Modal, Form, Button } from "react-bootstrap";
+import PropTypes from "prop-types";
 
 const CrudModal = ({
   show,
@@ -48,6 +49,17 @@ const CrudModal = ({
       </Modal.Body>
     </Modal>
   );
+};
+
+CrudModal.propTypes = {
+  show: PropTypes.bool.isRequired,
+  onHide: PropTypes.func.isRequired,
+  title: PropTypes.string,
+  children: PropTypes.node.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  editingItem: PropTypes.object,
+  entityName: PropTypes.string.isRequired,
+  accentColor: PropTypes.string,
 };
 
 export default CrudModal;

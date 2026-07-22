@@ -1,5 +1,6 @@
 import React from "react";
 import { Row, Col, Button, Modal, Form } from "react-bootstrap";
+import PropTypes from "prop-types";
 
 const TurnoCreateModal = ({
   show,
@@ -147,5 +148,17 @@ const TurnoCreateModal = ({
     </Modal.Footer>
   </Modal>
 );
+
+TurnoCreateModal.propTypes = {
+  show: PropTypes.bool.isRequired,
+  handleClose: PropTypes.func.isRequired,
+  nuevoTurno: PropTypes.object.isRequired,
+  setNuevoTurno: PropTypes.func.isRequired,
+  clientes: PropTypes.array.isRequired,
+  empleados: PropTypes.array.isRequired,
+  servicios: PropTypes.array.isRequired,
+  cargando: PropTypes.bool.isRequired,
+  handleCrearTurno: PropTypes.func.isRequired,
+};
 
 export default TurnoCreateModal;

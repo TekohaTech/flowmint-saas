@@ -1,5 +1,6 @@
 import React from "react";
 import { Row, Col, Button, Modal, Form } from "react-bootstrap";
+import PropTypes from "prop-types";
 
 const TurnoEditModal = ({
   show,
@@ -169,5 +170,18 @@ const TurnoEditModal = ({
     </Modal.Footer>
   </Modal>
 );
+
+TurnoEditModal.propTypes = {
+  show: PropTypes.bool.isRequired,
+  handleClose: PropTypes.func.isRequired,
+  turnoEditando: PropTypes.object.isRequired,
+  setTurnoEditando: PropTypes.func.isRequired,
+  clientes: PropTypes.array.isRequired,
+  empleados: PropTypes.array.isRequired,
+  servicios: PropTypes.array.isRequired,
+  cargando: PropTypes.bool.isRequired,
+  handleActualizarTurno: PropTypes.func.isRequired,
+  onEliminarClick: PropTypes.func.isRequired,
+};
 
 export default TurnoEditModal;

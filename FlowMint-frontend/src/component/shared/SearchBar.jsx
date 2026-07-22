@@ -1,6 +1,7 @@
 import React from "react";
 import { Row, Col, InputGroup, Form, Button } from "react-bootstrap";
 import { Search, Plus } from "lucide-react";
+import PropTypes from "prop-types";
 
 const SearchBar = ({ placeholder, searchTerm, onSearchChange, onAdd, addLabel }) => {
   return (
@@ -42,6 +43,14 @@ const SearchBar = ({ placeholder, searchTerm, onSearchChange, onAdd, addLabel })
       </Col>
     </Row>
   );
+};
+
+SearchBar.propTypes = {
+  placeholder: PropTypes.string.isRequired,
+  searchTerm: PropTypes.string.isRequired,
+  onSearchChange: PropTypes.func.isRequired,
+  onAdd: PropTypes.func.isRequired,
+  addLabel: PropTypes.string.isRequired,
 };
 
 export default SearchBar;
