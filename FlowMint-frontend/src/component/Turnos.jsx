@@ -289,13 +289,6 @@ const Turnos = ({ visible = true }) => {
       setTimeout(() => setShowToast(false), 3000);
       cargarDatos();
     } catch (error) {
-      console.error("Error al crear turno:", error);
-      // Log more specific details to find the validation error
-      console.error("Mensaje del backend:", error.response?.data?.message);
-      console.error(
-        "Respuesta completa del backend:",
-        JSON.stringify(error.response?.data, null, 2),
-      );
       const errorMessage =
         error.response?.data?.message || "Error al crear el turno.";
       if (typeof errorMessage === "string") {

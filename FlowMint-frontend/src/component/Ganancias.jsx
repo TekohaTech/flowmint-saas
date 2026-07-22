@@ -367,8 +367,6 @@ const Ganancias = () => {
       setAnualesPorEmpleado(responses[7]);
       setResumen(responses[8]);
     } catch (error) {
-      console.error("[Ganancias] Error:", error);
-      console.error("[Ganancias] Error response:", error.response);
       setError('Error al cargar los datos de ganancias. Por favor, inténtalo de nuevo.');
     } finally {
       setLoading(false);
