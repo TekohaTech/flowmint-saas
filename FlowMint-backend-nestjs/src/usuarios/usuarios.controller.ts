@@ -52,6 +52,7 @@ export class UsuariosController {
         throw new ForbiddenException('No tienes permiso para editar este usuario.');
       }
       delete updateUsuarioDto.comercio_id; // Prevent owner from changing commerce
+      delete updateUsuarioDto.rol_id; // Prevent owner from escalating roles
     }
     return this.usuariosService.update(id, updateUsuarioDto);
   }

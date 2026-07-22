@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { authAPI } from "../services/api";
 import { motion } from "framer-motion";
-import { Zap, Lock, User, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Lock, User, AlertCircle, Eye, EyeOff } from "lucide-react";
 import "../index.css";
 import { Logo } from "./VisualAssets";
 
@@ -22,7 +22,6 @@ const Login = () => {
     if (userData) {
       // El token ahora viaja en una cookie HttpOnly seteada por el backend
       localStorage.setItem('user', decodeURIComponent(userData));
-      localStorage.setItem('isLoggedIn', 'true');
       window.location.href = "/dashboard";
       return;
     }
@@ -46,9 +45,6 @@ const Login = () => {
 
     try {
       const response = await authAPI.login(credentials);
-      console.log('[Login] Response:', response);
-      console.log('[Login] Token guardado:', localStorage.getItem('token'));
-      console.log('[Login] User guardado:', localStorage.getItem('user'));
       window.location.href = "/dashboard";
     } catch (err) {
       console.error('[Login] Error:', err);
@@ -87,6 +83,8 @@ const Login = () => {
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
+            id="login-error"
+            role="alert"
             className="alert alert-danger mb-3 py-2 small d-flex align-items-center"
           >
             <AlertCircle size={16} className="me-2" />
@@ -115,6 +113,8 @@ const Login = () => {
                 value={credentials.user}
                 onChange={handleChange}
                 placeholder="admin"
+                aria-label="Usuario"
+                aria-describedby={error ? "login-error" : undefined}
                 className="form-control bg-dark text-white border-secondary ps-5 py-2"
                 style={{ borderRadius: '8px' }}
               />
@@ -133,12 +133,15 @@ const Login = () => {
                 value={credentials.pass}
                 onChange={handleChange}
                 placeholder="••••••••"
+                aria-label="Contraseña"
+                aria-describedby={error ? "login-error" : undefined}
                 className="form-control bg-dark text-white border-secondary ps-5 pe-5 py-2"
                 style={{ borderRadius: '8px' }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                 className="position-absolute end-0 top-50 translate-middle-y bg-transparent border-0 text-neon-cyan pe-3"
                 style={{ zIndex: 10, cursor: 'pointer' }}
               >

@@ -27,7 +27,7 @@ export class AuthController {
     
     res.cookie('access_token', authData.access_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV !== 'development',
       sameSite: 'lax',
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
@@ -53,6 +53,8 @@ export class AuthController {
   }
 
   @Public()
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { ttl: 60000, limit: 5 } })
   @Post('completar-registro')
   @ApiOperation({ summary: 'Completar registro de comercio' })
   async completarRegistro(@Body() dto: CompletarRegistroDto, @Request() req) {

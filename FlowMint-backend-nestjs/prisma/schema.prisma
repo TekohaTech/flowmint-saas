@@ -47,6 +47,9 @@ model Comercio {
   empleados   Empleado[]
   servicios   Servicio[]
   turnos      Turno[]
+
+  @@index([estado])
+  @@index([activo])
 }
 
 model Usuario {
@@ -71,6 +74,10 @@ model Usuario {
   token_verificacion String? @unique
   
   creado_en   DateTime @default(now())
+
+  @@index([comercio_id])
+  @@index([correo])
+  @@index([user])
 }
 
 model Rol {
@@ -93,6 +100,8 @@ model Cliente {
   turnos Turno[]
   
   @@unique([email, comercio_id]) // El email solo es único por comercio
+  @@index([comercio_id])
+  @@index([estado])
 }
 
 model Empleado {
@@ -106,6 +115,9 @@ model Empleado {
   comercio    Comercio @relation(fields: [comercio_id], references: [comercio_id])
 
   turnos Turno[]
+
+  @@index([comercio_id])
+  @@index([estado])
 }
 
 model Servicio {
@@ -120,6 +132,9 @@ model Servicio {
   comercio    Comercio @relation(fields: [comercio_id], references: [comercio_id])
 
   turnos Turno[]
+
+  @@index([comercio_id])
+  @@index([estado])
 }
 
 model Turno {
@@ -138,6 +153,12 @@ model Turno {
 
   servicio_id Int
   servicio    Servicio @relation(fields: [servicio_id], references: [servicio_id])
+
+  @@index([comercio_id])
+  @@index([estado])
+  @@index([fecha_hora])
+  @@index([cliente_id])
+  @@index([empleado_id])
 }
 
 // Control de intentos de registro por IP

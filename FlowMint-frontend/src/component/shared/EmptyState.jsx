@@ -1,0 +1,40 @@
+import React from "react";
+import { Button } from "react-bootstrap";
+import { Plus } from "lucide-react";
+import PropTypes from "prop-types";
+
+const EmptyState = ({ IconComponent, entityName, searchTerm, onAdd, addLabel }) => {
+  return (
+    <div className="text-center p-5" aria-live="polite">
+      <IconComponent
+        size={64}
+        style={{ color: "var(--text-muted)", opacity: 0.3 }}
+        className="mb-3"
+      />
+      <h4 style={{ color: "var(--text-muted)" }}>
+        No se encontraron {entityName.toLowerCase()}s
+      </h4>
+      <p style={{ color: "var(--text-muted)" }}>
+        {searchTerm
+          ? "Intenta ajustar tu búsqueda"
+          : `Comienza agregando tu primer ${entityName.toLowerCase()}`}
+      </p>
+      {!searchTerm && (
+        <Button variant="primary" onClick={onAdd} className="mt-3">
+          <Plus size={20} className="me-2" />
+          {addLabel}
+        </Button>
+      )}
+    </div>
+  );
+};
+
+EmptyState.propTypes = {
+  IconComponent: PropTypes.elementType.isRequired,
+  entityName: PropTypes.string.isRequired,
+  searchTerm: PropTypes.string,
+  onAdd: PropTypes.func.isRequired,
+  addLabel: PropTypes.string.isRequired,
+};
+
+export default EmptyState;

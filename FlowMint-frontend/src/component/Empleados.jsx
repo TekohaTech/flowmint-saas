@@ -1,121 +1,49 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   Container,
   Row,
   Col,
   Table,
   Button,
-  Modal,
   Form,
   Alert,
   Badge,
-  InputGroup,
 } from "react-bootstrap";
 import { employeesAPI } from "../services/api";
-import { Briefcase, Plus, Edit, Trash2, Search, User } from "lucide-react";
+import { Briefcase, User, Edit, Trash2 } from "lucide-react";
+import useCrud from "./shared/useCrud";
+import SearchBar from "./shared/SearchBar";
+import CrudModal from "./shared/CrudModal";
+import EmptyState from "./shared/EmptyState";
 
 const Empleados = () => {
-  const [employees, setEmployees] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [editingEmployee, setEditingEmployee] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [formData, setFormData] = useState({
-    nombre: "",
-    apellido: "",
-    puesto: "",
+  const {
+    items: employees,
+    loading,
+    error,
+    setError,
+    success,
+    setSuccess,
+    showModal,
+    editingItem,
+    searchTerm,
+    setSearchTerm,
+    formData,
+    handleChange,
+    handleShowModal,
+    handleCloseModal,
+    handleSubmit,
+    handleDelete,
+  } = useCrud({
+    api: employeesAPI,
+    entityName: "Empleado",
+    fields: [
+      { name: "nombre", label: "Nombre", type: "text", required: true },
+      { name: "apellido", label: "Apellido", type: "text", required: true },
+      { name: "puesto", label: "Puesto", type: "text", required: false },
+    ],
+    idKey: "empleado_id",
   });
-
-  useEffect(() => {
-    loadEmployees();
-  }, []);
-
-  const loadEmployees = async () => {
-    try {
-      setLoading(true);
-      const data = await employeesAPI.getAll();
-      setEmployees(data);
-      setError("");
-    } catch (err) {
-      setError("Error al cargar empleados. Por favor, inténtalo de nuevo.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleShowModal = (employee = null) => {
-    if (employee) {
-      setEditingEmployee(employee);
-      setFormData({
-        nombre: employee.nombre,
-        apellido: employee.apellido,
-        puesto: employee.puesto || "",
-      });
-    } else {
-      setEditingEmployee(null);
-      setFormData({
-        nombre: "",
-        apellido: "",
-        puesto: "",
-      });
-    }
-    setShowModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    setEditingEmployee(null);
-    setFormData({
-      nombre: "",
-      apellido: "",
-      puesto: "",
-    });
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
-
-    try {
-      if (editingEmployee) {
-        await employeesAPI.update(editingEmployee.empleado_id, formData);
-        setSuccess("¡Empleado actualizado exitosamente!");
-      } else {
-        await employeesAPI.create(formData);
-        setSuccess("¡Empleado creado exitosamente!");
-      }
-      handleCloseModal();
-      loadEmployees();
-      setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          "Error al guardar empleado. Por favor, inténtalo de nuevo.",
-      );
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar este empleado?")) {
-      try {
-        await employeesAPI.delete(id);
-        setSuccess("¡Empleado eliminado exitosamente!");
-        loadEmployees();
-        setTimeout(() => setSuccess(""), 3000);
-      } catch (err) {
-        setError("Error al eliminar empleado. Por favor, inténtalo de nuevo.");
-      }
-    }
-  };
 
   const filteredEmployees = employees.filter(
     (employee) =>
@@ -133,7 +61,14 @@ const Empleados = () => {
           <div className="d-flex align-items-center gap-3 mb-3">
             <Briefcase size={36} style={{ color: "var(--neon-purple)" }} />
             <div>
-              <h2 className="text-center" style={{ color: 'white', textShadow: '0 0 10px rgba(139, 92, 246, 0.3)', marginBottom: "0" }}>
+              <h2
+                className="text-center"
+                style={{
+                  color: "white",
+                  textShadow: "0 0 10px rgba(139, 92, 246, 0.3)",
+                  marginBottom: "0",
+                }}
+              >
                 EMPLEADOS
               </h2>
               <small style={{ color: "var(--text-muted)" }}>
@@ -166,44 +101,14 @@ const Empleados = () => {
         </Alert>
       )}
 
-      {/* Actions Bar */}
-      <Row className="mb-4">
-        <Col md={8}>
-          <InputGroup>
-            <InputGroup.Text
-              style={{
-                background: "var(--bg-card)",
-                borderColor: "var(--border-color)",
-                color: "var(--neon-cyan)",
-              }}
-            >
-              <Search size={20} />
-            </InputGroup.Text>
-            <Form.Control
-              type="text"
-              placeholder="Buscar empleados por nombre o posición..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                background: "var(--bg-card)",
-                borderColor: "var(--border-color)",
-                color: "var(--text-primary)",
-              }}
-            />
-          </InputGroup>
-        </Col>
-        <Col md={4} className="text-end">
-          <Button
-            variant="success"
-            onClick={() => handleShowModal()}
-            className="btn-success"
-            style={{ textTransform: "uppercase", fontWeight: "bold" }}
-          >
-            <Plus size={20} className="me-2" />
-            Agregar Empleado
-          </Button>
-        </Col>
-      </Row>
+      {/* Search Bar */}
+      <SearchBar
+        placeholder="Buscar empleados por nombre o posición..."
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onAdd={() => handleShowModal()}
+        addLabel="Agregar Empleado"
+      />
 
       {/* Employees Table */}
       <Row>
@@ -217,31 +122,13 @@ const Empleados = () => {
                 </p>
               </div>
             ) : filteredEmployees.length === 0 ? (
-              <div className="text-center p-5">
-                <Briefcase
-                  size={64}
-                  style={{ color: "var(--text-muted)", opacity: 0.3 }}
-                  className="mb-3"
-                />
-                <h4 style={{ color: "var(--text-muted)" }}>
-                  No se encontraron empleados
-                </h4>
-                <p style={{ color: "var(--text-muted)" }}>
-                  {searchTerm
-                    ? "Intenta ajustar tu búsqueda"
-                    : "Comienza agregando tu primer empleado"}
-                </p>
-                {!searchTerm && (
-                  <Button
-                    variant="primary"
-                    onClick={() => handleShowModal()}
-                    className="mt-3"
-                  >
-                    <Plus size={20} className="me-2" />
-                    Agregar Primer Empleado
-                  </Button>
-                )}
-              </div>
+              <EmptyState
+                IconComponent={Briefcase}
+                entityName="Empleado"
+                searchTerm={searchTerm}
+                onAdd={() => handleShowModal()}
+                addLabel="Agregar Primer Empleado"
+              />
             ) : (
               <Table
                 responsive
@@ -345,96 +232,68 @@ const Empleados = () => {
           {/* Stats */}
           <div className="mt-3 text-center">
             <small style={{ color: "var(--text-muted)" }}>
-              Mostrando {filteredEmployees.length} de {employees.length} empleados
+              Mostrando {filteredEmployees.length} de {employees.length}{" "}
+              empleados
             </small>
           </div>
         </Col>
       </Row>
 
       {/* Add/Edit Modal */}
-      <Modal
+      <CrudModal
         show={showModal}
         onHide={handleCloseModal}
-        centered
-        contentClassName="modal-content"
+        entityName="EMPLEADO"
+        editingItem={editingItem}
+        onSubmit={handleSubmit}
+        accentColor="var(--neon-purple)"
       >
-        <Modal.Header
-          closeButton
-          style={{
-            background: "var(--bg-card)",
-            borderBottom: "2px solid var(--border-color)",
-          }}
-        >
-          <Modal.Title style={{ color: "var(--neon-purple)" }}>
-            {editingEmployee ? "EDITAR EMPLEADO" : "NUEVO EMPLEADO"}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ background: "var(--bg-card)" }}>
-          <Form onSubmit={handleSubmit}>
-            <Row>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Nombre *</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="nombre"
-                    value={formData.nombre}
-                    onChange={handleChange}
-                    required
-                    placeholder="Ingresa tu nombre"
-                  />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Apellido *</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="apellido"
-                    value={formData.apellido}
-                    onChange={handleChange}
-                    required
-                    placeholder="Ingresa tu apellido"
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-
-            <Form.Group className="mb-4">
-              <Form.Label>
-                <Briefcase size={16} className="me-2" />
-                Posición / Rol
-              </Form.Label>
+        <Row>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Nombre *</Form.Label>
               <Form.Control
                 type="text"
-                name="puesto"
-                value={formData.puesto}
+                name="nombre"
+                value={formData.nombre}
                 onChange={handleChange}
-                placeholder="p. ej. Estilista Senior, Barbero, Colorista..."
+                required
+                placeholder="Ingresa tu nombre"
               />
-              <Form.Text style={{ color: "var(--text-muted)" }}>
-                Opcional: Especifica el rol o posición del empleado
-              </Form.Text>
             </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Apellido *</Form.Label>
+              <Form.Control
+                type="text"
+                name="apellido"
+                value={formData.apellido}
+                onChange={handleChange}
+                required
+                placeholder="Ingresa tu apellido"
+              />
+            </Form.Group>
+          </Col>
+        </Row>
 
-            <div className="d-flex gap-2 justify-content-end">
-              <Button
-                variant="secondary"
-                onClick={handleCloseModal}
-                style={{
-                  borderColor: "var(--text-muted)",
-                  color: "var(--text-muted)",
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" variant="success" className="btn-success">
-                {editingEmployee ? "Actualizar Empleado" : "Crear Empleado"}
-              </Button>
-            </div>
-          </Form>
-        </Modal.Body>
-      </Modal>
+        <Form.Group className="mb-4">
+          <Form.Label>
+            <Briefcase size={16} className="me-2" />
+            Posición / Rol
+          </Form.Label>
+          <Form.Control
+            type="text"
+            name="puesto"
+            value={formData.puesto}
+            onChange={handleChange}
+            placeholder="p. ej. Estilista Senior, Barbero, Colorista..."
+          />
+          <Form.Text style={{ color: "var(--text-muted)" }}>
+            Opcional: Especifica el rol o posición del empleado
+          </Form.Text>
+        </Form.Group>
+      </CrudModal>
     </Container>
   );
 };

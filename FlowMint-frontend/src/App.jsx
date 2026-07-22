@@ -1,59 +1,64 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Landing from './component/Landing';
-import Login from './component/Login';
-import Registros from './component/Registros';
-import CompletarRegistro from './component/CompletarRegistro';
-import PendienteActivacion from './component/PendienteActivacion';
-import Clientes from './component/Clientes';
-import Empleados from './component/Empleados';
-import Servicios from './component/Servicios';
-import Turnos from './component/Turnos';
-import Usuarios from './component/Usuarios';
-import Ganancias from './component/Ganancias';
-import Dashboard from './component/Dashboard';
-import Comercios from './component/Comercios';
+import LoadingSpinner from './component/LoadingSpinner';
 import ProtectedRoute from './component/ProtectedRoute';
-import DashboardHome from './component/DashboardHome';
-import VerificarEmail from './component/VerificarEmail';
-import ForgotPassword from './component/ForgotPassword';
-import ResetPassword from './component/ResetPassword';
-import NotFound from './component/NotFound';
+
+// Lazy-loaded page components — each becomes its own chunk
+const Landing = React.lazy(() => import('./component/Landing'));
+const Login = React.lazy(() => import('./component/Login'));
+const Registros = React.lazy(() => import('./component/Registros'));
+const CompletarRegistro = React.lazy(() => import('./component/CompletarRegistro'));
+const PendienteActivacion = React.lazy(() => import('./component/PendienteActivacion'));
+const VerificarEmail = React.lazy(() => import('./component/VerificarEmail'));
+const ForgotPassword = React.lazy(() => import('./component/ForgotPassword'));
+const ResetPassword = React.lazy(() => import('./component/ResetPassword'));
+const Dashboard = React.lazy(() => import('./component/Dashboard'));
+const DashboardHome = React.lazy(() => import('./component/DashboardHome'));
+const Clientes = React.lazy(() => import('./component/Clientes'));
+const Empleados = React.lazy(() => import('./component/Empleados'));
+const Servicios = React.lazy(() => import('./component/Servicios'));
+const Turnos = React.lazy(() => import('./component/Turnos'));
+const Usuarios = React.lazy(() => import('./component/Usuarios'));
+const Ganancias = React.lazy(() => import('./component/Ganancias'));
+const Comercios = React.lazy(() => import('./component/Comercios'));
+const NotFound = React.lazy(() => import('./component/NotFound'));
 
 function App() {
     return (
         <Router>
-            <Routes>
-                <Route path='/' element={<Landing />} />
-                <Route path='/login' element={<Login />} />
-                <Route path='/registro' element={<Registros />} />
-                <Route path='/completar-registro' element={<CompletarRegistro />} />
-                <Route path='/pendiente-activacion' element={<PendienteActivacion />} />
-                <Route path='/verificar-email' element={<VerificarEmail />} />
-                <Route path='/forgot-password' element={<ForgotPassword />} />
-                <Route path='/reset-password' element={<ResetPassword />} />
+            <Suspense fallback={<LoadingSpinner />}>
+                <Routes>
+                    <Route path='/' element={<Landing />} />
+                    <Route path='/login' element={<Login />} />
+                    <Route path='/registro' element={<Registros />} />
+                    <Route path='/completar-registro' element={<CompletarRegistro />} />
+                    <Route path='/pendiente-activacion' element={<PendienteActivacion />} />
+                    <Route path='/verificar-email' element={<VerificarEmail />} />
+                    <Route path='/forgot-password' element={<ForgotPassword />} />
+                    <Route path='/reset-password' element={<ResetPassword />} />
 
-                <Route 
-                    path='/dashboard' 
-                    element={
-                        <ProtectedRoute>
-                            <Dashboard />
-                        </ProtectedRoute>
-                    }
-                >
-                    <Route index element={<DashboardHome />} />
-                    <Route path='clientes' element={<Clientes />} />
-                    <Route path='empleados' element={<Empleados />} />
-                    <Route path='servicios' element={<Servicios />} />
-                    <Route path='turnos' element={<Turnos />} />
-                    <Route path='usuarios' element={<Usuarios />} />
-                    <Route path='ganancias' element={<Ganancias />} />
-                    <Route path='comercios' element={<Comercios />} />
-                </Route>
+                    <Route 
+                        path='/dashboard' 
+                        element={
+                            <ProtectedRoute>
+                                <Dashboard />
+                            </ProtectedRoute>
+                        }
+                    >
+                        <Route index element={<DashboardHome />} />
+                        <Route path='clientes' element={<Clientes />} />
+                        <Route path='empleados' element={<Empleados />} />
+                        <Route path='servicios' element={<Servicios />} />
+                        <Route path='turnos' element={<Turnos />} />
+                        <Route path='usuarios' element={<Usuarios />} />
+                        <Route path='ganancias' element={<Ganancias />} />
+                        <Route path='comercios' element={<Comercios />} />
+                    </Route>
 
-                {/* Catch-all 404 Route */}
-                <Route path="*" element={<NotFound />} />
-            </Routes>
+                    {/* Catch-all 404 Route */}
+                    <Route path="*" element={<NotFound />} />
+                </Routes>
+            </Suspense>
         </Router>
     );
 }

@@ -3,15 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Container, Row, Col, Button } from 'react-bootstrap';
 import { Zap, Clock, CheckCircle, LogOut } from 'lucide-react';
+import { authAPI } from '../services/api';
 
 const PendienteActivacion = () => {
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('isLoggedIn');
-    navigate('/');
+  const handleLogout = async () => {
+    await authAPI.logout();
   };
 
   return (

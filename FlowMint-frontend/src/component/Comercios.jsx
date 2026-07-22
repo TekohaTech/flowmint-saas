@@ -5,8 +5,8 @@ import {
 } from 'react-bootstrap';
 import { 
     Store, CheckCircle, XCircle, Search, Trash2,
-    Phone, MapPin, Mail, RefreshCw, Plus, Edit, Building, Power, Crown,
-    Clock, User, Calendar, Tag
+    MapPin, Mail, RefreshCw, Plus, Edit, Building, Power, Crown,
+    Clock, User, Tag
 } from 'lucide-react';
 import { comerciosAPI } from '../services/api';
 
@@ -52,26 +52,18 @@ const Comercios = () => {
     }, []);
 
     const handleToggleStatus = async (comercio) => {
-        console.log('=== DEBUG handleToggleStatus ===');
-        console.log('Comercio:', comercio);
-        console.log('Estado actual:', comercio.estado, 'Activo:', comercio.activo);
-        
         setActionLoading(comercio.comercio_id);
         try {
             const nuevoActivo = !comercio.activo;
             const nuevoEstado = nuevoActivo ? 'activo' : 'suspendido';
-            
-            console.log('Cambiando a:', { activo: nuevoActivo, estado: nuevoEstado });
             
             await comerciosAPI.update(comercio.comercio_id, { 
                 activo: nuevoActivo,
                 estado: nuevoEstado
             });
             
-            console.log('API llamada exitosamente');
             await fetchComercios();
         } catch (err) {
-            console.error('Error en handleToggleStatus:', err);
             alert('Error al cambiar el estado: ' + (err.response?.data?.message || err.message));
         } finally {
             setActionLoading(null);
