@@ -12,28 +12,6 @@ const api = axios.create({
     },
 });
 
-// Request interceptor to add token
-const PUBLIC_ENDPOINTS = ['/auth/login', '/auth/register', '/auth/completar-registro', '/auth/forgot-password', '/auth/reset-password'];
-
-api.interceptors.request.use(
-    (config) => {
-        const isPublicEndpoint = PUBLIC_ENDPOINTS.some(endpoint => config.url.includes(endpoint));
-        
-        if (!isPublicEndpoint) {
-            const token = localStorage.getItem('token');
-            if (token) {
-                config.headers.Authorization = `Bearer ${token}`;
-            }
-        } else {
-            // Public endpoint — no token needed
-        }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
-);
-
 // Response interceptor to handle errors
 api.interceptors.response.use(
     (response) => {
@@ -41,9 +19,7 @@ api.interceptors.response.use(
     },
     (error) => {
         if (error.response?.status === 401) {
-            localStorage.removeItem('token');
             localStorage.removeItem('user');
-            localStorage.removeItem('isLoggedIn');
         }
         return Promise.reject(error);
     }
@@ -53,12 +29,9 @@ api.interceptors.response.use(
 export const authAPI = {
     login: async (credentials) => {
         const response = await api.post('/auth/login', credentials);
-        // Ensure both token and user object exist
-        if (response.data.access_token && response.data.user) {
-            localStorage.setItem('token', response.data.access_token);
-            // Safely stringify user object
+        // Token is in httpOnly cookie (set by backend) — store user data for display
+        if (response.data.user) {
             localStorage.setItem('user', JSON.stringify(response.data.user));
-            localStorage.setItem('isLoggedIn', 'true');
         }
         return response.data;
     },
@@ -67,10 +40,9 @@ export const authAPI = {
         try {
             await api.post('/auth/logout');
         } catch (error) {
-            console.error("Logout failed at server, clearing local storage anyway", error);
+            // Server logout failed — cookie may already be cleared
         }
         localStorage.removeItem('user');
-        localStorage.removeItem('isLoggedIn');
         window.location.href = '/login';
     },
 
@@ -106,7 +78,9 @@ export const authAPI = {
     },
 
     isAuthenticated: () => {
-        return localStorage.getItem('isLoggedIn') === 'true';
+        // Quick local check: user data exists = likely logged in
+        // For real validation, use getProfile() which checks the httpOnly cookie
+        return localStorage.getItem('user') !== null;
     },
 };
 

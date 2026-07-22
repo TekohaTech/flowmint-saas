@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Navbar, Nav, Button } from 'react-bootstrap';
+import { authAPI } from '../services/api';
 
 const CustomNavbar = () => {
     const [expanded, setExpanded] = useState(false);
@@ -28,13 +29,9 @@ const CustomNavbar = () => {
         };
     }, []);
 
-    const handleLogout = () => {
-        // Limpiar todos los datos de autenticación
-        localStorage.removeItem('token');
-        localStorage.removeItem('isLoggedIn');
-        localStorage.clear();
+    const handleLogout = async () => {
         setExpanded(false);
-        navigate('/login');
+        await authAPI.logout();
     };
 
     return (

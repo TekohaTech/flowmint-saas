@@ -22,7 +22,6 @@ const Login = () => {
     if (userData) {
       // El token ahora viaja en una cookie HttpOnly seteada por el backend
       localStorage.setItem('user', decodeURIComponent(userData));
-      localStorage.setItem('isLoggedIn', 'true');
       window.location.href = "/dashboard";
       return;
     }

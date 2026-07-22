@@ -26,10 +26,9 @@ const CompletarRegistro = () => {
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
     
-    if (!token || !userStr) {
+    if (!userStr) {
       navigate('/login');
       return;
     }
@@ -69,8 +68,6 @@ const CompletarRegistro = () => {
     setError('');
 
     try {
-      const token = localStorage.getItem('token');
-      
       const payload = {
         email: userData?.correo || userData?.user,
         nombreComercio: formData.nombreComercio,
@@ -80,11 +77,7 @@ const CompletarRegistro = () => {
         categoria: formData.categoria || null
       };
 
-      const response = await api.post('/auth/completar-registro', payload, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await api.post('/auth/completar-registro', payload);
 
       setSuccess(true);
 
