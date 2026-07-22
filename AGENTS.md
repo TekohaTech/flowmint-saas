@@ -61,8 +61,5 @@ docker-compose -f docker-compose-db.yml up -d
 
 ## Known Tech Debt
 
-- Frontend has ~1,350 lines of duplicated CRUD component code (DataTable, CRUDModal extraction needed)
-- `ganancias.service.ts` has 8x duplicated whereClause — should extract private method
-- No meaningful test coverage (only boilerplate)
 - Frontend is JSX (no TypeScript) — migration planned
-- moment.js could be replaced with date-fns (~250KB savings)
+- No meaningful test coverage (only boilerplate specs deleted, need real tests)

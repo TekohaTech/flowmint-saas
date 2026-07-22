@@ -31,6 +31,11 @@ build/
 out/
 *.tsbuildinfo
 .turbo
+*.bak
+*.timestamp-*
+seed.js
+seed.js.map
+seed.d.ts
 
 # ============================================================
 # LOGS
