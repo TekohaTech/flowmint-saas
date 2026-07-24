@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm ci --include=dev
 
-COPY ./
+COPY ./ .
 
 # Generate Prisma Client (uses local binary, won't connect to DB)
 ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
