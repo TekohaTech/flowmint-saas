@@ -1,0 +1,7 @@
+# Docker build context is repo root — exclude frontend and dev files
+FlowMint-frontend/
+.git/
+node_modules/
+*.md
+*.bak
+*.timestamp-*

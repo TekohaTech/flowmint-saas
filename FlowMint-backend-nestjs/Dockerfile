@@ -3,10 +3,10 @@ FROM node:22-slim AS builder
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY FlowMint-backend-nestjs/package*.json ./
 RUN npm ci --include=dev
 
-COPY ./ .
+COPY FlowMint-backend-nestjs/ ./
 
 # Generate Prisma Client (uses local binary, won't connect to DB)
 ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
@@ -19,7 +19,7 @@ FROM node:22-slim AS prod-deps
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY FlowMint-backend-nestjs/package*.json ./
 RUN npm ci --omit=dev
 
 # Stage 3: Create the production image
@@ -36,6 +36,8 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 # Copy only what's needed for production
 COPY --from=builder /usr/src/app/dist ./dist
 COPY --from=prod-deps /usr/src/app/node_modules ./node_modules
+# Restore generated Prisma Client (prisma is devDependency, so prod-deps lacks it)
+COPY --from=builder /usr/src/app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /usr/src/app/package*.json ./
 COPY --from=builder /usr/src/app/prisma ./prisma
 
