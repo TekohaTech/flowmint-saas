@@ -3,10 +3,10 @@ FROM node:22-slim AS builder
 
 WORKDIR /usr/src/app
 
-COPY FlowMint-backend-nestjs/package*.json ./
+COPY package*.json ./
 RUN npm ci --include=dev
 
-COPY FlowMint-backend-nestjs/ ./
+COPY ./ .
 
 # Generate Prisma Client (uses local binary, won't connect to DB)
 ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder"
@@ -19,7 +19,7 @@ FROM node:22-slim AS prod-deps
 
 WORKDIR /usr/src/app
 
-COPY FlowMint-backend-nestjs/package*.json ./
+COPY package*.json ./
 RUN npm ci --omit=dev
 
 # Stage 3: Create the production image
