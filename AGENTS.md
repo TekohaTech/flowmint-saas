@@ -49,6 +49,25 @@ cd FlowMint-frontend
 npx vite build         # Vite production build
 ```
 
+## Deployment
+
+- **Frontend**: https://flowmint.pages.dev/ (Cloudflare Pages)
+- **Backend**: Render (NestJS service)
+- **Database**: Supabase (PostgreSQL)
+
+### Render Docker
+
+- Render "Root Directory" = `FlowMint-backend-nestjs/` (where it looks for Dockerfile)
+- Docker build context = **repo root** (NOT FlowMint-backend-nestjs/)
+- All COPY paths in Dockerfile must use `FlowMint-backend-nestjs/` prefix
+- Root `.dockerignore` excludes frontend and dev files from build context
+- `prisma` is a devDependency — generated `.prisma/client` must be explicitly copied to final stage
+
+```bash
+# Test Docker build locally
+docker build -f FlowMint-backend-nestjs/Dockerfile -t flowmint-backend-test .
+```
+
 ## Docker
 
 ```bash
