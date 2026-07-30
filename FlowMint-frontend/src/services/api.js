@@ -112,34 +112,6 @@ export const usersAPI = {
     },
 };
 
-// Roles API
-export const rolesAPI = {
-    getAll: async () => {
-        const response = await api.get('/roles');
-        return response.data;
-    },
-
-    getById: async (id) => {
-        const response = await api.get(`/roles/${id}`);
-        return response.data;
-    },
-
-    create: async (roleData) => {
-        const response = await api.post('/roles', roleData);
-        return response.data;
-    },
-
-    update: async (id, roleData) => {
-        const response = await api.patch(`/roles/${id}`, roleData);
-        return response.data;
-    },
-
-    delete: async (id) => {
-        const response = await api.delete(`/roles/${id}`);
-        return response.data;
-    },
-};
-
 // Clients API
 export const clientsAPI = {
     getAll: async () => {
@@ -220,34 +192,6 @@ export const servicesAPI = {
 
     delete: async (id) => {
         const response = await api.delete(`/servicios/${id}`);
-        return response.data;
-    },
-};
-
-// Appointments API
-export const appointmentsAPI = {
-    getAll: async () => {
-        const response = await api.get('/turnos');
-        return response.data;
-    },
-
-    getById: async (id) => {
-        const response = await api.get(`/turnos/${id}`);
-        return response.data;
-    },
-
-    create: async (appointmentData) => {
-        const response = await api.post('/turnos', appointmentData);
-        return response.data;
-    },
-
-    update: async (id, appointmentData) => {
-        const response = await api.patch(`/turnos/${id}`, appointmentData);
-        return response.data;
-    },
-
-    delete: async (id) => {
-        const response = await api.delete(`/turnos/${id}`);
         return response.data;
     },
 };
@@ -387,6 +331,26 @@ export const revenueAPI = {
 export const aiAPI = {
     chat: async (message) => {
         const response = await api.post('/ai/chat', { message });
+        return response.data;
+    },
+};
+
+// Notifications API
+export const notificationsAPI = {
+    create: async (data) => {
+        const response = await api.post('/notificaciones', data);
+        return response.data;
+    },
+    getMine: async (unreadOnly = false) => {
+        const response = await api.get(`/notificaciones/mine?unread_only=${unreadOnly}`);
+        return response.data;
+    },
+    getUnreadCount: async () => {
+        const response = await api.get('/notificaciones/unread-count');
+        return response.data;
+    },
+    markRead: async (id) => {
+        const response = await api.patch(`/notificaciones/${id}/read`);
         return response.data;
     },
 };

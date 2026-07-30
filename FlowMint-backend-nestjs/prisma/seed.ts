@@ -25,7 +25,10 @@ async function main() {
   const rolDueno = await prisma.rol.create({ data: { rol_id: 2, nombre: 'DUENO' } });
   const rolEmpleado = await prisma.rol.create({ data: { rol_id: 3, nombre: 'EMPLEADO' } });
 
-  const hashedPass = await bcrypt.hash('admin123', 10);
+  // Passwords seguros: min 8 chars, 1 mayúscula, 1 número
+  const hashedPassAdmin = await bcrypt.hash('Admin123!', 10);
+  const hashedPassDueno = await bcrypt.hash('Dueno123!', 10);
+  const hashedPassEmp = await bcrypt.hash('Empleado123!', 10);
 
   // 2. Crearte a TI (SuperAdmin)
   await prisma.usuario.create({
@@ -33,7 +36,7 @@ async function main() {
       nombre: 'Juan',
       apellido: 'Admin',
       user: 'admin',
-      pass: hashedPass,
+      pass: hashedPassAdmin,
       correo: 'admin@flowmint.com',
       rol_id: rolSuperAdmin.rol_id,
       estado: 'A',
@@ -64,7 +67,7 @@ async function main() {
       nombre: 'Carlos',
       apellido: 'Barbero',
       user: 'carlos',
-      pass: hashedPass,
+      pass: hashedPassDueno,
       correo: 'carlos@barberia.com',
       rol_id: rolDueno.rol_id,
       comercio_id: comercio1.comercio_id,
@@ -132,7 +135,7 @@ async function main() {
       nombre: 'Lucía',
       apellido: 'Estética',
       user: 'lucia',
-      pass: hashedPass,
+      pass: hashedPassDueno,
       rol_id: rolDueno.rol_id,
       comercio_id: comercio2.comercio_id,
       estado: 'A',
@@ -140,9 +143,9 @@ async function main() {
   });
 
   console.log('✅ Sistema SaaS inicializado.');
-  console.log('👤 SuperAdmin: admin / admin123');
-  console.log('🏠 Comercio Activo: carlos / admin123');
-  console.log('⏳ Comercio Pendiente: lucia / admin123');
+  console.log('👤 SuperAdmin: admin / Admin123!');
+  console.log('🏠 Comercio Activo: carlos / Dueno123!');
+  console.log('⏳ Comercio Pendiente: lucia / Dueno123!');
 }
 
 main()

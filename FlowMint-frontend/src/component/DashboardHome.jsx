@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Spinner, Button } from 'react-bootstrap';
-import { FaUserFriends, FaCalendarAlt, FaCut, FaUserTie, FaDollarSign } from 'react-icons/fa';
-import { Crown, CheckCircle, XCircle, Users, Power, Store } from 'lucide-react';
+import { Users, Calendar, Scissors, Briefcase, DollarSign, Crown, CheckCircle, XCircle, Power, Store } from 'lucide-react';
 import api, { authAPI } from '../services/api';
 
 function DashboardHome() {
@@ -63,8 +62,8 @@ function DashboardHome() {
           const ingresosMensuales = turnosRes.data
             .filter(turno => {
               const fecha = new Date(turno.fecha_hora);
-              return fecha.getMonth() === mesActual && 
-                     fecha.getFullYear() === anioActual && 
+              return fecha.getMonth() === mesActual &&
+                     fecha.getFullYear() === anioActual &&
                      turno.estado !== 'cancelado';
             })
             .reduce((total, turno) => {
@@ -102,7 +101,7 @@ function DashboardHome() {
   if (isSuperAdmin) {
     return (
       <Container fluid className="px-3 px-md-4 py-3 py-md-4">
-        <div className="mb-4">
+        <div className="page-header mb-4">
           <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-2 gap-sm-3">
             <Crown size={32} className="text-warning" />
             <div>
@@ -114,7 +113,7 @@ function DashboardHome() {
 
         <Row className="g-3 mb-4">
           <Col xs={12} sm={4}>
-            <Card className="border-0 h-100" style={{ background: 'var(--bg-card)' }}>
+            <Card className="border-0 h-100">
               <Card.Body className="d-flex align-items-center gap-3 py-3">
                 <div className="rounded-circle bg-success bg-opacity-25 p-2 p-md-3">
                   <CheckCircle size={24} className="text-success" />
@@ -127,7 +126,7 @@ function DashboardHome() {
             </Card>
           </Col>
           <Col xs={12} sm={4}>
-            <Card className="border-0 h-100" style={{ background: 'var(--bg-card)' }}>
+            <Card className="border-0 h-100">
               <Card.Body className="d-flex align-items-center gap-3 py-3">
                 <div className="rounded-circle bg-warning bg-opacity-25 p-2 p-md-3">
                   <XCircle size={24} className="text-warning" />
@@ -140,7 +139,7 @@ function DashboardHome() {
             </Card>
           </Col>
           <Col xs={12} sm={4}>
-            <Card className="border-0 h-100" style={{ background: 'var(--bg-card)' }}>
+            <Card className="border-0 h-100">
               <Card.Body className="d-flex align-items-center gap-3 py-3">
                 <div className="rounded-circle bg-info bg-opacity-25 p-2 p-md-3">
                   <Users size={24} className="text-info" />
@@ -154,7 +153,7 @@ function DashboardHome() {
           </Col>
         </Row>
 
-        <Card className="border-secondary mb-4" style={{ background: 'var(--bg-card)' }}>
+        <Card className="border-secondary mb-4">
           <Card.Body className="p-3 p-md-4">
             <h5 className="text-white mb-3 d-flex align-items-center gap-2">
               <Power size={18} className="text-success" />
@@ -215,10 +214,10 @@ function DashboardHome() {
 
       <Row className="g-3 mb-4">
         <Col xs={6} lg={3}>
-          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }} aria-label="Estadística de clientes">
+          <Card className="text-white h-100" aria-label="Estadística de clientes">
             <Card.Body className="py-3">
               <div className="d-flex align-items-center gap-2 mb-2">
-                <FaUserFriends className="text-info" />
+                <Users className="text-info" />
                 <small className="text-light opacity-75">Clientes</small>
               </div>
               <div className="fs-2 fw-bold text-white">{stats.totalClientes}</div>
@@ -226,10 +225,10 @@ function DashboardHome() {
           </Card>
         </Col>
         <Col xs={6} lg={3}>
-          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }} aria-label="Estadística de turnos hoy">
+          <Card className="text-white h-100" aria-label="Estadística de turnos hoy">
             <Card.Body className="py-3">
               <div className="d-flex align-items-center gap-2 mb-2">
-                <FaCalendarAlt className="text-warning" />
+                <Calendar className="text-warning" />
                 <small className="text-light opacity-75">Turnos Hoy</small>
               </div>
               <div className="fs-2 fw-bold text-white">{stats.turnosHoy}</div>
@@ -237,10 +236,10 @@ function DashboardHome() {
           </Card>
         </Col>
         <Col xs={6} lg={3}>
-          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }} aria-label="Estadística de servicios">
+          <Card className="text-white h-100" aria-label="Estadística de servicios">
             <Card.Body className="py-3">
               <div className="d-flex align-items-center gap-2 mb-2">
-                <FaCut className="text-pink" />
+                <Scissors className="text-pink" />
                 <small className="text-light opacity-75">Servicios</small>
               </div>
               <div className="fs-2 fw-bold text-white">{stats.totalServicios}</div>
@@ -248,10 +247,10 @@ function DashboardHome() {
           </Card>
         </Col>
         <Col xs={6} lg={3}>
-          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }} aria-label="Estadística de empleados">
+          <Card className="text-white h-100" aria-label="Estadística de empleados">
             <Card.Body className="py-3">
               <div className="d-flex align-items-center gap-2 mb-2">
-                <FaUserTie className="text-success" />
+                <Briefcase className="text-success" />
                 <small className="text-light opacity-75">Empleados</small>
               </div>
               <div className="fs-2 fw-bold text-white">{stats.totalEmpleados}</div>
@@ -262,10 +261,10 @@ function DashboardHome() {
 
       <Row className="g-3 mb-4">
         <Col xs={12} lg={6}>
-          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }} aria-label="Estadística de ingresos del mes">
+          <Card className="text-white h-100" aria-label="Estadística de ingresos del mes">
             <Card.Body className="py-3">
               <div className="d-flex align-items-center gap-2 mb-2">
-                <FaDollarSign className="text-success" />
+                <DollarSign className="text-success" />
                 <small className="text-light opacity-75">Ingresos del Mes</small>
               </div>
               <div className="fs-1 fw-bold text-success">${stats.ingresosMensuales?.toLocaleString() || '0'}</div>
@@ -273,10 +272,10 @@ function DashboardHome() {
           </Card>
         </Col>
         <Col xs={12} lg={6}>
-          <Card className="text-white h-100" style={{ background: 'var(--bg-card)' }}>
+          <Card className="text-white h-100">
             <Card.Body className="py-3">
               <div className="d-flex align-items-center gap-2 mb-3">
-                <FaCalendarAlt className="text-info" />
+                <Calendar className="text-info" />
                 <small className="text-light opacity-75">Próximos Turnos</small>
               </div>
               {stats.proximosTurnos.length > 0 ? (
@@ -293,8 +292,6 @@ function DashboardHome() {
           </Card>
         </Col>
       </Row>
-
-      <style>{`.text-pink { color: #ec4899 !important; }`}</style>
     </Container>
   );
 }

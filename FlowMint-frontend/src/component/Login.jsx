@@ -3,7 +3,6 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import { authAPI } from "../services/api";
 import { motion } from "framer-motion";
 import { Lock, User, AlertCircle, Eye, EyeOff } from "lucide-react";
-import "../index.css";
 import { Logo } from "./VisualAssets";
 
 const Login = () => {

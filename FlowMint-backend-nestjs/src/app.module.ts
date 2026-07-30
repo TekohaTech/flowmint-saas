@@ -13,6 +13,7 @@ import { TurnosModule } from './turnos/turnos.module';
 import { GananciasModule } from './ganancias/ganancias.module';
 import { AiModule } from './ai/ai.module';
 import { ComerciosModule } from './comercios/comercios.module';
+import { NotificacionesModule } from './notificaciones/notificaciones.module';
 import { EmailModule } from './email/email.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
@@ -37,6 +38,7 @@ import { APP_GUARD } from '@nestjs/core';
     GananciasModule, 
     AiModule, 
     ComerciosModule,
+    NotificacionesModule,
     EmailModule
   ],
   controllers: [AppController],

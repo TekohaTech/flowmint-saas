@@ -47,6 +47,7 @@ model Comercio {
   empleados   Empleado[]
   servicios   Servicio[]
   turnos      Turno[]
+  notificaciones Notificacion[]
 
   @@index([estado])
   @@index([activo])
@@ -68,6 +69,9 @@ model Usuario {
   comercio    Comercio? @relation(fields: [comercio_id], references: [comercio_id])
   
   rol        Rol      @relation(fields: [rol_id], references: [rol_id])
+  
+  // Notificaciones
+  notificaciones Notificacion[]
   
   // Verificación de email
   email_verificado Boolean  @default(false)
@@ -169,4 +173,26 @@ model RegistroIP {
   intento         DateTime @default(now())
 
   @@index([ip, intento])
+}
+
+// Sistema de notificaciones admin → usuario
+// Límites: máx 50 por usuario, auto-delete leídas >30 días, no leídas >90 días
+model Notificacion {
+  notificacion_id Int      @id @default(autoincrement())
+  usuario_id      Int      // usuario destino
+  comercio_id     Int?     // null para SUPERADMIN global
+  target_all      Boolean  @default(false) // enviada a todos
+  tipo            String   @default("info") // info, warning, alert
+  titulo          String   @db.VarChar(200)
+  mensaje         String   @db.VarChar(500) // max 500 chars, son anotaciones simples
+  leido           Boolean  @default(false)
+  creado_en       DateTime @default(now())
+  creado_por      Int      // admin que envió
+
+  usuario  Usuario   @relation(fields: [usuario_id], references: [usuario_id])
+  comercio Comercio? @relation(fields: [comercio_id], references: [comercio_id])
+
+  @@index([usuario_id, leido])
+  @@index([comercio_id])
+  @@index([creado_en(sort: Desc)])
 }

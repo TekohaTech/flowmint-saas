@@ -46,14 +46,39 @@ const Registros = () => {
     setSuccess("");
   };
 
+  // Password strength: same rules as backend RegisterDto
+  const getPasswordChecks = (pass) => ({
+    length: pass.length >= 8,
+    uppercase: /[A-Z]/.test(pass),
+    number: /\d/.test(pass),
+  });
+
+  const getPasswordStrength = (pass) => {
+    if (!pass) return 0;
+    const checks = getPasswordChecks(pass);
+    return Object.values(checks).filter(Boolean).length; // 0-3
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
     setLoading(true);
 
-    if (formData.pass.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres");
+    // Password validation — matches backend RegisterDto
+    const passChecks = getPasswordChecks(formData.pass);
+    if (!passChecks.length) {
+      setError("La contraseña debe tener al menos 8 caracteres");
+      setLoading(false);
+      return;
+    }
+    if (!passChecks.uppercase) {
+      setError("La contraseña debe tener al menos una letra mayúscula");
+      setLoading(false);
+      return;
+    }
+    if (!passChecks.number) {
+      setError("La contraseña debe tener al menos un número");
       setLoading(false);
       return;
     }
@@ -330,7 +355,7 @@ const Registros = () => {
                 name="pass"
                 value={formData.pass}
                 onChange={handleChange}
-                placeholder="Mínimo 6 caracteres"
+                placeholder="Mínimo 8 caracteres, 1 mayúscula, 1 número"
                 required
                 autoComplete="new-password"
                 disabled={loading}
@@ -354,9 +379,42 @@ const Registros = () => {
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
-            <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
-              Debe tener al menos 6 caracteres
-            </small>
+            {/* Password strength indicator */}
+            {formData.pass && (
+              <div className="mt-2">
+                <div className="d-flex gap-1 mb-1" style={{ height: "4px" }}>
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      style={{
+                        flex: 1,
+                        borderRadius: "2px",
+                        background:
+                          i < getPasswordStrength(formData.pass)
+                            ? getPasswordStrength(formData.pass) === 1
+                              ? "#ff006e"
+                              : getPasswordStrength(formData.pass) === 2
+                              ? "#ffd60a"
+                              : "#16f2b3"
+                            : "var(--border-color)",
+                        transition: "background 0.3s",
+                      }}
+                    />
+                  ))}
+                </div>
+                <div className="d-flex flex-column" style={{ fontSize: "0.7rem" }}>
+                  <span style={{ color: getPasswordChecks(formData.pass).length ? "#16f2b3" : "var(--text-muted)" }}>
+                    {getPasswordChecks(formData.pass).length ? "✓" : "○"} Mínimo 8 caracteres
+                  </span>
+                  <span style={{ color: getPasswordChecks(formData.pass).uppercase ? "#16f2b3" : "var(--text-muted)" }}>
+                    {getPasswordChecks(formData.pass).uppercase ? "✓" : "○"} Al menos 1 mayúscula
+                  </span>
+                  <span style={{ color: getPasswordChecks(formData.pass).number ? "#16f2b3" : "var(--text-muted)" }}>
+                    {getPasswordChecks(formData.pass).number ? "✓" : "○"} Al menos 1 número
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Commerce Fields */}
