@@ -241,7 +241,7 @@ const useTurnos = () => {
       fecha_hora: format(new Date(turno.fecha_hora), "yyyy-MM-dd'T'HH:mm"),
       estado: turno.estado,
     });
-    setShowEditarTurnoModal(true);
+    setShowDetailsModal(true);
   };
 
   const handleSlotClick = (slotInfo) => {

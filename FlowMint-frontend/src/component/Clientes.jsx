@@ -13,6 +13,7 @@ import { clientsAPI } from "../services/api";
 import { Users, Mail, Phone, Edit, Trash2 } from "lucide-react";
 import useCrud from "./shared/useCrud";
 import SearchBar from "./shared/SearchBar";
+import { blockNonNumeric } from "./shared/numericUtils";
 import CrudModal from "./shared/CrudModal";
 import EmptyState from "./shared/EmptyState";
 
@@ -40,7 +41,7 @@ const Clientes = () => {
     fields: [
       { name: "nombre", label: "Nombre", type: "text", required: true },
       { name: "apellido", label: "Apellido", type: "text", required: true },
-      { name: "telefono", label: "Teléfono", type: "tel", required: false },
+      { name: "telefono", label: "Teléfono", type: "tel", required: false, numeric: true },
       { name: "email", label: "Email", type: "email", required: false },
     ],
     idKey: "cliente_id",
@@ -292,10 +293,12 @@ const Clientes = () => {
           </Form.Label>
           <Form.Control
             type="tel"
+            inputMode="numeric"
             name="telefono"
             value={formData.telefono}
             onChange={handleChange}
-            placeholder="+1 (555) 123-4567"
+            onKeyDown={blockNonNumeric}
+            placeholder="3764000001"
           />
         </Form.Group>
       </CrudModal>

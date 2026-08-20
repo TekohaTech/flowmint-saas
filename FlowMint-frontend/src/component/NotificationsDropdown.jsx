@@ -4,6 +4,20 @@ import { notificationsAPI } from '../services/api';
 
 const MAX_MESSAGE_LINES = 2;
 
+const timeAgo = (dateStr) => {
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const seconds = Math.floor((now - then) / 1000);
+  if (seconds < 60) return 'ahora';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `hace ${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `hace ${hours}h`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `hace ${days}d`;
+  return new Date(dateStr).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
+};
+
 const NotificationsDropdown = () => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -204,15 +218,18 @@ const NotificationsDropdown = () => {
                     >
                       {notif.titulo}
                     </span>
-                    {!notif.leido && (
-                      <span
-                        className="badge"
-                        style={{ fontSize: '0.6rem', background: '#00f3ff', color: 'black' }}
-                      >
-                        Nuevo
-                      </span>
-                    )}
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', marginLeft: '6px', flexShrink: 0 }}>
+                      {timeAgo(notif.creado_en)}
+                    </span>
                   </div>
+                  {!notif.leido && (
+                    <span
+                      className="badge mb-1"
+                      style={{ fontSize: '0.6rem', background: '#00f3ff', color: 'black' }}
+                    >
+                      Nuevo
+                    </span>
+                  )}
                   <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
                     {notif.mensaje.length > 80 && !expandedIds.has(notif.notificacion_id) ? (
                       <>

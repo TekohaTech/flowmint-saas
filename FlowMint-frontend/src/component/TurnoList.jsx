@@ -1,5 +1,5 @@
-import React from "react";
-import { Container, Row, Col } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Row, Col } from "react-bootstrap";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { es } from "date-fns/locale";
@@ -8,6 +8,16 @@ import PropTypes from "prop-types";
 const locales = { es };
 const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
 
+const useIsMobile = (breakpoint = 768) => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < breakpoint);
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < breakpoint);
+    window.addEventListener("resize", handler);
+    return () => window.removeEventListener("resize", handler);
+  }, [breakpoint]);
+  return isMobile;
+};
+
 const TurnoList = ({
   turnos,
   currentView,
@@ -15,6 +25,8 @@ const TurnoList = ({
   onSelectEvent,
   onSelectSlot,
 }) => {
+  const isMobile = useIsMobile();
+
   const events = turnos.map((turno) => {
     const startDate = new Date(turno.fecha_hora);
     const duracion = turno.servicio?.duracion || 60;
@@ -22,7 +34,9 @@ const TurnoList = ({
 
     return {
       id: turno.turno_id,
-      title: `${turno.servicio?.nombre || "Servicio"} con ${turno.cliente?.nombre || "Cliente"} ${turno.cliente?.apellido || ""}`,
+      title: isMobile
+        ? `${turno.cliente?.nombre || "C"} ${turno.cliente?.apellido || ""}`
+        : `${turno.servicio?.nombre || "Servicio"} con ${turno.cliente?.nombre || "Cliente"} ${turno.cliente?.apellido || ""}`,
       start: startDate,
       end: endDate,
       turno_data: turno,
@@ -32,7 +46,7 @@ const TurnoList = ({
   return (
     <Row>
       <Col xs={12}>
-        <div style={{ height: "600px" }}>
+        <div style={{ height: isMobile ? "420px" : "600px" }}>
           <Calendar
             localizer={localizer}
             events={events}
@@ -42,10 +56,11 @@ const TurnoList = ({
             onSelectEvent={onSelectEvent}
             onSelectSlot={onSelectSlot}
             selectable
-            defaultView="month"
+            defaultView={isMobile ? "week" : "month"}
             view={currentView}
             onView={setCurrentView}
             views={["month", "week", "day"]}
+            toolbar={true}
             aria-label="Calendario de turnos"
             messages={{
               date: "Fecha",
@@ -73,8 +88,9 @@ const TurnoList = ({
                 border: "none",
                 color: "white",
                 margin: "1px",
-                padding: "2px",
-                fontSize: "0.8rem",
+                padding: isMobile ? "1px 2px" : "2px",
+                fontSize: isMobile ? "0.65rem" : "0.8rem",
+                lineHeight: isMobile ? "1.1" : "1.3",
               },
             })}
           />

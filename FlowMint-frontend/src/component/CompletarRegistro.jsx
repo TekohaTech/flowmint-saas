@@ -8,6 +8,7 @@ import {
   Zap, Store, MapPin, Phone, Mail, Tag, ArrowRight, CheckCircle
 } from 'lucide-react';
 import api from '../services/api';
+import { blockNonNumeric } from './shared/numericUtils';
 
 const CompletarRegistro = () => {
   const navigate = useNavigate();
@@ -55,9 +56,11 @@ const CompletarRegistro = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const numericFields = ['telefono'];
+    const cleaned = numericFields.includes(name) ? value.replace(/[^0-9]/g, '') : value;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: cleaned
     }));
     setError('');
   };
@@ -201,11 +204,13 @@ const CompletarRegistro = () => {
                               <Phone size={16} />
                             </span>
                             <Form.Control
-                              type="text"
+                              type="tel"
+                              inputMode="numeric"
                               name="telefono"
                               value={formData.telefono}
                               onChange={handleChange}
-                              placeholder="Ej: 3764-123456"
+                              onKeyDown={blockNonNumeric}
+                              placeholder="3764000001"
                               className="bg-dark text-white border-secondary ps-5"
                               style={{ borderRadius: '8px' }}
                             />

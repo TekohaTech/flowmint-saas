@@ -123,6 +123,60 @@ const customStyles = `
   .rbc-time-view-resources .rbc-time-header-gutter {
     border-right: 1px solid #444;
   }
+
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    .rbc-toolbar {
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .rbc-toolbar-label {
+      font-size: 1rem;
+      order: -1;
+      width: 100%;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .rbc-toolbar button {
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      margin: 0 2px;
+    }
+
+    .rbc-header {
+      padding: 4px 2px;
+      font-size: 0.75rem;
+    }
+
+    .rbc-date-cell {
+      padding: 2px 1px;
+      font-size: 0.7rem;
+    }
+
+    .rbc-day-bg {
+      min-height: 0;
+    }
+
+    .rbc-month-row {
+      min-height: 0;
+    }
+
+    .rbc-show-more {
+      font-size: 0.65rem;
+      padding: 1px 4px;
+    }
+
+    .rbc-timeslot-group {
+      min-height: 40px;
+    }
+
+    .rbc-time-slot {
+      min-height: 24px;
+    }
+  }
 `;
 
 export default customStyles;

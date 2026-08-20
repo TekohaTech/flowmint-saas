@@ -58,7 +58,11 @@ const useCrud = ({ api, entityName, fields, idKey, onBeforeSubmit, transformSubm
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // Auto-filter numeric fields: only allow digits
+    const field = fields.find((f) => f.name === name);
+    const isNumeric = field && (field.type === "number" || field.numeric);
+    const cleaned = isNumeric ? value.replace(/[^0-9]/g, "") : value;
+    setFormData((prev) => ({ ...prev, [name]: cleaned }));
   };
 
   const handleSubmit = async (e) => {

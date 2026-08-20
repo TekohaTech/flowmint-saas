@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import "../index.css";
 import { Logo } from "./VisualAssets";
+import { blockNonNumeric } from "./shared/numericUtils";
 
 const Registros = () => {
   const [formData, setFormData] = useState({
@@ -41,7 +42,10 @@ const Registros = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    // Numeric fields: only allow digits
+    const numericFields = ["dni", "telefono"];
+    const cleaned = numericFields.includes(name) ? value.replace(/[^0-9]/g, "") : value;
+    setFormData({ ...formData, [name]: cleaned });
     setError("");
     setSuccess("");
   };
@@ -289,12 +293,15 @@ const Registros = () => {
             </label>
             <input
               type="text"
+              inputMode="numeric"
               id="dni"
               name="dni"
               value={formData.dni}
               onChange={handleChange}
-              placeholder="Ingresa tu número de DNI (opcional)"
+              onKeyDown={blockNonNumeric}
+              placeholder="Solo números (ej: 40123456)"
               disabled={loading}
+              maxLength={8}
             />
           </div>
 
@@ -481,11 +488,13 @@ const Registros = () => {
             </label>
             <input
               type="tel"
+              inputMode="numeric"
               id="telefono"
               name="telefono"
               value={formData.telefono}
               onChange={handleChange}
-              placeholder="+54 9 11 1234 5678"
+              onKeyDown={blockNonNumeric}
+              placeholder="3764000001"
               disabled={loading}
             />
           </div>

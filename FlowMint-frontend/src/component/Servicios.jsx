@@ -12,6 +12,7 @@ import {
 } from "react-bootstrap";
 import { servicesAPI } from "../services/api";
 import { Scissors, DollarSign, Clock, Edit, Trash2 } from "lucide-react";
+import { formatPeso, blockNonNumeric } from "./shared/numericUtils";
 import useCrud from "./shared/useCrud";
 import SearchBar from "./shared/SearchBar";
 import CrudModal from "./shared/CrudModal";
@@ -41,8 +42,8 @@ const Servicios = () => {
     fields: [
       { name: "nombre", label: "Nombre del Servicio", type: "text", required: true },
       { name: "descripcion", label: "Descripción", type: "textarea", required: false },
-      { name: "precio", label: "Precio", type: "number", required: true },
-      { name: "duracion", label: "Duración", type: "number", required: true },
+      { name: "precio", label: "Precio", type: "number", required: true, numeric: true },
+      { name: "duracion", label: "Duración", type: "number", required: true, numeric: true },
     ],
     idKey: "servicio_id",
     onBeforeSubmit: (data, setError) => {
@@ -58,8 +59,8 @@ const Servicios = () => {
     },
     transformSubmit: (data) => ({
       ...data,
-      precio: parseFloat(data.precio),
-      duracion: parseInt(data.duracion),
+      precio: parseInt(data.precio, 10) || 0,
+      duracion: parseInt(data.duracion, 10) || 0,
     }),
   });
 
@@ -207,7 +208,7 @@ const Servicios = () => {
                               fontSize: "1.1rem",
                             }}
                           >
-                            ${service.precio.toFixed(2)}
+                            {formatPeso(service.precio)}
                           </span>
                         </div>
                       </td>
@@ -315,13 +316,15 @@ const Servicios = () => {
                 </InputGroup.Text>
                 <Form.Control
                   type="number"
-                  step="0.01"
-                  min="0.01"
+                  step="1"
+                  min="1"
+                  inputMode="numeric"
                   name="precio"
                   value={formData.precio}
                   onChange={handleChange}
+                  onKeyDown={blockNonNumeric}
                   required
-                  placeholder="0.00"
+                  placeholder="3000"
                 />
               </InputGroup>
             </Form.Group>
@@ -336,9 +339,11 @@ const Servicios = () => {
                 <Form.Control
                   type="number"
                   min="1"
+                  inputMode="numeric"
                   name="duracion"
                   value={formData.duracion}
                   onChange={handleChange}
+                  onKeyDown={blockNonNumeric}
                   required
                   placeholder="30"
                 />

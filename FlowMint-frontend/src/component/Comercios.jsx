@@ -9,6 +9,7 @@ import {
     Clock, User, Tag
 } from 'lucide-react';
 import { comerciosAPI } from '../services/api';
+import { blockNonNumeric } from './shared/numericUtils';
 
 const Comercios = () => {
     const [comercios, setComercios] = useState([]);
@@ -118,9 +119,11 @@ const Comercios = () => {
 
     const handleFormChange = (e) => {
         const { name, value, type, checked } = e.target;
+        const numericFields = ['telefono'];
+        const cleaned = numericFields.includes(name) ? value.replace(/[^0-9]/g, '') : value;
         setFormData(prev => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : value
+            [name]: type === 'checkbox' ? checked : cleaned
         }));
     };
 
@@ -415,11 +418,13 @@ const Comercios = () => {
                                 <Form.Label className="text-light opacity-75 small">Teléfono</Form.Label>
                                 <Form.Control 
                                     className="bg-black border-secondary text-white" 
-                                    type="text" 
+                                    type="tel"
+                                    inputMode="numeric"
                                     name="telefono"
                                     value={formData.telefono}
                                     onChange={handleFormChange}
-                                    placeholder="Teléfono" 
+                                    onKeyDown={blockNonNumeric}
+                                    placeholder="3764000001" 
                                 />
                             </Col>
                             <Col xs={6}>
