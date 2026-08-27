@@ -31,7 +31,7 @@ const Usuarios = () => {
 
     const currentUser = authAPI.getCurrentUser();
     const isSuperAdmin = currentUser?.rol === 'SUPERADMIN';
-    const isAdmin = isSuperAdmin || currentUser?.rol === 'DUEÑO';
+    const isAdmin = isSuperAdmin || currentUser?.rol === 'DUENO';
 
     const fetchUsuarios = useCallback(async () => {
         try {
@@ -102,7 +102,9 @@ const Usuarios = () => {
             user: '',
             pass: '',
             correo: '',
-            rol_id: roles.find(r => r.nombre === 'DUEÑO')?.rol_id || roles[0]?.rol_id,
+            rol_id: isSuperAdmin
+                ? (roles.find(r => r.nombre === 'DUENO')?.rol_id || roles[0]?.rol_id)
+                : (roles.find(r => r.nombre === 'EMPLEADO')?.rol_id || null),
             comercio_id: currentUser?.comercio_id || null
         });
         setShowModal(true);
@@ -218,7 +220,7 @@ const Usuarios = () => {
                                 )}
                                 <td>
                                     <span className={`badge border ${usuario.rol?.nombre === 'SUPERADMIN' ? 'border-danger text-danger' : 'border-primary text-primary'}`}>
-                                        {usuario.rol?.nombre || 'N/A'}
+                                        {usuario.rol?.nombre === 'DUENO' ? 'Dueño / Empresa' : (usuario.rol?.nombre || 'N/A')}
                                     </span>
                                 </td>
                                 <td className="text-center">
@@ -265,11 +267,13 @@ const Usuarios = () => {
                             </Col>
                             <Col md={6}>
                                 <Form.Label className="small text-light opacity-75 text-uppercase">Rol de Acceso</Form.Label>
-                                <Form.Select className="bg-black border-secondary text-white" name="rol_id" value={modalData.rol_id || ''} onChange={handleFormChange} required>
+                                <Form.Select className="bg-black border-secondary text-white" name="rol_id" value={modalData.rol_id || ''} onChange={handleFormChange} required disabled={!isSuperAdmin}>
                                     <option value="" disabled>Seleccione...</option>
-                                    {roles.map(rol => (
-                                        <option key={rol.rol_id} value={rol.rol_id}>{rol.nombre}</option>
-                                    ))}
+                                    {roles
+                                        .filter(rol => isSuperAdmin ? true : rol.nombre === 'EMPLEADO')
+                                        .map(rol => (
+                                            <option key={rol.rol_id} value={rol.rol_id}>{rol.nombre === 'DUENO' ? 'Dueño / Empresa' : rol.nombre}</option>
+                                        ))}
                                 </Form.Select>
                             </Col>
                             {isSuperAdmin && (

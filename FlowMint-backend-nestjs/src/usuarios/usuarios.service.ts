@@ -83,4 +83,19 @@ export class UsuariosService {
       },
     });
   }
+
+  /**
+   * Returns the rol_id for EMPLEADO. Used to prevent privilege escalation:
+   * a DUENO may only create EMPLEADO accounts inside their own commerce.
+   */
+  async getEmpleadoRoleId(): Promise<number> {
+    const empleado = await this.prisma.rol.findFirst({
+      where: { nombre: 'EMPLEADO' },
+      select: { rol_id: true },
+    });
+    if (!empleado) {
+      throw new Error('EMPLEADO role not found');
+    }
+    return empleado.rol_id;
+  }
 }

@@ -14,10 +14,12 @@ export class UsuariosController {
 
   @Post()
   @Roles(RolNombre.SUPERADMIN, RolNombre.DUENO)
-  create(@Body() createUsuarioDto: CreateUsuarioDto, @Request() req) {
-    // If not SuperAdmin, force the commerce ID to the user's own commerce
+  async create(@Body() createUsuarioDto: CreateUsuarioDto, @Request() req) {
+    // If not SuperAdmin, force the commerce ID and role to prevent privilege escalation
     if (req.user.rol.nombre !== RolNombre.SUPERADMIN) {
       createUsuarioDto.comercio_id = req.user.comercio_id;
+      // A DUENO can only create EMPLEADO accounts — never another DUENO or SUPERADMIN
+      createUsuarioDto.rol_id = await this.usuariosService.getEmpleadoRoleId();
     }
     return this.usuariosService.create(createUsuarioDto);
   }

@@ -49,71 +49,108 @@ const Dashboard = () => {
   const toggleSidebar = () => setShowSidebar(!showSidebar);
   const toggleChat = () => setShowChat(!showChat);
 
-  const menuItems = user?.rol === 'SUPERADMIN'
-    ? [
-        {
-          path: "/dashboard",
-          icon: Zap,
-          label: "Panel",
-          color: "var(--neon-cyan)",
-        },
-        {
-          path: "/dashboard/comercios",
-          icon: Store,
-          label: "Comercios",
-          color: "var(--neon-green)",
-        },
-        {
-          path: "/dashboard/usuarios",
-          icon: User,
-          label: "Usuarios",
-          color: "var(--neon-purple)",
-        },
-      ]
-    : [
-        {
-          path: "/dashboard",
-          icon: Zap,
-          label: "Panel",
-          color: "var(--neon-cyan)",
-        },
-        {
-          path: "/dashboard/turnos",
-          icon: Calendar,
-          label: "Turnos",
-          color: "var(--neon-cyan)",
-        },
-        {
-          path: "/dashboard/clientes",
-          icon: Users,
-          label: "Clientes",
-          color: "var(--neon-green)",
-        },
-        {
-          path: "/dashboard/empleados",
-          icon: Briefcase,
-          label: "Empleados",
-          color: "var(--neon-purple)",
-        },
-        {
-          path: "/dashboard/servicios",
-          icon: Scissors,
-          label: "Servicios",
-          color: "var(--neon-pink)",
-        },
-        {
-          path: "/dashboard/usuarios",
-          icon: User,
-          label: "Usuarios",
-          color: "var(--neon-yellow)",
-        },
-        {
-          path: "/dashboard/ganancias",
-          icon: DollarSign,
-          label: "Ganancias",
-          color: "var(--neon-orange)",
-        },
-      ];
+  let menuItems;
+  if (user?.rol === 'SUPERADMIN') {
+    menuItems = [
+      {
+        path: "/dashboard",
+        icon: Zap,
+        label: "Panel",
+        color: "var(--neon-cyan)",
+      },
+      {
+        path: "/dashboard/comercios",
+        icon: Store,
+        label: "Comercios",
+        color: "var(--neon-green)",
+      },
+      {
+        path: "/dashboard/usuarios",
+        icon: User,
+        label: "Usuarios",
+        color: "var(--neon-purple)",
+      },
+    ];
+  } else if (user?.rol === 'DUENO') {
+    menuItems = [
+      {
+        path: "/dashboard",
+        icon: Zap,
+        label: "Panel",
+        color: "var(--neon-cyan)",
+      },
+      {
+        path: "/dashboard/turnos",
+        icon: Calendar,
+        label: "Turnos",
+        color: "var(--neon-cyan)",
+      },
+      {
+        path: "/dashboard/clientes",
+        icon: Users,
+        label: "Clientes",
+        color: "var(--neon-green)",
+      },
+      {
+        path: "/dashboard/empleados",
+        icon: Briefcase,
+        label: "Empleados",
+        color: "var(--neon-purple)",
+      },
+      {
+        path: "/dashboard/servicios",
+        icon: Scissors,
+        label: "Servicios",
+        color: "var(--neon-pink)",
+      },
+      {
+        path: "/dashboard/usuarios",
+        icon: User,
+        label: "Usuarios",
+        color: "var(--neon-yellow)",
+      },
+      {
+        path: "/dashboard/ganancias",
+        icon: DollarSign,
+        label: "Ganancias",
+        color: "var(--neon-orange)",
+      },
+    ];
+  } else {
+    // EMPLEADO — operate the business without structural privileges
+    menuItems = [
+      {
+        path: "/dashboard",
+        icon: Zap,
+        label: "Panel",
+        color: "var(--neon-cyan)",
+      },
+      {
+        path: "/dashboard/turnos",
+        icon: Calendar,
+        label: "Turnos",
+        color: "var(--neon-cyan)",
+      },
+      {
+        path: "/dashboard/clientes",
+        icon: Users,
+        label: "Clientes",
+        color: "var(--neon-green)",
+      },
+      {
+        path: "/dashboard/servicios",
+        icon: Scissors,
+        label: "Servicios",
+        color: "var(--neon-pink)",
+      },
+      {
+        path: "/dashboard/ganancias",
+        icon: DollarSign,
+        label: "Ganancias",
+        color: "var(--neon-orange)",
+      },
+    ];
+  }
 
   const sidebarProps = {
     user,
