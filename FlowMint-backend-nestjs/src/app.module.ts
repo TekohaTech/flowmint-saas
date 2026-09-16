@@ -15,6 +15,7 @@ import { AiModule } from './ai/ai.module';
 import { ComerciosModule } from './comercios/comercios.module';
 import { NotificacionesModule } from './notificaciones/notificaciones.module';
 import { EmailModule } from './email/email.module';
+import { HealthModule } from './health/health.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
@@ -39,7 +40,8 @@ import { APP_GUARD } from '@nestjs/core';
     AiModule, 
     ComerciosModule,
     NotificacionesModule,
-    EmailModule
+    EmailModule,
+    HealthModule
   ],
   controllers: [AppController],
   providers: [

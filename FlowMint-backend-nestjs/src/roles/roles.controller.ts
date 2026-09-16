@@ -22,7 +22,7 @@ export class RolesController {
   }
 
   @Get()
-  @Roles(RolNombre.SUPERADMIN)
+  @Roles(RolNombre.SUPERADMIN, RolNombre.DUENO)
   findAll() {
     return this.rolesService.findAll();
   }
