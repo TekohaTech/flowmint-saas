@@ -77,6 +77,14 @@ export const authAPI = {
         return response.data;
     },
 
+    activarPin: async (data) => {
+        const response = await api.post('/auth/activar-pin', data);
+        if (response.data.user) {
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+        }
+        return response.data;
+    },
+
     isAuthenticated: () => {
         // Quick local check: user data exists = likely logged in
         // For real validation, use getProfile() which checks the httpOnly cookie
@@ -108,6 +116,11 @@ export const usersAPI = {
 
     delete: async (id) => {
         const response = await api.delete(`/usuarios/${id}`);
+        return response.data;
+    },
+
+    generarPin: async (id) => {
+        const response = await api.post(`/usuarios/${id}/generar-pin`);
         return response.data;
     },
 };

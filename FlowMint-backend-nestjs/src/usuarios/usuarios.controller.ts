@@ -15,13 +15,16 @@ export class UsuariosController {
   @Post()
   @Roles(RolNombre.SUPERADMIN, RolNombre.DUENO)
   async create(@Body() createUsuarioDto: CreateUsuarioDto, @Request() req) {
+    const callerRole = req.user.rol?.nombre;
+
     // If not SuperAdmin, force the commerce ID and role to prevent privilege escalation
-    if (req.user.rol.nombre !== RolNombre.SUPERADMIN) {
+    if (callerRole !== RolNombre.SUPERADMIN) {
       createUsuarioDto.comercio_id = req.user.comercio_id;
       // A DUENO can only create EMPLEADO accounts — never another DUENO or SUPERADMIN
       createUsuarioDto.rol_id = await this.usuariosService.getEmpleadoRoleId();
     }
-    return this.usuariosService.create(createUsuarioDto);
+
+    return this.usuariosService.create(createUsuarioDto, callerRole);
   }
 
   @Get()
@@ -69,5 +72,29 @@ export class UsuariosController {
       }
     }
     return this.usuariosService.remove(id);
+  }
+
+  @Post(':id/generar-pin')
+  @Roles(RolNombre.SUPERADMIN, RolNombre.DUENO)
+  async generarPin(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req,
+  ) {
+    const usuario = await this.usuariosService.findOne(id);
+    if (!usuario || usuario.comercio_id == null) {
+      throw new ForbiddenException('Usuario no encontrado');
+    }
+
+    // DUENO can only generate PIN for users in their own commerce
+    if (req.user.rol?.nombre !== RolNombre.SUPERADMIN) {
+      if (usuario.comercio_id !== req.user.comercio_id) {
+        throw new ForbiddenException(
+          'No tenés permiso para generar PIN para este usuario',
+        );
+      }
+    }
+
+    const pin = await this.usuariosService.generarPin(id, usuario.comercio_id);
+    return { pin };
   }
 }

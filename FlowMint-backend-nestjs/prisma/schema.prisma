@@ -76,6 +76,11 @@ model Usuario {
   // Verificación de email
   email_verificado Boolean  @default(false)
   token_verificacion String? @unique
+
+  // Activación por PIN (Fase 2)
+  pin_hash       String?
+  pin_expiracion DateTime?
+  pin_intentos   Int      @default(0)
   
   creado_en   DateTime @default(now())
 

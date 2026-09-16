@@ -30,13 +30,14 @@ export class CreateUsuarioDto {
   user: string;
 
   @ApiProperty({
-    description: 'The password for the user (minimum 6 characters).',
+    description: 'The password for the user (minimum 6 characters). Not required for EMPLEADO accounts created by DUENO — a PIN is generated instead.',
     example: 'securepass123',
+    required: false,
   })
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @MinLength(6)
-  pass: string;
+  pass?: string;
 
   @ApiProperty({
     description: 'The email address of the user.',

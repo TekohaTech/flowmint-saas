@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { CompletarRegistroDto } from './dto/completar-registro.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ActivarPinDto } from './dto/activar-pin.dto';
 import { EmailService } from '../email/email.service';
 import * as crypto from 'crypto';
 
@@ -99,7 +100,7 @@ export class AuthService {
       throw new UnauthorizedException('Usuario no encontrado');
     }
 
-    const { pass, ...result } = user;
+    const { pass, pin_hash, pin_expiracion, ...result } = user;
     return result;
   }
 
@@ -119,6 +120,42 @@ export class AuthService {
         user: user?.user || user?.correo,
         rol: user?.rol?.nombre,
         comercio_id: user?.comercio_id
+      },
+    };
+  }
+
+  /**
+   * Employee self-activation: validate the 6-digit PIN, set their own
+   * password, and sign them in immediately (same JWT flow as login).
+   */
+  async activarPin(dto: ActivarPinDto) {
+    const activatedUser = await this.usuariosService.activarConPin(
+      dto.user,
+      dto.pin,
+      dto.pass,
+    );
+
+    // The PIN must never be returned or logged after activation
+    const { pin, ...safeUser } = activatedUser as any;
+
+    const payload = {
+      username: safeUser?.correo || safeUser?.user,
+      sub: safeUser?.usuario_id,
+      rol: safeUser?.rol?.nombre,
+      comercio_id: safeUser?.comercio_id,
+    };
+
+    this.logger.log(`Employee activated via PIN: usuario_id=${safeUser?.usuario_id}`);
+
+    return {
+      access_token: this.jwtService.sign(payload),
+      user: {
+        usuario_id: safeUser?.usuario_id,
+        nombre: safeUser?.nombre,
+        apellido: safeUser?.apellido,
+        user: safeUser?.user || safeUser?.correo,
+        rol: safeUser?.rol?.nombre,
+        comercio_id: safeUser?.comercio_id,
       },
     };
   }

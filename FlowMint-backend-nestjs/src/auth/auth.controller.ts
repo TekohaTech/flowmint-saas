@@ -8,6 +8,7 @@ import { CompletarRegistroDto } from './dto/completar-registro.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ActivarPinDto } from './dto/activar-pin.dto';
 import { ThrottlerGuard, Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
@@ -33,6 +34,16 @@ export class AuthController {
     });
 
     return authData;
+  }
+
+  @Public()
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { ttl: 60000, limit: 10 } })
+  @Post('activar-pin')
+  @ApiOperation({ summary: 'Activar cuenta de empleado con PIN y establecer contraseña' })
+  @ApiBody({ type: ActivarPinDto })
+  async activarPin(@Body() dto: ActivarPinDto) {
+    return this.authService.activarPin(dto);
   }
 
   @Post('logout')
