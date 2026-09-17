@@ -61,6 +61,10 @@ export class ComerciosService {
     if (dto.dueno_telefono !== undefined) updateData.dueno_telefono = dto.dueno_telefono;
 
     if (dto.activo !== undefined) {
+      // Persist the boolean flag too — the login gate reads comercio.activo,
+      // so without this the toggle left the row inconsistent (estado=activo
+      // but activo=false), blocking DUENO/EMPLEADO logins forever.
+      updateData.activo = dto.activo;
       if (dto.activo === true) {
         updateData.estado = 'activo';
         updateData.fecha_activacion = new Date();
