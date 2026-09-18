@@ -6,7 +6,7 @@
 - **Frontend**: React 18 + Vite + react-bootstrap + react-router-dom v6
 - **Auth**: JWT (passport-jwt) + httpOnly cookies
 - **AI**: Groq SDK (primary) + Cerebras SDK (fallback) via AI orchestrator
-- **Email**: Nodemailer (SMTP)
+- **Email**: Brevo HTTP API (`fetch`) with Nodemailer SMTP fallback
 - **Infra**: Docker + docker-compose
 
 ## Architecture
@@ -15,6 +15,15 @@
 - RBAC roles: SUPERADMIN, DUENO, EMPLEADO
 - Soft delete pattern: `estado: 'A'` (active), `'I'` (inactive), `'B'` (deleted)
 - JWT_SECRET is **required** — app refuses to start without it (no fallback)
+
+## Business Rules (Data Retention)
+
+Full source of truth: see `ai.md` → "Business Rules — Data Retention & Deletion".
+
+- **No orphan commerces**: a `Comercio` must never remain active without a linked owner account.
+- **Deleting a user cleans its commerce**: `UsuariosService.remove()` deletes the commerce if empty; if the commerce still holds data (clients/turnos/etc.) it is **suspended, not deleted** to preserve history.
+- **Inactive / non-paying tenants**: prior notice is sent to `dueno_email`; data is permanently deleted after the notice period.
+- **Legal**: reference law is Argentina **Ley 25.326**. The contract wording must be validated by legal counsel.
 
 ## Conventions
 

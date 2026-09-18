@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  Logger,
+} from '@nestjs/common';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -258,8 +263,83 @@ export class UsuariosService {
     return this.stripSensitive(updated);
   }
 
-  remove(id: number) {
-    return this.prisma.usuario.delete({ where: { usuario_id: id } });
+  /**
+   * Elimina un usuario y evita dejar comercios huérfanos.
+   *
+   * Regla de negocio (retención de datos):
+   *  - Si el usuario borrado era el único vínculo de su comercio y este NO
+   *    tiene datos asociados (clientes, empleados, servicios, turnos), el
+   *    comercio se elimina para no dejar registros fantasma en el panel admin.
+   *  - Si el comercio todavía tiene datos, NO se borra: se suspende para
+   *    conservar el historial (retención) hasta su baja definitiva.
+   */
+  async remove(id: number) {
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { usuario_id: id },
+      select: {
+        usuario_id: true,
+        comercio_id: true,
+      },
+    });
+
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    const comercioId = usuario.comercio_id;
+
+    return this.prisma.$transaction(async (tx) => {
+      // Las notificaciones referencian al usuario (FK) — limpiarlas primero
+      await tx.notificacion.deleteMany({ where: { usuario_id: id } });
+
+      const deleted = await tx.usuario.delete({ where: { usuario_id: id } });
+
+      // El SUPERADMIN no pertenece a ningún comercio
+      if (comercioId == null) {
+        return deleted;
+      }
+
+      const [usuarios, clientes, empleados, servicios, turnos] =
+        await Promise.all([
+          tx.usuario.count({ where: { comercio_id: comercioId } }),
+          tx.cliente.count({ where: { comercio_id: comercioId } }),
+          tx.empleado.count({ where: { comercio_id: comercioId } }),
+          tx.servicio.count({ where: { comercio_id: comercioId } }),
+          tx.turno.count({ where: { comercio_id: comercioId } }),
+        ]);
+
+      const comercioVacio =
+        usuarios === 0 &&
+        clientes === 0 &&
+        empleados === 0 &&
+        servicios === 0 &&
+        turnos === 0;
+
+      if (comercioVacio) {
+        await tx.notificacion.deleteMany({
+          where: { comercio_id: comercioId },
+        });
+        await tx.comercio.delete({ where: { comercio_id: comercioId } });
+        this.logger.log(
+          `Comercio ${comercioId} eliminado junto a su último usuario (usuario_id=${id})`,
+        );
+      } else {
+        await tx.comercio.update({
+          where: { comercio_id: comercioId },
+          data: {
+            activo: false,
+            estado: 'suspendido',
+            fecha_suspension: new Date(),
+            motivo_suspension: 'Propietario eliminado del sistema',
+          },
+        });
+        this.logger.log(
+          `Comercio ${comercioId} suspendido con datos conservados tras eliminar su dueño (usuario_id=${id})`,
+        );
+      }
+
+      return deleted;
+    });
   }
 
   async findByUsername(username: string) {

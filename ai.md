@@ -84,6 +84,42 @@ Access flow: `JwtAuthGuard` (extracts user from Bearer/cookie) -> `RolesGuard` (
 ### Soft Delete Pattern
 `Cliente`, `Empleado`, `Servicio` use `estado: 'A'` (active) / `'B'` (deleted). `findAll()` and `findOne()` always filter by `estado: 'A'`. `Turno` uses hard delete. `Comercio` uses lifecycle states (`pendiente` -> `activo` | `suspendido`).
 
+## Business Rules — Data Retention & Deletion
+
+These rules govern how tenant (Comercio) data is created, suspended and deleted.
+They are the technical source of truth for the SaaS **Terms of Use** contract.
+
+### R1 — No orphan commerces
+A `Comercio` must never exist without a linked owner account when it still holds
+data that makes it visible to the admin panel. Orphan records (comercio with no
+`Usuario`) must not remain active.
+
+### R2 — User deletion cascades to its commerce
+`UsuariosService.remove(id)` runs inside a transaction:
+1. Deletes notifications referencing the user (FK constraint).
+2. Deletes the user.
+3. If the user was the last link to its `comercio_id`:
+   - **Empty commerce** (0 users, clients, employees, services, turnos) → the
+     commerce is **hard-deleted** (no ghost rows in the admin panel).
+   - **Commerce with data** → the commerce is **suspended**, not deleted
+     (`activo=false`, `estado='suspendido'`, `fecha_suspension`, `motivo_suspension`).
+     Data is retained for history/recovery.
+
+### R3 — Retention policy for inactive / non-paying tenants (contract)
+- Before any deletion, the platform sends prior notice to the registered owner
+  (`dueno_email`) informing the suspension date and the pending deletion date.
+- After the notice period, tenants that remain inactive / non-paying have their
+  data **permanently deleted** from the system.
+- Deletion is intentional and preventive: it avoids storing personal data of
+  users that no longer have a relationship with the platform.
+
+### R4 — Legal note (Argentina)
+The reference law for personal data protection in Argentina is **Ley 25.326**
+(Protección de Datos Personales). The retention/deletion periods, the notice
+period and the exact contract wording **must be validated by legal counsel**
+before publishing the Terms of Use. This document defines the *business rule*,
+not the legal text.
+
 ## Backend Architecture (`FlowMint-backend-nestjs/`)
 
 ### Module Inventory (11 feature + 1 global)
