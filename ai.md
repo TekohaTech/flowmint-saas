@@ -50,7 +50,8 @@ Access flow: `JwtAuthGuard` (extracts user from Bearer/cookie) -> `RolesGuard` (
 - **Relations:** `hasMany` -> `Usuario`
 
 ### Usuario
-- `usuario_id` (PK), `nombre`, `apellido`, `dni?`, `user?` (`@unique`), `pass?`, `googleId?` (`@unique`), `correo?` (`@unique`)
+- `usuario_id` (PK), `nombre`, `apellido`, `user?` (`@unique`), `pass?`, `googleId?` (`@unique`), `correo?` (`@unique`)
+  - Nota: la columna `dni` (nullable) aún existe en la DB por compatibilidad, pero **ya no se pide ni se guarda** (removido del registro por no tener finalidad — minimización Ley 25.326).
 - `rol_id` (FK -> `Rol`, default `2` = DUENO)
 - `estado` (`A`/`I`/`B`), `comercio_id?` (FK -> `Comercio`, nullable for SUPERADMIN)
 - `email_verificado` (`Boolean`), `token_verificacion?` (`@unique`)

@@ -161,7 +161,7 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto, ip: string) {
-    const { nombre, apellido, user, correo, pass, dni, nombreComercio, categoria, direccion, telefono } = dto;
+    const { nombre, apellido, user, correo, pass, nombreComercio, categoria, direccion, telefono } = dto;
 
     const usuarioExistente = await this.prisma.usuario.findFirst({
       where: {
@@ -216,7 +216,6 @@ export class AuthService {
         user,
         correo,
         pass: hashedPassword,
-        dni: dni || null,
         rol_id: 2,
         estado: 'A',
         comercio_id: nuevoComercio.comercio_id,

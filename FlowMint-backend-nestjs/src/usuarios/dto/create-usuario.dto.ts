@@ -13,15 +13,6 @@ export class CreateUsuarioDto {
   apellido: string;
 
   @ApiProperty({
-    description: 'The DNI (National Identity Document) of the user.',
-    example: '12345678A',
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
-  dni?: string;
-
-  @ApiProperty({
     description: 'The username for logging in.',
     example: 'carlos.r',
   })

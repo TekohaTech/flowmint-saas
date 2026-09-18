@@ -54,16 +54,6 @@ export class RegisterDto {
   pass: string;
 
   @ApiProperty({
-    description: 'User DNI (optional)',
-    example: '12345678',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  @MaxLength(20)
-  dni?: string;
-
-  @ApiProperty({
     description: 'Commerce name',
     example: 'Barbería Juan',
   })

@@ -57,7 +57,6 @@ model Usuario {
   usuario_id Int      @id @default(autoincrement())
   nombre     String
   apellido   String
-  dni        String?
   user       String?  @unique // Opcional ahora que usamos Google
   pass       String?  // Opcional ahora que usamos Google
   googleId   String?  @unique // Identificador de Google

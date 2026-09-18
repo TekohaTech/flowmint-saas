@@ -5,7 +5,7 @@
 
 /**
  * Only allows digits (0-9). Blocks letters, symbols, and special chars.
- * Use on onChange for integer fields (telefono, DNI, duracion).
+ * Use on onChange for integer fields (telefono, duracion).
  */
 export const onlyDigits = (value) => {
   return value.replace(/[^0-9]/g, "");

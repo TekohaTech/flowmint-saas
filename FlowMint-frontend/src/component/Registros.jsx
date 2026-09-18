@@ -11,7 +11,6 @@ import {
   UserPlus,
   Eye,
   EyeOff,
-  CreditCard,
   Building2,
   MapPin,
   Phone,
@@ -25,7 +24,6 @@ const Registros = () => {
   const [formData, setFormData] = useState({
     nombre: "",
     apellido: "",
-    dni: "",
     user: "",
     pass: "",
     correo: "",
@@ -43,7 +41,7 @@ const Registros = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     // Numeric fields: only allow digits
-    const numericFields = ["dni", "telefono"];
+    const numericFields = ["telefono"];
     const cleaned = numericFields.includes(name) ? value.replace(/[^0-9]/g, "") : value;
     setFormData({ ...formData, [name]: cleaned });
     setError("");
@@ -281,28 +279,6 @@ const Registros = () => {
                 disabled={loading}
               />
             </div>
-          </div>
-
-          <div className="mb-3">
-            <label htmlFor="dni" className="mb-2">
-              <CreditCard
-                size={16}
-                style={{ marginRight: "8px", verticalAlign: "middle" }}
-              />
-              Número de DNI
-            </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              id="dni"
-              name="dni"
-              value={formData.dni}
-              onChange={handleChange}
-              onKeyDown={blockNonNumeric}
-              placeholder="Solo números (ej: 40123456)"
-              disabled={loading}
-              maxLength={8}
-            />
           </div>
 
           <div className="mb-3">
