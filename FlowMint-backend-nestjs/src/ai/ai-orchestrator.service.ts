@@ -18,36 +18,68 @@ export class AiOrchestratorService implements OnModuleInit {
     this.logger.log('AI Orchestrator initialized with ' + this.providers.length + ' providers');
   }
 
-  async chat(messages: any[], providerName?: string) {
-    if (this.providers.length === 0) {
-      throw new Error('No AI providers available. Please configure API keys.');
+  private selectProviders(providerName?: string): any[] {
+    if (!providerName) {
+      return [...this.providers];
     }
-
-    const provider = providerName 
-      ? this.providers.find(p => p.name === providerName)
-      : this.providers[0];
-
-    if (!provider) {
-      throw new Error(`Provider ${providerName} not found`);
-    }
-
-    return provider.chat(messages);
+    return this.providers.filter(p => p.name === providerName);
   }
 
-  async chatStream(messages: any[], providerName?: string) {
-    if (this.providers.length === 0) {
-      throw new Error('No AI providers available. Please configure API keys.');
+  async chat(messages: any[], providerName?: string): Promise<string> {
+    const candidates = this.selectProviders(providerName);
+    if (candidates.length === 0) {
+      throw new Error(
+        providerName
+          ? `Provider ${providerName} not found`
+          : 'No AI providers available. Please configure API keys.',
+      );
     }
 
-    const provider = providerName 
-      ? this.providers.find(p => p.name === providerName)
-      : this.providers[0];
-
-    if (!provider) {
-      throw new Error(`Provider ${providerName} not found`);
+    let lastError: unknown = null;
+    for (const provider of candidates) {
+      try {
+        const response = await provider.chat(messages);
+        this.logger.log(`AI response from provider '${provider.name}'`);
+        return response;
+      } catch (error: any) {
+        lastError = error;
+        this.logger.error(
+          `AI provider '${provider.name}' failed: ${error?.message ?? error}. Trying next provider...`,
+        );
+      }
     }
 
-    return provider.chatStream(messages);
+    throw lastError ?? new Error('All AI providers failed');
+  }
+
+  async *chatStream(messages: any[], providerName?: string): AsyncGenerator<string> {
+    const candidates = this.selectProviders(providerName);
+    if (candidates.length === 0) {
+      throw new Error(
+        providerName
+          ? `Provider ${providerName} not found`
+          : 'No AI providers available. Please configure API keys.',
+      );
+    }
+
+    let lastError: unknown = null;
+    for (const provider of candidates) {
+      try {
+        const stream = provider.chatStream(messages);
+        for await (const chunk of stream) {
+          yield chunk;
+        }
+        this.logger.log(`AI stream completed from provider '${provider.name}'`);
+        return;
+      } catch (error: any) {
+        lastError = error;
+        this.logger.error(
+          `AI provider '${provider.name}' failed: ${error?.message ?? error}. Trying next provider...`,
+        );
+      }
+    }
+
+    throw lastError ?? new Error('All AI providers failed');
   }
 
   async generateResponse(message: string, systemPrompt?: string): Promise<string> {
