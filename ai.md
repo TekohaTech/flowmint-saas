@@ -138,17 +138,21 @@ not the legal text.
 | **AiModule** | AI chat with dual-provider orchestrator + SSE streaming | `src/ai/ai-orchestrator.service.ts`, `groq.service.ts`, `cerebras.service.ts`, `ai.controller.ts`, `ai.service.ts` |
 | **EmailModule** | `@Global()` - Nodemailer verification emails | `src/email/email.service.ts` |
 
-### SMTP / Email (Brevo)
+### Email (Brevo)
 - **Provider:** Brevo (formerly Sendinblue), free plan: 300 emails/day
-- **SMTP Host:** `smtp-relay.brevo.com`, **Port:** `587`, **Secure:** `false`
-- **EmailService** (`src/email/email.service.ts`): Nodemailer-based, sends verification and password reset emails
-- **Methods:** `sendVerificationEmail(to, token)` | `sendResetPasswordEmail(to, resetUrl)`
-- **Config (env):** `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `FRONTEND_URL`
+- **Transport:** **Brevo HTTP API** (`POST https://api.brevo.com/v3/smtp/email`) via native `fetch` + `AbortSignal.timeout(15000)`. Nodemailer SMTP (`smtp-relay.brevo.com:587`) is kept as fallback only. The HTTP API is required on hosts that block outbound SMTP ports — Render free tier blocks 25, 465 and 587.
+- **Transport selection:** if `BREVO_API_KEY` is set → HTTP API; else if `SMTP_HOST` is set → Nodemailer; else warning + no send.
+- **EmailService** (`src/email/email.service.ts`): sends verification, password reset and password-changed emails
+- **Methods:** `sendVerificationEmail(to, token)` | `sendResetPasswordEmail(to, resetUrl, nombre?)` | `sendPasswordChangedEmail(to, nombre?)`
+- **Config (env):** `BREVO_API_KEY`, `EMAIL_FROM`, `FRONTEND_URL` (legacy fallback: `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`)
+- **Note:** user-provided values (name, email) are HTML-escaped before being embedded in the email body.
 
 ### Forgot / Reset Password Flow
-1. `POST /auth/forgot-password` (public, throttled 3/min) - Takes `{ correo }`, generates JWT (15 min expiry, type `reset_password`), sends email with link to `FRONTEND_URL/reset-password?token=...`. Always returns same message regardless of whether email exists (no info leakage).
-2. `POST /auth/reset-password` (public, throttled 5/min) - Takes `{ token, pass }`, verifies JWT, hashes new pass with bcrypt, updates user. Token type is validated as `reset_password`.
-3. **Security:** JWT with 15-min expiry, bcrypt hashing, rate limiting, generic error messages.
+1. `POST /auth/forgot-password` (public, throttled 3/min) - Takes `{ correo }`, generates JWT (15 min expiry, type `reset_password`) and sends a **personalized** email (greets the user by name) with a link to `FRONTEND_URL/reset-password?token=...`. Always returns the same message regardless of whether the email exists (no user enumeration).
+2. `POST /auth/reset-password` (public, throttled 5/min) - Takes `{ token, pass }`, verifies the JWT, hashes the new password with bcrypt and updates the user. Then sends a **password-changed confirmation email** (security alert: "if it wasn't you, secure your account").
+3. **Single-use token:** the JWT carries `fph`, a SHA-256 fingerprint of the current password hash. It only validates while the password is unchanged, so using it once changes the password and burns the token — it **cannot be replayed** during the 15-minute window.
+4. **Security:** JWT with 15-min expiry, single-use enforcement, bcrypt hashing, rate limiting, generic error messages, HTML-escaped email content.
+5. **Tests:** `src/auth/auth.service.spec.ts` covers the flow (happy path, replay rejection, expired/forged token, wrong token type, missing user).
 
 ### Authentication Flow
 ```

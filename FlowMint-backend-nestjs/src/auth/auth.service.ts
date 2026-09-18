@@ -291,20 +291,26 @@ export class AuthService {
     }
 
     const resetToken = this.jwtService.sign(
-      { sub: user.usuario_id, type: 'reset_password' },
+      {
+        sub: user.usuario_id,
+        type: 'reset_password',
+        // Binds the token to the current password hash: once the password
+        // changes, this token (and any other issued before) becomes invalid.
+        fph: this.fingerprintPassword(user.pass),
+      },
       { expiresIn: '15m' },
     );
 
     const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:5173';
     const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
 
-    await this.emailService.sendResetPasswordEmail(correo, resetUrl);
+    await this.emailService.sendResetPasswordEmail(correo, resetUrl, user.nombre);
 
     return { message: 'Si el correo existe, recibirás un enlace de recuperación.' };
   }
 
   async resetPassword(token: string, newPass: string) {
-    let payload: { sub: number; type: string };
+    let payload: { sub: number; type: string; fph?: string };
     try {
       payload = this.jwtService.verify(token);
     } catch {
@@ -315,14 +321,46 @@ export class AuthService {
       throw new BadRequestException('Token inválido.');
     }
 
+    const user = await this.prisma.usuario.findUnique({
+      where: { usuario_id: payload.sub },
+      select: { usuario_id: true, correo: true, nombre: true, pass: true },
+    });
+
+    if (!user) {
+      throw new BadRequestException('El enlace de recuperación es inválido o expiró.');
+    }
+
+    // Single-use enforcement: the token stays valid only while the password
+    // hash is unchanged. Using it once changes the hash and burns the token,
+    // so it cannot be replayed inside the 15 minute window.
+    if (this.fingerprintPassword(user.pass) !== payload.fph) {
+      throw new BadRequestException('El enlace de recuperación es inválido o expiró.');
+    }
+
     const hashedPassword = await bcrypt.hash(newPass, 10);
 
     await this.prisma.usuario.update({
-      where: { usuario_id: payload.sub },
+      where: { usuario_id: user.usuario_id },
       data: { pass: hashedPassword },
     });
 
+    if (user.correo) {
+      await this.emailService.sendPasswordChangedEmail(user.correo, user.nombre);
+    }
+
     return { message: 'Contraseña actualizada exitosamente. Ya podés iniciar sesión.' };
+  }
+
+  /**
+   * Stable, non-reversible fingerprint of the current password hash.
+   * Embedded in reset tokens so they self-invalidate after use.
+   */
+  private fingerprintPassword(passHash: string | null): string {
+    return crypto
+      .createHash('sha256')
+      .update(passHash ?? '')
+      .digest('hex')
+      .slice(0, 16);
   }
 
   private async verificarControlIP(ip: string, correo: string) {
