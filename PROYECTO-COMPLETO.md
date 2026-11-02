@@ -5,8 +5,9 @@ FlowMint is a professional multi-tenant SaaS platform designed for beauty shops,
 ## 🚀 Key Features (SaaS Edition)
 
 - **Multi-tenant Architecture:** Total data isolation between businesses. No commerce can see data from others.
-- **Google OAuth 2.0:** Secure login and one-click registration.
-- **Auto-Provisioning:** New Google sign-ups automatically create a new (inactive) shop space.
+- **Authentication:** Email + password with JWT over httpOnly cookies. The "Continue with Google"
+  button is a **placeholder** — no OAuth strategy is implemented yet.
+- **Auto-Provisioning:** A new sign-up automatically creates its own (inactive) shop space.
 - **SuperAdmin Dashboard:** Master control panel to activate/deactivate shop accounts (Subscription management).
 - **Financial Analytics:** Isolated revenue reports per shop.
 - **AI Assistant:** Integrated AI to help business owners manage their shop contextually.
@@ -31,7 +32,7 @@ FlowMint is a professional multi-tenant SaaS platform designed for beauty shops,
 1.  **Database:** Supabase (Free tier PostgreSQL).
 2.  **Backend:** Vercel or Render.
 3.  **Frontend:** Netlify or Vercel.
-4.  **Google Auth:** Set up a project in Google Cloud Console and add `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to environment variables.
+4.  **Secrets:** Set `DATABASE_URL`, `JWT_SECRET` and `FRONTEND_URL` on the backend host.
 
 ---
 © 2026 FlowMint System - Posadas, Misiones, Argentina.

@@ -1,5 +1,7 @@
 # FlowMint SaaS: Professional Engineering, Cybersecurity & AI Protocol
 
+> Last synced with code: 2026-11-02 (commit `7b4132b`).
+
 ## Project Identity
 FlowMint is a high-availability, Multi-tenant SaaS for appointment management (beauty shops, barbershops, aesthetics centers).
 - **Tenant Isolation:** Critical requirement. Every business (`Comercio`) is isolated via `comercio_id`.
@@ -123,11 +125,11 @@ not the legal text.
 
 ## Backend Architecture (`FlowMint-backend-nestjs/`)
 
-### Module Inventory (11 feature + 1 global)
+### Module Inventory (12 feature + 2 global)
 | Module | Responsibility | Key Files |
 |--------|---------------|-----------|
-| **PrismaModule** | Global PrismaClient singleton | `src/prisma/prisma.service.ts`, `prisma.module.ts` |
-| **AuthModule** | JWT + Local auth, Google OAuth, guards, decorators | `src/auth/auth.service.ts`, `jwt.strategy.ts`, `local.strategy.ts`, `jwt-auth.guard.ts`, `roles.guard.ts`, `roles.decorator.ts`, `public.decorator.ts` |
+| **PrismaModule** | `@Global()` PrismaClient singleton | `src/prisma/prisma.service.ts`, `prisma.module.ts` |
+| **AuthModule** | JWT + Local auth, guards, decorators, PIN activation (no OAuth strategy) | `src/auth/auth.service.ts`, `jwt.strategy.ts`, `local.strategy.ts`, `jwt-auth.guard.ts`, `roles.guard.ts`, `roles.decorator.ts`, `public.decorator.ts` |
 | **RolesModule** | CRUD roles (SUPERADMIN/DUENO/EMPLEADO) | `src/roles/roles.service.ts`, `roles.controller.ts` |
 | **UsuariosModule** | CRUD users, exports UsuariosService for AuthModule | `src/usuarios/usuarios.service.ts`, `usuarios.controller.ts` |
 | **ComerciosModule** | Tenant lifecycle, activate/suspend, SUPERADMIN-only | `src/comercios/comercios.service.ts`, `comercios.controller.ts` |
@@ -137,7 +139,9 @@ not the legal text.
 | **TurnosModule** | Appointments with **time-overlap conflict detection** | `src/turnos/turnos.service.ts`, `turnos.controller.ts` |
 | **GananciasModule** | Revenue analytics (daily/weekly/monthly/annual, by service/employee, summary) | `src/ganancias/ganancias.service.ts`, `ganancias.controller.ts` |
 | **AiModule** | AI chat with dual-provider orchestrator + SSE streaming | `src/ai/ai-orchestrator.service.ts`, `groq.service.ts`, `cerebras.service.ts`, `ai.controller.ts`, `ai.service.ts` |
-| **EmailModule** | `@Global()` - Nodemailer verification emails | `src/email/email.service.ts` |
+| **NotificacionesModule** | In-app notifications (per-user, `target_all` broadcast, read state) | `src/notificaciones/notificaciones.service.ts`, `notificaciones.controller.ts` |
+| **EmailModule** | `@Global()` - Brevo HTTP API / Nodemailer fallback (verification, reset, password changed) | `src/email/email.service.ts` |
+| **HealthModule** | Public `GET /api/health` probe (service + DB readiness, no JWT) | `src/health/health.controller.ts`, `health.module.ts` |
 
 ### Email (Brevo)
 - **Provider:** Brevo (formerly Sendinblue), free plan: 300 emails/day
@@ -181,8 +185,18 @@ Other endpoints
 
 ### Rate Limiting (3 layers)
 1. **Global Throttler:** 100 requests / 60s via `APP_GUARD`
-2. **Per-endpoint Throttle:** Login (10/60s), Register (5/60s)
+2. **Per-endpoint Throttle:** Login (10/60s), Activar PIN (10/60s), Register (5/60s),
+   Completar registro (5/60s), Forgot password (3/60s), Reset password (5/60s)
 3. **IP-based `RegistroIP` table:** Blocks same IP/email for 2 hours after registration
+   (enforced only when `NODE_ENV === 'production'`)
+
+### Employee Accounts (PIN activation)
+- The owner creates employee accounts; each gets a **6-digit PIN** (`pin_hash`,
+  `pin_expiracion`, `pin_intentos` on `Usuario`)
+- Employee self-activates via `POST /api/auth/activar-pin`: validates the PIN, sets their own
+  password and returns the normal JWT (same login flow)
+- Hard limit: **`MAX_EMPLEADOS_CUENTA = 2`** employee accounts per commerce
+- The PIN is never returned or logged after activation
 
 ### Input Validation (DTOs)
 All DTOs use `class-validator` decorators (`@IsString()`, `@IsInt()`, `@IsEmail()`, `@IsNotEmpty()`, `@MinLength()`, `@Matches()`, `@Min(0)`, `@IsOptional()`, `@Type(() => Date)`). Update DTOs extend `PartialType(CreateXDto)`. Password regex: `@Matches(/^(?=.*[A-Z])(?=.*\d)/)`.
@@ -192,25 +206,30 @@ All DTOs use `class-validator` decorators (`@IsString()`, `@IsInt()`, `@IsEmail(
 ### Tech Stack
 - **Framework:** React 18 + Vite (plain JSX, no TypeScript)
 - **UI Library:** React Bootstrap v2.10 (Bootstrap 5.3.2)
-- **Icons:** lucide-react v0.553, react-icons v5.5, react-bootstrap-icons
+- **Icons:** lucide-react v0.553, react-icons v5.5
 - **Animation:** framer-motion v12
-- **Calendar:** react-big-calendar v1.13 + moment v2.30
-- **Charts:** chart.js v4.5 + react-chartjs-2 v5.3 + chartjs-plugin-datalabels v2.2
-- **CSS:** Custom retro-neon theme (`index.css`, 1349 lines) with neon colors, glow effects, scanlines
+- **Calendar:** react-big-calendar v1.13 + **date-fns v4** (moment is not installed)
+- **Charts:** chart.js v4.5 + react-chartjs-2 v5.3 (no datalabels plugin)
+- **CSS:** Custom retro-neon theme (`index.css`, ~1074 lines) with neon colors, glow effects, scanlines
 - **Routing:** React Router DOM v6
 
 ### State Management
 No global state library. Uses:
 - `localStorage` for persistence (`token`, `user`, `isLoggedIn`)
 - `useState`/`useEffect` per component
-- `hooks/useAuth.js` - decodes JWT, checks expiry, provides `login()`/`logout()`
+- `ProtectedRoute.jsx` guards authenticated routes and checks the JWT (there is **no**
+  `hooks/useAuth.js` — do not assume one exists)
+- The axios interceptor in `api.js` clears `localStorage` and redirects on 401
 
 ### API Layer (`src/services/api.js`)
 THE ONLY source of truth for API communication. Axios-based, `withCredentials: true`.
 - **Request interceptor:** Skips auth header for public endpoints; attaches `Bearer <token>` for all others
 - **Response interceptor:** On 401, clears localStorage and redirects
 
-**API modules exported:** `authAPI`, `usersAPI`, `rolesAPI`, `clientsAPI`, `employeesAPI`, `servicesAPI`, `appointmentsAPI`, `comerciosAPI`, `revenueAPI`.
+**API modules exported:** `authAPI`, `usersAPI`, `clientsAPI`, `employeesAPI`, `servicesAPI`,
+`comerciosAPI`, `revenueAPI`, `aiAPI`, `notificationsAPI`.
+There is **no** `rolesAPI` and **no** `appointmentsAPI` — appointment calls use the shared `api`
+instance directly inside `useTurnos.js` (`/turnos`, `/clientes`, `/empleados`, `/servicios`).
 
 ### Routing
 ```
@@ -242,11 +261,10 @@ THE ONLY source of truth for API communication. Axios-based, `withCredentials: t
 | `Ganancias.jsx` | Revenue reports with Chart.js (daily, weekly, monthly, annual, by service, by employee) |
 
 ### Legacy / Dead Code (DO NOT USE)
-- `src/servicios/servicios.js` - old fetch-based API client, not imported
-- `src/component/Layout.jsx` - replaced by Dashboard.jsx shell
-- `src/component/Sidebar.jsx` - replaced by inline sidebar in Dashboard.jsx
-- `src/component/CustomNavbar.jsx` - replaced by inline navbar in Dashboard.jsx
-- `src/component/Home.jsx` - replaced by Landing.jsx
+- `src/component/Sidebar.jsx` - leftover file, not imported anywhere; the sidebar now lives inline
+  in `Dashboard.jsx`
+- The previously documented dead files (`Layout.jsx`, `CustomNavbar.jsx`, `Home.jsx`,
+  `src/servicios/servicios.js`) were deleted and no longer exist — do not try to reuse them
 
 ## Infrastructure
 | Component | Tech | Notes |
